@@ -1,0 +1,153 @@
+<?php
+require_once './include/const.php';
+require_once './include/fonctions.php';
+
+class model {
+	
+	private $_dbcon;
+	
+	private $_idmodel;
+	
+	private $_iddecree_type;
+	
+	private $_name;
+	
+	private $_path;
+	
+	function __construct($dbcon, $idmodel)
+	{
+		require_once ("./include/dbconnection.php");
+		$this->_idmodel = $idmodel;
+		$this->_dbcon = $dbcon;
+	}
+	
+	function getid()
+	{
+		return $this->_idmodel;
+	}
+	
+	
+	function getModelInfo()
+	{
+		$select = "SELECT model.*, dty.name as namedecree_type FROM model INNER JOIN decree_type dty ON dty.iddecree_type = model.iddecree_type WHERE model.idmodel = $this->_idmodel";
+		$result = mysqli_query($this->_dbcon, $select);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				return $res;
+			}
+			else
+			{
+				elog("model $this->_idmodel absent de la table.");
+			}
+		}
+		else
+		{
+			elog("erreur select path from model $this->_idmodel ".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
+	
+	function getDecreeType()
+	{
+		$select = "SELECT dty.* FROM model mod INNER JOIN decree_type dty ON dtY.iddecree_type = mod.iddecree_type WHERE mod.idmodel = $this->_idmodel";
+		$result = mysqli_query($this->_dbcon, $select);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				return $res;
+			}
+			else
+			{
+				elog("decreetype pour le model $this->_idmodel absent de la base.");
+			}
+		}
+		else
+		{
+			elog("erreur select decreetype for model. ".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
+	
+	function getfile()
+	{
+		$select = "SELECT path FROM model WHERE idmodel = $this->_idmodel";
+		$result = mysqli_query($this->_dbcon, $select);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				return $res['path'];
+			}
+			else 
+			{
+				elog("model $this->_idmodel absent de la table.");
+			}
+		}
+		else 
+		{
+			elog("erreur select path from model. ".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
+	
+	function getModelFields()
+	{
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = $this->_idmodel";
+		$result = mysqli_query($this->_dbcon, $select);
+		$fields = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$fields[] = $res;
+			}
+		}
+		else
+		{
+			elog("erreur select fields from model. ".mysqli_error($this->_dbcon));
+		}
+		return $fields;
+	}
+	
+	function getQueryField($field_type)
+	{
+		$select = "SELECT qfi.schema, qfi.query, qmf.query_clause FROM query_field qfi LEFT JOIN query_model_field qmf ON qmf.idquery_field = qfi.idquery_field  AND qmf.idmodel = ".$this->_idmodel." WHERE qfi.idfield_type = ".$field_type;
+		$result = mysqli_query($this->_dbcon, $select);
+		$fields = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$fields = $res;
+			}
+		}
+		else
+		{
+			elog("erreur select fields from model. ".mysqli_error($this->_dbcon));
+		}
+		return $fields;
+	}
+	
+	function getNumeroId()
+	{
+		$select = "SELECT idmodel_field FROM model_field WHERE idmodel = ".$this->_idmodel." AND idfield_type = 1";
+		$result = mysqli_query($this->_dbcon, $select);
+		$numeroid = 0;
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_row($result))
+			{
+				$numeroid = $res[0];
+			}
+		}
+		else
+		{
+			elog("erreur select fields from model. ".mysqli_error($this->_dbcon));
+		}
+		return $numeroid;		
+	}
+	
+}
