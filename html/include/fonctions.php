@@ -11,7 +11,7 @@ function findPerson($name, $id = '')
 	echo "<script>";
 	//var input_elt = $( ".token-autocomplete input" );
 	echo "$( '#".$name.$id."' ).autocompleteUser(
-			'https://wsgroups.univ-paris1.fr/searchUserCAS', { disableEnterKey: true, select: completionAgent, wantedAttr: 'displayName',
+			'https://wsgroups.univ-paris1.fr/searchUserCAS', { disableEnterKey: false, select: completionAgent, wantedAttr: 'displayName',
 			wsParams: { allowInvalidAccounts: 0, showExtendedInfo: 1, filter_eduPersonAffiliation: 'employee|staff' } });
 	";
 	echo "</script>";

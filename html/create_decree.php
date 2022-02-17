@@ -60,20 +60,62 @@
 ?>
 
 <script>
-function ajouterInput(divname) 
+function ajouterValeur(divname, value='') 
 {
-	var inputbase = document.getElementById(divname+'_div');
-	var container = inputbase.parentElement;
-	var nbinput = document.getElementById(divname+"_number");
-	nbinput.setAttribute("value", parseInt(nbinput.getAttribute("value"),10)+parseInt(1,10));
-	var input = document.createElement("input");
-	input.setAttribute("type", "text");	
-	input.setAttribute("id", divname+nbinput.getAttribute("value"));
-	input.setAttribute("name", input.getAttribute("id"));
-	input.setAttribute("value", document.getElementById(divname+"1").nextSibling.innerText);
-	input.setAttribute("readonly", true);
-	inputbase.appendChild(input);
-	container.innerHTML += "<br>";
+	//alert("divname "+divname);
+	//alert("inputbase "+inputbase.id);
+	//var container = inputbase.parentElement;
+	var table = document.getElementById("table_"+divname);
+	var row = table.insertRow(-1);
+	var rowindex = row.rowIndex;
+	var nameindex = parseInt(rowindex+2,10);
+	var cell0 = row.insertCell(0);
+	//var name = document.createTextNode(document.getElementById(divname+"1").nextSibling.innerText);
+	var name = document.createElement("input");
+	name.setAttribute("type", "text");	
+	name.setAttribute("id", divname+"[]");
+	//alert(divname+nameindex);
+	name.setAttribute("name", divname+"[]");
+	if(value != '') {
+		name.setAttribute("value", value);
+	} else {	
+		name.setAttribute("value", document.getElementById(divname+"1").nextSibling.innerText);
+	}
+	name.setAttribute("readonly", true);
+	document.getElementById(divname+"1").nextSibling.innerText = '';
+	document.getElementById(divname+"1").value = '';
+	cell0.appendChild(name);
+	var cell1 = row.insertCell(1);
+	row.setAttribute("id", "row"+divname+nameindex);
+	var moins = document.createElement("button");
+	moins.innerText = "-";
+	moins.setAttribute("onclick", "return supprimerValeur('moins"+divname+nameindex+"');");
+	cell1.setAttribute("id", "moins"+divname+nameindex);
+	cell1.appendChild(moins);
+	//alert("nbinput "+nbinput.id);
+	//nbinput.setAttribute("value", parseInt(nbinput.getAttribute("value"),10)+parseInt(1,10));
+	//var input = document.getElementById("test");
+	//alert("input "+input.id);
+	//input.innerHTML += "<br>"+document.getElementById(divname+"1").nextSibling.innerText;
+	//input.setAttribute("type", "text");	
+	//input.setAttribute("id", divname+nbinput.getAttribute("value"));
+	//input.setAttribute("name", input.getAttribute("id"));
+	//input.setAttribute("value", document.getElementById(divname+"1").nextSibling.innerText);
+	//input.setAttribute("readonly", true);
+	//inputbase.appendChild(input);
+	//container.innerHTML += "<br>";
+	return false;
+}
+
+function supprimerValeur(cellid)
+{
+	var cell = document.getElementById(cellid);
+	var row = document.getElementById(cell.parentNode.id);
+	var rowindex = row.rowIndex;
+	//alert(rowindex);
+	var table = row.parentNode;
+	table.deleteRow(rowindex);
+	return false;
 }
 </script>
 
@@ -93,7 +135,7 @@ if ($mode == 'modif') { ?>
 		if ($user->hasAccessDecree($mod_select_decree))
 		{
 			$mod_decree_fields = $mod_decree->getFields();
-			//print_r2($mod_decree_fields);
+			print_r2($mod_decree_fields);
 		}
 		else 
 		{
@@ -161,9 +203,9 @@ if ($mode == 'modif') { ?>
 			switch ($modelfield['number']) {
 				case '+': $nb_field = "1";
 					?>
-					<button onclick="ajouterInput('<?php echo $modelfield['name'];?>')">+</button> <b style="color:red">BUG À CORRIGER</b>
-					
-			<br>
+					<!-- <button onclick="return ajouterValeur('<?php echo $modelfield['name'];?>');">+</button>
+					<table id='<?php echo "table_".$modelfield['name'];?>'></table>
+			<br> -->
 					<?php break;
 					
 				default: $nb_field = $modelfield['number'];
@@ -182,7 +224,13 @@ if ($mode == 'modif') { ?>
 						case 'user':
 						?>
 						
-				<?php findPerson($modelfield['name'].$i);?>
+				<?php findPerson($modelfield['name'],$i);
+				if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+				{
+					echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+					echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+
+				}?>
 		
 						<?php break;
 						case 'year':
@@ -241,7 +289,24 @@ if ($mode == 'modif') { ?>
 						<?php break;
 					}
 				}
-			} ?>
+			} 
+			if ($modelfield['number'] == '+')
+			{ ?>
+				<button onclick="return ajouterValeur('<?php echo $modelfield['name'];?>');">+</button>
+				<table id='<?php echo "table_".$modelfield['name'];?>'></table>
+				<br>
+				<?php if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields) && sizeof($mod_decree_fields[$modelfield['idmodel_field']]) > 1)
+					{
+						for($i = 1; $i < sizeof($mod_decree_fields[$modelfield['idmodel_field']]); $i++)
+						{
+							echo "<script>ajouterValeur('".$modelfield['name']."')</script>";
+							echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."';</script>";
+							echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = '".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."';</script>";
+						}
+					}
+			 	}
+			
+			?>
 			</div>
 		<?php } ?>
 		<?php if (isset($mod_year) && isset($mod_num))
@@ -300,12 +365,26 @@ if ($mode == 'modif') { ?>
 			{
 				if ($modelfield['auto'] == 'N') 
 				{
-					for($i = 1; $i <= $modelfield['number']; $i++)
+					if ($modelfield['number'] == '+')
 					{
-						//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
-						if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+						//print_r2($_POST);
+						$valeurs = $_POST[$modelfield['name']];
+						foreach($valeurs as $valeur)
 						{
-							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $_POST[$modelfield['name'].$i]);
+							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $valeur);
+						}
+						if ($_POST[$modelfield['name']."1"] != '')
+							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $_POST[$modelfield['name']."1"]);
+					}
+					else 
+					{
+						for($i = 1; $i <= $modelfield['number']; $i++)
+						{
+							//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
+							if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+							{
+								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $_POST[$modelfield['name'].$i]);
+							}
 						}
 					}
 				}
@@ -433,6 +512,7 @@ if ($mode == 'modif') { ?>
 	
 	<?php } ?>
 <?php //} ?>
+
 </body>
 </html>
 
