@@ -16,6 +16,10 @@
         header('Location: index.php');
         exit();
     }
+    if (isset($_POST['selectarrete']))
+    {
+    	$post_selectarrete = $_POST['selectarrete'];
+    }
      
     // Récupération des modeles auxquels à accès l'utilisateur
     $user = new user($dbcon, $userid);
@@ -29,7 +33,7 @@
     		$listModels[] = $model->getModelInfo();
     	}
     } else {
-	    $roles = $user->getModelRoles();
+	    $roles = $user->getGroupeRoles($_SESSION['groupes'], 'model');
 	    $listModels = array();
 	    foreach ($roles as $role)
 	    {
@@ -43,9 +47,9 @@
 
 <div> Consultation des arrêtés</div>
 <?php 
-	//var_dump($roles);
+	//print_r2($roles);
 	echo "<br>";
-	//var_dump($listModels);
+	//print_r2($listModels);
 	echo "<br>";
 ?>
 <?php if (sizeof($listModels) == 0 ) { ?>
@@ -68,7 +72,7 @@ Sélection du modèle :
         			</optgroup> 
         		<?php } $type = $model['iddecree_type']; ?>
 	        	<optgroup label="<?php echo $model['namedecree_type'];?>">
-        	<?php } if (isset($_POST['selectarrete']) && $_POST['selectarrete'] == $model['idmodel']) { ?>
+        	<?php } if (isset($post_selectarrete) && $post_selectarrete == $model['idmodel']) { ?>
 	            	<option value="<?php echo $model['idmodel'];?>" selected="selected"><?php echo $model['name'];?></option>
 	            	<?php } else { ?>
 	            	<option value="<?php echo $model['idmodel'];?>"><?php echo $model['name'];?></option>
@@ -82,7 +86,7 @@ Sélection du modèle :
 Affichage des arrêtés pour le modèle et l'utilisateur
 <br><br>
 <?php 
-$alldecrees = isset($_POST['selectarrete']) ? $user->getAllDecrees($_POST['selectarrete']) : $user->getAllDecrees(); 
+$alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees(); 
 if (sizeof($alldecrees) > 0) { ?>
 	<table class="tableausimple">
 		<tr>
@@ -102,7 +106,8 @@ if (sizeof($alldecrees) > 0) { ?>
 			<?php } else {?>
 				<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
 			<?php } ?>
-			<td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>
+			<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
+			<td class="cellulesimple"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>
 			<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
 			<td class="cellulesimple"><?php echo $decree['structure']; ?></td>
 			<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
@@ -114,13 +119,7 @@ if (sizeof($alldecrees) > 0) { ?>
 </table>
 <?php } ?>
 
-<?php 
-if (isset($_GET["num"]) && is_int($_GET["num"]) && isset($_GET["year"]) && is_int($_GET["year"]))
-{
-	//$decree = new decree($dbcon, )
-	echo 'coucou';
-}
-?>
+
 </body>
 </html>
 

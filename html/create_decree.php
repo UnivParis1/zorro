@@ -6,15 +6,17 @@
     require_once ('./include/dbconnection.php');
     require_once ('./class/user.php');
     require_once ('./class/model.php');
-	require_once ('./class/reference.php');
+    require_once ('./class/reference.php');
+    require_once ('./class/ldap.php');
 	
+    
     /*if (isset($_POST["userid"]))
         $userid = $_POST["userid"];
     else
         $userid = null;*/
     $ref = new reference($dbcon, $rdbApo);
     $userid = $ref->getUserUid();
-    echo $_SESSION['uid'];
+    //echo $_SESSION['uid'];
     if (is_null($userid) or ($userid == "")) 
     {
         elog("Redirection vers index.php (UID de l'utilisateur=" . $uid . ")");
@@ -22,17 +24,48 @@
         exit();
     }
     
-    if (isset($_GET['num']) && isset($_GET['year']))
+    if (isset($_GET['id']))
     {
     	$mode = 'modif';
-    	$mod_year = $_GET['year'];
-    	$mod_num = $_GET['num'];
+    	$mod_decree_id = intval($_GET['id']);
+    }
+    elseif (isset($_POST['mod_id']))
+    {    	
+    	$mode = 'modif';
+    	$mod_decree_id = intval($_POST['mod_id']);
     }
     else 
     {
     	$mode = 'create';
     }
-     
+    if (isset($_POST['arrete'])) 
+    {
+    	$post_arrete = $_POST['arrete'];
+    }
+    if (isset($_POST['selectarrete']))
+    {
+    	$post_selectarrete = $_POST['selectarrete'];
+    }
+    if (isset($_POST['valide']))
+    {
+    	$post_valide = $_POST['valide'];
+    }
+    elseif (isset($_POST['duplique']))
+    {
+    	$post_duplique = $_POST['duplique'];
+    }
+    
+    /*if (isset($_POST['mod_year']) && isset($_POST['mod_num']))
+    {
+    	$mode = 'modif';
+    	$mod_year = intval($_POST['mod_year']);
+    	$mod_num = intval($_POST['mod_num']);
+    }*/
+
+    //if ((isset($_POST[$modelfield['name'].$i])))
+    //{
+    	
+    //}
     // Récupération des modeles auxquels à accès l'utilisateur
     $user = new user($dbcon, $userid);
     if ($user->isSuperAdmin())
@@ -47,7 +80,8 @@
     }
     else 
     {
-	    $roles = $user->getRoles(); // roles actifs de l'utilisateur
+    	$roles = $user->getGroupeRoles($_SESSION['groupes']); // roles actifs de l'utilisateur
+    	//print_r2($_SESSION['groupes']);
 	    $listModels = array();
 	    foreach ($roles as $role)
 	    {
@@ -57,24 +91,376 @@
     }
     
     require ("include/menu.php");
-?>
+    if ($mode == 'modif') 
+    {
+    	// RÉCUPÉRATION DU DOCUMENT ET DE SES PARAMÈTRES
+		$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
+		$mod_num = $mod_decree->getNumber();
+		$mod_year = $mod_decree->getYear();
+		if ($mod_decree_id != NULL)
+		{
+			$mod_select_decree = $mod_decree->getDecree();
+			$mod_decree_fields = $mod_decree->getFields();
+		}
+	}
+	
+	if (isset($_POST['sign'])) {
+		$ldap = new ldap();
+		elog('on est dans la signature...');
+		if (isset($_POST["composantecod1"]))
+		{
+			$supannCodeEntite = $ldap->getSupannCodeEntiteFromAPO($_POST["composantecod1"]);
+			if ($supannCodeEntite != NULL)
+			{
+				$responsables = $ldap->getStructureResp($supannCodeEntite);
+				$filename = $mod_decree->getFileName();
+				if ($filename != "" && file_exists(PDF_PATH.$filename))
+				{
+					if (sizeof($responsables) > 0)
+					{
+						$curl = curl_init();
+						$params = array
+						(
+								'createByEppn' => "system",
+								//'targetEmails' => $ref->getUserMail()
+								//'targetUrls' => array()
+						);
+						elog("mail du créateur : ".$ref->getUserMail());
+						$params['recipientEmails'] = '';
+						foreach ($responsables as $responsable)
+						{
+							elog("mail du responsable : ".$responsable['mail']);
+							//$params['recipientEmails'] .= "1*".$responsable['mail'].",";
+						}
+						$params['recipientEmails'] = "1*elodie.briere@univ-paris1.fr,2*canica.sar@univ-paris1.fr,";//,"1*canica.sar@univ-paris1.fr","2*canica.sar@univ-paris1.fr");
+						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
+						elog($params['recipientEmails']);
+						$params['targetEmails'] = "elodie.briere@univ-paris1.fr";
+						$params['targetUrls'] = array(TARGET_URL."arreteMaitrise");
+						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
+						$opts = [
+								CURLOPT_URL => ESIGNATURE_CURLOPT_URL."286037".ESIGNATURE_CURLOPT_URL2,
+								CURLOPT_CUSTOMREQUEST => "POST",
+								CURLOPT_VERBOSE => true,
+								CURLOPT_POST => true,
+								CURLOPT_POSTFIELDS => $params,
+								CURLOPT_RETURNTRANSFER => true,
+								CURLOPT_SSL_VERIFYPEER => false
+						];
+						curl_setopt_array($curl, $opts);
+						//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+						$json = curl_exec($curl);
+						//print_r2($json);
+						$info = curl_getinfo($curl);
+						//echo "code: ${info['http_code']}";
+						
+						//print_r2($info);
+						$error = curl_error ($curl);
+						curl_close($curl);
+						if ($error != "")
+						{
+							elog( "Erreur Curl = " . $error . "<br><br>");
+						}
+						//echo "<br>" . print_r($json,true) . "<br>";
+						$id = json_decode($json, true);
+						elog(var_export($opts, true));
+						elog(" -- RETOUR ESIGNATURE CREATION ARRETE -- " . var_export($id, true));
+						if (is_int($id))
+						{
+							$mod_decree->setIdEsignature($id);
+							// TODO : Affichage de la création réussie
+						}
+						else 
+						{
+							"Echec de création dans eSignature.";
+						}
+					}
+					else
+					{
+						elog("pas de responsable de structure.");
+					}
+				}
+				else 
+				{
+					elog ("fichier pdf absent ".PDF_PATH.$filename);
+				}
+			}
+		}
+		else
+		{
+			elog("pas de code composante.");
+		}
+	}
+    elseif (isset($post_selectarrete) && $post_selectarrete != '' || isset($mod_select_decree))
+    {
+    	$selectarrete = isset($mod_select_decree) ? $mod_select_decree['idmodel'] : $post_selectarrete;
+    	$modelselected = new model($dbcon, $selectarrete);
+    	$urlselected = $modelselected->getfile();
+    	$modelfields = $modelselected->getModelFields();
+    	
+    	//if (isset($_POST['user'])) echo "<br>".htmlspecialchars($_POST['user'])."<br>";
+    	
+    	$year = date('Y');
+    	if (isset($_POST['annee1']))
+    	{
+    		$year = intval($_POST['annee1']);
+    	}
+    	$numero_dispo = $ref->getNumDispo($year);
+    	
+    	$decreefields = array();
+    	if (isset($post_valide)||isset($post_duplique))
+    	{
+    		// Si le document est en mode modif et qu'il n'est pas validé dans esignature on supprime le numero d'arrêté et on crée un nouveau
+    		if (isset($mod_year) && isset($mod_num) && isset($post_valide) && $post_valide == "Remplacer")
+    		{
+    			$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
+    			$mod_decree_infos = $mod_decree->getDecree();
+    			if ($mod_decree_infos != NULL && $mod_decree_infos['status'] != 'v')
+    			{
+    				$mod_decree->unsetNumber($user->getId());
+    				elog("Suppression du numero");
+    				// TODO : Supprimer le PDF qui avait été créé
+    			}
+    			// TODO : Si l'année n'a pas changé, conserver le numéro de l'arrêté
+    		}
+    		$idmodel_field_numero = $modelselected->getNumeroId();
+    		$decreefields[] = array('idmodel_field' => $idmodel_field_numero, 'value' => $numero_dispo);
+    		foreach ($modelfields as $modelfield)
+    		{
+    			if ($modelfield['auto'] == 'N')
+    			{
+    				if ($modelfield['number'] == '+')
+    				{
+    					//print_r2($_POST);
+    					$valeurs = isset($_POST[$modelfield['name']]) ? $_POST[$modelfield['name']] : array();
+    					foreach($valeurs as $valeur)
+    					{
+    						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($valeur));
+    					}
+    					if (isset($_POST[$modelfield['name']."1"]) && $_POST[$modelfield['name']."1"] != '')
+    						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+    				}
+    				else
+    				{
+    					for($i = 1; $i <= $modelfield['number']; $i++)
+    					{
+    						//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
+    						if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+    						{
+    							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name'].$i]));
+    						}
+    					}
+    				}
+    			}
+    		}
+    		
+    		$idmodel = $post_selectarrete;
+    		$decree = new decree($dbcon, $year, $numero_dispo);
+    		$structure = htmlspecialchars($_POST['composantecod1']);
+    		$decree->save($user->getid(), $idmodel, $structure);
+    		$decree->setFields($decreefields);
+    		$modelselected = new model($dbcon, $idmodel);
+    		
+    		$modelfile = new ZipArchive();
+    		if (file_exists("./models/".$modelselected->getfile()))
+    		{
+    			$fieldstoinsert = $decree->getFields();
+    			// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
+    			$modelfields = $modelselected->getModelFields();
+    			//echo "<br>modelfields <br><br>"; print_r2($modelfields);
+    			$modelfieldsarrange = array_column($modelfields, 'idmodel_field', 'name');
+    			$modelfieldstype = array_column($modelfields, 'datatype', 'idmodel_field');
+    			//echo "<br>modelfieldsarrange <br><br>"; print_r2($modelfieldsarrange);
+    			//echo "<br>modelfieldstype <br><br>"; print_r2($modelfieldstype);
+    			// copie du modele pour l'arrêté
+    			$odtfilename = $decree->getFileName("odt");
+    			copy("./models/".$modelselected->getfile(), PDF_PATH.$odtfilename);
+    			// ouverture du modele pour l'arrêté
+    			$modelfile->open(PDF_PATH.$odtfilename);
+    			// extraction du content.xml dans le dossier temporaire pour l'arrêté
+    			$modelfile->extractTo(PDF_PATH.$year.'_'.$numero_dispo."/", array('content.xml'));
+    			// ouverture du content.xml extrait
+    			$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content.xml", 'r+');
+    			// lecture du content.xml extrait
+    			$contenu = fread($content, filesize(PDF_PATH.$year.'_'.$numero_dispo."/content.xml"));
+    			$doc = new DOMDocument('1.0', 'utf-8');
+    			$doc->preserveWhiteSpace = false;
+    			$doc->formatOutput = true;
+    			$doc->loadXML($contenu);
+    			$x = $doc->documentElement;
+    			$body = $x->getElementsByTagName('body')->item(0);
+    			// echo "BODY 1 : <br>"; print_r2($body);
+    			foreach ($fieldstoinsert as $idmodel_field => $field)
+    			{
+    				// dupliquer les champs multiples
+    				$nbChamps = sizeof($field);
+    				$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
+    				if ($nbChamps > 1)
+    				{
+    					// echo "Champs à multiplier : ";print_r2($field);
+    					// trouver le champs dans le xml
+    					$noeudcourant = $body; // le dernier noeud contenant le champ
+    					$noeudpere = $body; // le noeud où raccrocher le clone du champ
+    					$noeudadupliquer = $body; // le noeud à cloner
+    					$positiondunoeudadupliquer = 0; // la position où raccrocher le clone du champ sous le noeud père
+    					while (strpos($noeudcourant->textContent, '$$$'.$champ.'$$$') !== false)
+    					{
+    						if ($noeudcourant->hasChildNodes())
+    						{
+    							if ($noeudcourant->nextSibling != null || $noeudcourant->previousSibling != null)
+    							{
+    								$noeudadupliquer = $noeudcourant;
+    							}
+    							if ($noeudcourant->childNodes->count() > 1)
+    							{
+    								$noeudpere = $noeudcourant;
+    								$positiondunoeudadupliquer = 0;
+    							}
+    							foreach($noeudcourant->childNodes as $node)
+    							{
+    								if (strpos($node->textContent, '$$$'.$champ.'$$$') !== false)
+    								{
+    									$noeudcourant = $node;
+    									// echo "Noeud contenant le champ : <br>"; print_r2($node);
+    									break;
+    								}
+    								if ($noeudpere == $noeudcourant)
+    								{
+    									$positiondunoeudadupliquer++;
+    								}
+    							}
+    						}
+    						else
+    						{
+    							// echo "Dernier noeud contenant le champ : <br>"; print_r2($node);
+    							break;
+    						}
+    					}
+    					// echo "Noeud à dupliquer  : <br>"; print_r2($noeudadupliquer);
+    					// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
+    					// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
+    					// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
+    					for ($i = 1; $i <= $nbChamps; $i++)
+    					{
+    						// dupliquer le noeud
+    						$clone = $noeudadupliquer->cloneNode(true);
+    						// insérer le noeud
+    						$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
+    						// echo "Noeud père après $i ème insert : <br>"; print_r2($noeudpere);
+    					}
+    				}
+    			}
+    			// print_r2($body);
+    			// enregistrement du xml modifié
+    			$doc->save(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml");
+    			fclose($content);
+    			$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'r+');
+    			// lecture du content2.xml extrait
+    			$contenu = fread($content, filesize(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml"));
+    			// copie du contenu extrait
+    			$contenu2 = $contenu;
+    			//echo "<br>contenu <br><br>"; print_r2($contenu);echo "<br><br>";
+    			$position1 = strpos($contenu, '$$$'); // position de la balise de début d'un champ paramétrable
+    			$position2 = strpos($contenu, '$$$', $position1+1); // position de la balise de fin d'un champ paramétrable
+    			//print_r2(strlen($contenu));
+    			$nb_field = array();
+    			$champsamodif = array();
+    			while ($position1 < strlen($contenu) && substr($contenu, $position1 + 3, $position2 - $position1 - 3) && $position1 !== false && $position2 !== false)
+    			{
+    				$field = substr($contenu, $position1 + 3, $position2 - $position1 - 3); // le nom du champ est entre les balises
+    				if (!key_exists($field, $nb_field))
+    				{
+    					$nb_field[$field] = 0;
+    				}
+    				if (key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists($nb_field[$field], $fieldstoinsert[$modelfieldsarrange[$field]]))
+    				{
+    					// echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']."<br>";
+    					if ($modelfieldstype[$modelfieldsarrange[$field]] == 'user')
+    					{
+    						$champsamodif[] = array("valeur" => "- ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
+    					}
+    					else
+    					{
+    						$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
+    					}
+    				}
+    				else
+    				{
+    					//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : vide <br>";
+    					$champsamodif[] = array("valeur" => '', "position" => $position1, "longueur" => (strlen($field)+6));
+    				}
+    				$nb_field[$field] += 1;
+    				$position1 = strpos($contenu, '$$$', $position2 + 4);
+    				$position2 = strpos($contenu, '$$$', $position1 + 1);
+    			}
+    			fclose($content);
+    			$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'w');
+    			$champsamodiffromlast = array_reverse($champsamodif);
+    			// remplacement des champs à partir de la fin du fichier
+    			foreach ($champsamodiffromlast as $champ)
+    			{
+    				$contenu2 = substr_replace($contenu2, $champ['valeur'], $champ['position'], $champ['longueur']);
+    			}
+    			// écriture du contenu modifié dans le fichier
+    			fwrite($content, $contenu2);
+    			// Ajout du fichier dans le document
+    			$modelfile->addFile(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'content.xml');
+    			//print_r2($fieldstoinsert);
+    			$modelfile->close();
+    			
+    			// CONVERSION EN PDF
+    			$descriptorspec = array(
+    					0 => array("pipe", "r"),  // stdin
+    					1 => array("pipe", "w"),  // stdout
+    					2 => array("pipe", "w"),  // stderr
+    			);
+    			$process = proc_open("unoconv --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
+    			$stdout = stream_get_contents($pipes[1]);
+    			fclose($pipes[1]);
+    			
+    			$stderr = stream_get_contents($pipes[2]);
+    			fclose($pipes[2]);
+    			if ($stdout != "")
+    			{
+    				elog( "stdout : \n");
+    				elog($stdout);
+    				elog( "La création du document PDF a échoué. <br>");
+    			}
+    			if ($stderr != "")
+    			{
+    				elog( "stderr :\n");
+    				elog($stderr);
+    				elog( "La création du document PDF a échoué. <br>");
+    			}
+    			?>
+		<?php }
+		if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique))
+			{
+				$mod_num = $numero_dispo;
+				$mod_year = $year;
+				$mod_decree_id = $decree->getId();
+				$mode = 'modif';
+			}
+		}
+		?>
+	
+	<br><br>
+	<?php } else {
+	} ?>
+	
+<?php // ------------------------------------------------------- AFFICHAGE ------------------------------------------------------- ?>
 
 <script>
 function ajouterValeur(divname, value='') 
 {
-	//alert("divname "+divname);
-	//alert("inputbase "+inputbase.id);
-	//var container = inputbase.parentElement;
 	var table = document.getElementById("table_"+divname);
 	var row = table.insertRow(-1);
 	var rowindex = row.rowIndex;
 	var nameindex = parseInt(rowindex+2,10);
 	var cell0 = row.insertCell(0);
-	//var name = document.createTextNode(document.getElementById(divname+"1").nextSibling.innerText);
 	var name = document.createElement("input");
 	name.setAttribute("type", "text");	
 	name.setAttribute("id", divname+"[]");
-	//alert(divname+nameindex);
 	name.setAttribute("name", divname+"[]");
 	if(value != '') {
 		name.setAttribute("value", value);
@@ -92,18 +478,6 @@ function ajouterValeur(divname, value='')
 	moins.setAttribute("onclick", "return supprimerValeur('moins"+divname+nameindex+"');");
 	cell1.setAttribute("id", "moins"+divname+nameindex);
 	cell1.appendChild(moins);
-	//alert("nbinput "+nbinput.id);
-	//nbinput.setAttribute("value", parseInt(nbinput.getAttribute("value"),10)+parseInt(1,10));
-	//var input = document.getElementById("test");
-	//alert("input "+input.id);
-	//input.innerHTML += "<br>"+document.getElementById(divname+"1").nextSibling.innerText;
-	//input.setAttribute("type", "text");	
-	//input.setAttribute("id", divname+nbinput.getAttribute("value"));
-	//input.setAttribute("name", input.getAttribute("id"));
-	//input.setAttribute("value", document.getElementById(divname+"1").nextSibling.innerText);
-	//input.setAttribute("readonly", true);
-	//inputbase.appendChild(input);
-	//container.innerHTML += "<br>";
 	return false;
 }
 
@@ -112,22 +486,19 @@ function supprimerValeur(cellid)
 	var cell = document.getElementById(cellid);
 	var row = document.getElementById(cell.parentNode.id);
 	var rowindex = row.rowIndex;
-	//alert(rowindex);
 	var table = row.parentNode;
 	table.deleteRow(rowindex);
 	return false;
 }
 </script>
-
+<div id="contenu1">
 <?php 
 if ($mode == 'modif') { ?>
 	<p style="color:DodgerBlue;"><b>MODIFICATION DU DOCUMENT <?php echo $mod_year.'/'.$mod_num;?></b></p>
 	<?php 
 	// RÉCUPÉRATION DU DOCUMENT ET DE SES PARAMÈTRES
-	$mod_year = intval($mod_year);
-	$mod_num = intval($mod_num);
-	$mod_decree = new decree($dbcon, $mod_year, $mod_num);
-	$mod_decree_id = $mod_decree->getId();
+	$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
+	//print_r2($mod_decree);
 	if ($mod_decree_id != NULL)
 	{
 		$mod_select_decree = $mod_decree->getDecree();
@@ -135,7 +506,7 @@ if ($mode == 'modif') { ?>
 		if ($user->hasAccessDecree($mod_select_decree))
 		{
 			$mod_decree_fields = $mod_decree->getFields();
-			print_r2($mod_decree_fields);
+			//print_r2($mod_decree_fields);
 		}
 		else 
 		{
@@ -147,18 +518,16 @@ if ($mode == 'modif') { ?>
 		$mode = 'create';
 	}
 }?>
-<?php 
-//if ($mode == 'create') { ?>
-	<div><b> Sélection du modèle </b></div>
-	<br>
+	<div class="gauche">
 	<?php if (sizeof($listModels) == 0 ) { ?>
 		Vous n'avez accès à aucun modèle de document. <br>
 	<?php } else { ?>
-	<form name="formselectdecree" action="create_decree.php" method="post">
+	<form class ="form-zorro" name="formselectdecree" action="create_decree.php" method="post">
+
 	<input type="hidden" name='userid' value='<?php echo $userid;?>'>
 	<select style="width:26em" name="selectarrete" id="selectarrete" onchange="this.form.submit()">			             		
 	        <?php 
-	        if (!isset($_POST['arrete'])) { ?>
+	        if (!isset($post_arrete)) { ?>
 	        <option value="" selected="selected">&nbsp;</option>
 	        <?php } else { ?>
 	            <option value="">&nbsp;</option>
@@ -170,7 +539,7 @@ if ($mode == 'modif') { ?>
 	        			</optgroup> 
 	        		<?php } $type = $model['iddecree_type']; ?>
 		        	<optgroup label="<?php echo $model['namedecree_type'];?>">
-	        	<?php } if ((isset($_POST['selectarrete']) && $_POST['selectarrete'] == $model['idmodel']) || (isset($mod_select_decree) && $mod_select_decree['idmodel'] == $model['idmodel'])) { ?>
+	        	<?php } if ((isset($post_selectarrete) && $post_selectarrete == $model['idmodel']) || (isset($mod_select_decree) && $mod_select_decree['idmodel'] == $model['idmodel'])) { ?>
 		            	<option value="<?php echo $model['idmodel'];?>" selected="selected"><?php echo $model['name'];?></option>
 		            	<?php } else { ?>
 		            	<option value="<?php echo $model['idmodel'];?>"><?php echo $model['name'];?></option>
@@ -179,9 +548,9 @@ if ($mode == 'modif') { ?>
 	</select>
 	</form>
 	<?php } ?>
-	<?php if (isset($_POST['selectarrete']) && $_POST['selectarrete'] != '' || isset($mod_select_decree)) 
+	<?php if (isset($post_selectarrete) && $post_selectarrete != '' || isset($mod_select_decree)) 
 		{ 
-			$selectarrete = isset($mod_select_decree) ? $mod_select_decree['idmodel'] : $_POST['selectarrete'];
+			$selectarrete = isset($mod_select_decree) ? $mod_select_decree['idmodel'] : $post_selectarrete;
 			$modelselected = new model($dbcon, $selectarrete); 
 			$urlselected = $modelselected->getfile();
 		?>
@@ -192,20 +561,18 @@ if ($mode == 'modif') { ?>
 		 ?>
 		<form name='find_person' method='post' action='create_decree.php'>
 		<input type="hidden" name='userid' value='<?php echo $userid;?>'>
-		<input type="hidden" name='selectarrete' value='<?php echo isset($_POST['selectarrete']) ? $_POST['selectarrete'] : $mod_select_decree['idmodel'];?>'>
+		<input type="hidden" name='selectarrete' value='<?php echo isset($post_selectarrete) ? $post_selectarrete : $mod_select_decree['idmodel'];?>'>
 		<?php foreach ($modelfields as $modelfield)
 		{
 			if ($modelfield['auto'] != 'O')
-				echo $modelfield['name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];?> 
+				echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];?> 
 			<div id='<?php echo $modelfield['name'].'_div';?>'>
 			<input type="hidden" id='<?php echo $modelfield['name'].'_number';?>' value=1>
 			<?php 
 			switch ($modelfield['number']) {
 				case '+': $nb_field = "1";
 					?>
-					<!-- <button onclick="return ajouterValeur('<?php echo $modelfield['name'];?>');">+</button>
-					<table id='<?php echo "table_".$modelfield['name'];?>'></table>
-			<br> -->
+
 					<?php break;
 					
 				default: $nb_field = $modelfield['number'];
@@ -217,7 +584,7 @@ if ($mode == 'modif') { ?>
 			{
 				if ($modelfield['auto'] == 'O')
 				{?>
-					<label><?php echo $modelfield['name'];?> : </label>Automatique
+					<label><?php echo $modelfield['web_name'];?> : </label>Automatique
 				<?php }
 				else {
 					switch ($modelfield['datatype']) {
@@ -309,210 +676,52 @@ if ($mode == 'modif') { ?>
 			?>
 			</div>
 		<?php } ?>
+		</div>
+		<div class="droite">
 		<?php if (isset($mod_year) && isset($mod_num))
 		{ ?>
-			<input type="hidden" id='mod_year' name='mod_year' value=<?php echo $mod_year;?>>
-			<input type="hidden" id='mod_num' name='mod_num' value=<?php echo $mod_num;?>>
-		<br><input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ?')"><input type='submit' name='duplique' value='Dupliquer'><br>
+			<input type="hidden" id='mod_year' name='mod_year' value='<?php echo $mod_year;?>'>
+			<input type="hidden" id='mod_num' name='mod_num' value='<?php echo $mod_num;?>'>
+			<input type="hidden" id='mod_id' name='mod_id' value='<?php echo $mod_decree_id;?>'>
+		<br>
+		<?php // TODO : Contrôler l'état de la demande dans esignature ?>
+		<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ?')">
+		<input type='submit' name='duplique' value='Dupliquer'>
+		<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
+		<br>
 		<?php } else {?>
 		<br><input type='submit' name='valide' value='Valider'><br>
 		<?php } ?>
+		</div>
 		</form>
-		<?php if (isset($_POST['user'])) echo "<br>".$_POST['user']."<br>";
-		
-		$year = date('Y');
-		if (isset($_POST['annee1']))
-		{
-			$year = $_POST['annee1'];
-		}
-		$numero_dispo = $ref->getNumDispo($year);
-		/*$sql_num_dispo = "SELECT 
-							number + 1 AS numero_dispo 
-						FROM (SELECT number FROM decree WHERE year = $year UNION SELECT 0 AS number FROM dual) AS d
-						WHERE NOT EXISTS (SELECT d2.number FROM decree d2 WHERE d2.number = d.number + 1 AND (d2.status <> 'a' OR d2.status IS NULL) AND d2.year = $year) 
-						ORDER BY number LIMIT 1";
-		$result = mysqli_query($dbcon, $sql_num_dispo);
-		$numero_dispo = -1;
-		if (mysqli_error($dbcon))
-		{
-			elog("Erreur a l'execution de la requete du prochain numero d'arrete.");
-		}
-		else {
-			
-			if ($res = mysqli_fetch_assoc($result))
-			{
-				$numero_dispo = $res['numero_dispo'];
-			}
-		}*/
-		$decreefields = array();
-		if (isset($_POST['valide'])||isset($_POST['duplique'])) 
-		{
-			// Si le document est en mode modif et qu'il n'est pas validé dans esignature on supprime le numero d'arrêté et on crée un nouveau
-			if (isset($_POST['mod_year']) && isset($_POST['mod_num']) && !isset($_POST['duplique']))
-			{
-				$mod_decree = new decree($dbcon, intval($_POST['mod_year']), intval($_POST['mod_num']));
-				$mod_decree_infos = $mod_decree->getDecree();
-				if ($mod_decree_infos != NULL && $mod_decree_infos['status'] != 'v')
-				{
-					$mod_decree->unsetNumber($user->getId());
-					elog("Suppression du numero");
-					// TODO : Supprimer le PDF qui avait été créé
-				}
-			}
-			$idmodel_field_numero = $modelselected->getNumeroId();
-			$decreefields[] = array('idmodel_field' => $idmodel_field_numero, 'value' => $numero_dispo);
-			foreach ($modelfields as $modelfield)
-			{
-				if ($modelfield['auto'] == 'N') 
-				{
-					if ($modelfield['number'] == '+')
-					{
-						//print_r2($_POST);
-						$valeurs = $_POST[$modelfield['name']];
-						foreach($valeurs as $valeur)
-						{
-							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $valeur);
-						}
-						if ($_POST[$modelfield['name']."1"] != '')
-							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $_POST[$modelfield['name']."1"]);
-					}
-					else 
-					{
-						for($i = 1; $i <= $modelfield['number']; $i++)
-						{
-							//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
-							if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
-							{
-								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $_POST[$modelfield['name'].$i]);
-							}
-						}
-					}
-				}
-			}
-		
-			$idmodel = $_POST['selectarrete'];
-			$decree = new decree($dbcon, $year, $numero_dispo);
-			$structure = $_POST['composante1'];
-			$decree->save($user->getid(), $idmodel, $structure);
-			$decree->setFields($decreefields);
-			$modelselected = new model($dbcon, $idmodel);
-		
-			$modelfile = new ZipArchive();
-			if (file_exists("./models/".$modelselected->getfile()))
-			{
-				$fieldstoinsert = $decree->getFields(); //echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
-				$modelfields = $modelselected->getModelFields();
-				//echo "<br>modelfields <br><br>"; print_r2($modelfields);
-				$modelfieldsarrange = array_column($modelfields, 'idmodel_field', 'name');
-				//echo "<br>modelfieldsarrange <br><br>"; print_r2($modelfieldsarrange);
-				// copie du modele pour l'arrêté
-				copy("./models/".$modelselected->getfile(), "./files/".substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.substr($modelselected->getfile(), -4));
-				// ouverture du modele pour l'arrêté
-				$modelfile->open("./files/".substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.substr($modelselected->getfile(), -4));
-				//$modelfile->open("./models/".$modelselected->getfile());
-				//$contenu = $modelfile->getFromName('content.xml');
-				// extraction du content.xml dans le dossier temporaire pour l'arrêté
-				$modelfile->extractTo("./files/".$year.'_'.$numero_dispo."/", array('content.xml'));
-				// ouverture du content.xml extrait
-				$content = fopen("./files/".$year.'_'.$numero_dispo."/content.xml", 'r+');
-				// lecture du content.xml extrait
-				$contenu = fread($content, filesize("./files/".$year.'_'.$numero_dispo."/content.xml"));
-				// copie du contenu extrait
-				$contenu2 = $contenu;
-				//$contenu = $modelfile->getFromName('content.xml');
-				//echo "<br>contenu <br><br>"; print_r2($contenu);echo "<br><br>";
-				$position1 = strpos($contenu, '$$$');
-				$position2 = strpos($contenu, '$$$', $position1+1);
-				//var_dump(strlen($contenu));
-				$nb_field = array();
-				$champsamodif = array();
-				while ($position1 < strlen($contenu) && substr($contenu, $position1 + 3, $position2 - $position1 - 3) && $position1 !== false && $position2 !== false)
-				{
-					$field = substr($contenu, $position1 + 3, $position2 - $position1 - 3);
-					if (!key_exists($field, $nb_field))
-					{
-						$nb_field[$field] = 0;
-					}
-					if (key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists($nb_field[$field], $fieldstoinsert[$modelfieldsarrange[$field]]))
-					{ 
-						//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']."<br>";
-						$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
-					}
-					else
-					{
-						//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : vide <br>";
-						$champsamodif[] = array("valeur" => '', "position" => $position1, "longueur" => (strlen($field)+6));
-					}
-					$nb_field[$field] += 1;
-					$position1 = strpos($contenu, '$$$', $position2 + 4);
-					$position2 = strpos($contenu, '$$$', $position1 + 1);
-				}
-				fclose($content);
-				$content = fopen("./files/".$year.'_'.$numero_dispo."/content.xml", 'w');
-				$champsamodiffromlast = array_reverse($champsamodif);
-				// remplacement des champs à partir de la fin du fichier
-				foreach ($champsamodiffromlast as $champ)
-				{
-					$contenu2 = substr_replace($contenu2, $champ['valeur'], $champ['position'], $champ['longueur']);
-				}
-				// écriture du contenu modifié dans le fichier
-				fwrite($content, $contenu2);
-				//$index = $modelfile->locateName('content.xml');
-				$modelfile->addFile("./files/".$year.'_'.$numero_dispo."/content.xml", 'content.xml');
-				//var_dump($fieldstoinsert);
-				$modelfile->close();
-				
-				// CONVERSION EN PDF
-				$descriptorspec = array(
-						0 => array("pipe", "r"),  // stdin
-						1 => array("pipe", "w"),  // stdout
-						2 => array("pipe", "w"),  // stderr
-				);
-				$process = proc_open("unoconv --doctype=document --format=pdf files/".substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.substr($modelselected->getfile(), -4), $descriptorspec, $pipes);
-				$stdout = stream_get_contents($pipes[1]);
-				fclose($pipes[1]);
-				
-				$stderr = stream_get_contents($pipes[2]);
-				fclose($pipes[2]);
-				if ($stdout != "")
-				{
-					elog( "stdout : \n");
-					var_dump($stdout);
-				}
-				if ($stderr != "")
-				{
-					elog( "stderr :\n");
-					var_dump($stderr);
-				}
-				?>
-				<br>Prévisualisation du document : <br>
+		<div class="contenu2">
 		<?php 
-				if (file_exists("files/".substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.".pdf"))
-				{ 
-					$doc_pdf = fopen("files/".substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.".pdf", 'r');
-					$contenu_pdf = fread($doc_pdf, filesize("files/".substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.".pdf"));
-					$encodage = base64_encode($contenu_pdf); 
-					?>
-					<!-- <a href="files/<?php echo substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.".pdf";?>" target="_blank" ><b>ICI</b></a><br> -->
-					<?php echo '<iframe src=data:application/pdf;base64,' . $encodage . ' width="80%" height="500px">';
-					echo "</iframe>";?>
-		
-					<br><br>
-					<input type="button" onclick="alert('Hello World!')" value="Poursuivre la signature">
+		if (isset($mod_decree))
+		{
+			$filename = PDF_PATH.$mod_decree->getFileName();
+			//print_r2($filename);
+			if (file_exists($filename))
+			{ 
+				$doc_pdf = fopen($filename, 'r');
+				$contenu_pdf = fread($doc_pdf, filesize($filename));
+				$encodage = base64_encode($contenu_pdf); 
+				?>
+				<!-- <a href="files/<?php echo substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.".pdf";?>" target="_blank" ><b>ICI</b></a><br> -->
+				<?php echo '<iframe src=data:application/pdf;base64,' . $encodage . ' width="100%" height="500px">';
+				echo "</iframe>";?>
+	
+				<br><br>
 					            
 			<?php }
-		?>
-		<?php }
-			
+			else {	?>
+				<p> pas de document PDF.</p>
+			<?php }
 		}
 		?>
-	
-	<br><br>
-	<?php } else { ?>
-	
-	<?php } ?>
-<?php //} ?>
+		</div>
+<?php } ?>
 
+</div>
 </body>
 </html>
 

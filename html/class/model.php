@@ -12,12 +12,14 @@ class model {
 	
 	private $_name;
 	
-	private $_path;
+	private $_model_path;
+	
+	private $_export_path;
 	
 	function __construct($dbcon, $idmodel)
 	{
 		require_once ("./include/dbconnection.php");
-		$this->_idmodel = $idmodel;
+		$this->_idmodel = intval($idmodel);
 		$this->_dbcon = $dbcon;
 	}
 	
@@ -44,7 +46,7 @@ class model {
 		}
 		else
 		{
-			elog("erreur select path from model $this->_idmodel ".mysqli_error($this->_dbcon));
+			elog("erreur select * from model $this->_idmodel ".mysqli_error($this->_dbcon));
 		}
 		return 0;
 	}
@@ -73,13 +75,13 @@ class model {
 	
 	function getfile()
 	{
-		$select = "SELECT path FROM model WHERE idmodel = $this->_idmodel";
+		$select = "SELECT model_path FROM model WHERE idmodel = $this->_idmodel";
 		$result = mysqli_query($this->_dbcon, $select);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
 			{
-				return $res['path'];
+				return $res['model_path'];
 			}
 			else 
 			{
@@ -88,7 +90,7 @@ class model {
 		}
 		else 
 		{
-			elog("erreur select path from model. ".mysqli_error($this->_dbcon));
+			elog("erreur select model_path from model. ".mysqli_error($this->_dbcon));
 		}
 		return 0;
 	}
@@ -114,7 +116,7 @@ class model {
 	
 	function getQueryField($field_type)
 	{
-		$select = "SELECT qfi.schema, qfi.query, qmf.query_clause FROM query_field qfi LEFT JOIN query_model_field qmf ON qmf.idquery_field = qfi.idquery_field  AND qmf.idmodel = ".$this->_idmodel." WHERE qfi.idfield_type = ".$field_type;
+		$select = "SELECT qfi.schema, qfi.query, qmf.query_clause FROM query_field qfi LEFT JOIN query_model_field qmf ON qmf.idquery_field = qfi.idquery_field  AND qmf.idmodel = ".$this->_idmodel." WHERE qfi.idfield_type = ".intval($field_type);
 		$result = mysqli_query($this->_dbcon, $select);
 		$fields = array();
 		if ( !mysqli_error($this->_dbcon))
@@ -126,7 +128,7 @@ class model {
 		}
 		else
 		{
-			elog("erreur select fields from model. ".mysqli_error($this->_dbcon));
+			elog("erreur select query_model_fields. ".mysqli_error($this->_dbcon));
 		}
 		return $fields;
 	}

@@ -37,7 +37,8 @@ class reference {
 	{
 		$select = "SELECT * FROM model ";
 		if ($iddecree_type != null)
-			$select .= " WHERE iddecree_type = ".$iddecree_type;
+			$select .= " WHERE iddecree_type = ".intval($iddecree_type);
+		$select .= " ORDER BY iddecree_type, name";
 		$result = mysqli_query($this->_dbcon, $select);
 		$list = array();
 		if ( !mysqli_error($this->_dbcon))
@@ -71,16 +72,6 @@ class reference {
 			elog("erreur select * from role.".mysqli_error($this->_dbcon));
 		}
 		return $list;
-	}
-	
-	function getRole($number)
-	{
-		
-	}
-	
-	function getmodelfield($idmodel)
-	{
-		$select = "SELECT * FROM model_field WHERE idmodel = ".$idmodel;
 	}
 	
 	function getUserUid()
@@ -151,8 +142,8 @@ class reference {
 	{
 		$sql_num_dispo = "SELECT
 							number + 1 AS numero_dispo
-						FROM (SELECT d.number FROM decree d INNER JOIN number num ON num.year = d.year WHERE d.year = $year AND num.low_number <= d.number UNION SELECT num.low_number - 1 AS number FROM number num WHERE num.year = $year) AS d
-						WHERE NOT EXISTS (SELECT d2.number FROM decree d2 WHERE d2.number = d.number + 1 AND (d2.status <> 'a' OR d2.status IS NULL) AND d2.year = $year)
+						FROM (SELECT d.number FROM decree d INNER JOIN number num ON num.year = d.year WHERE d.year = ".intval($year)." AND num.low_number <= d.number UNION SELECT num.low_number - 1 AS number FROM number num WHERE num.year = ".intval($year).") AS d
+						WHERE NOT EXISTS (SELECT d2.number FROM decree d2 WHERE d2.number = d.number + 1 AND (d2.status <> 'a' OR d2.status IS NULL) AND d2.year = ".intval($year).")
 						ORDER BY number LIMIT 1";
 		$result = mysqli_query($this->_dbcon, $sql_num_dispo);
 		$numero_dispo = -1;
@@ -168,6 +159,36 @@ class reference {
 			}
 		}
 		return $numero_dispo;
+	}
+	
+	function getAllGroupes()
+	{
+		$select = "SELECT idgroupe, name, grouper FROM groupe";
+		$res = mysqli_query($this->_dbcon, $select);
+		$allgroupes = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($res))
+			{
+				$allgroupes[] = $row;
+			}
+		}
+		return $allgroupes;
+	}
+	
+	function getGroupeById($idgroupe)
+	{
+		$select = "SELECT idgroupe, name, grouper FROM groupe WHERE idgroupe = ".intval($idgroupe);
+		$res = mysqli_query($this->_dbcon, $select);
+		$groupe = NULL;
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($res))
+			{
+				$groupe = $row;
+			}
+		}
+		return $groupe;
 	}
 
 }

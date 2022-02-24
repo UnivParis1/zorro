@@ -11,7 +11,7 @@
     if (isset($_SESSION["uid"]))
     	$userid = $_SESSION["uid"];
     elseif (isset($_POST["userid"]))
-        $userid = $_POST["userid"];
+        $userid = htmlspecialchars($_POST["userid"]);
     require_once ('./class/ldap.php');
     require_once ("./include/menu.php");
 
@@ -23,12 +23,32 @@
 	    echo '<html><body class="bodyhtml">';
 	    $ldap = new ldap();
 	    $infos_ldap = $ldap->getInfos($userid);
-	    //var_dump($infos_ldap);
+	    //print_r2($infos_ldap);
+	    
 	    foreach ($infos_ldap as $cle => $info)
 	    {
 	    	echo $cle.' : '.$info." <br> ";
 	    }
 	    echo "<br>";
+	    //print_r2($infos_ldap['supannentiteaffectation']);
+ 
+	    $roles = $ldap->getStructureResp($infos_ldap['supannentiteaffectation']);
+	    foreach ($roles as $role)
+	    {
+	    	echo $role['role']." : ".$role['name']." ".$role['mail']."<br>";
+	    }
+	    if (!isset($_SESSION['groupes']))
+	    {
+	    	require_once('./class/user.php');
+	    	require_once('./class/reference.php');
+	    	$ref = new reference($dbcon, $rdbApo);
+	    	$user = new user($dbcon, $userid);
+	    	$allgroupes = $ref->getAllGroupes();
+	    	$groupes = $user->getUserGroupes($allgroupes);
+	    	$_SESSION['groupes'] = $groupes;
+	    	//print_r2($_SESSION['groupes']);
+	    }
+
 ?>
 </body>
 </html>

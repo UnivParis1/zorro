@@ -115,19 +115,23 @@
 
 <!-- On rend la CSS "dynamique" en lui passant en paramètre le timestamp Unix de dernière modification du fichier -->
 <!-- Donc à chaque changement de CSS, on force le chargement de la nouvelle CSS -->
-<link rel="stylesheet" type="text/css"
-	href="style/style.css?<?php echo filemtime('style/style.css')  ?>"
-	media="screen"></link>
+
 <link rel="stylesheet" type="text/css" href="style/jquery-ui.css"
+	media="screen"></link>
+<link rel="stylesheet" type="text/css"
+	href="style/css33.css?<?php echo filemtime('style/css33.css')  ?>"
+	media="screen"></link>
+	<link rel="stylesheet" type="text/css"
+	href="style/style.css?<?php echo filemtime('style/style.css')  ?>"
 	media="screen"></link>
 </head>
 
-<body class="bodyhtml"> 
-<div id="mainmenu">
-		<ul class="niveau1">
-			<li onclick="">MENU
-				<ul class="niveau2">
-					<?php if ($user->getid() != 0) { ?>
+<body>
+	<div class="containerApp"> 
+		<header id="header-zorro">
+			<nav class="navigat" >
+				<ul >
+					<?php if ($user->isSuperAdmin() || (isset($_SESSION['groupes']) && sizeof($_SESSION['groupes']) > 0)) { ?>
 					<li onclick='document.createdecree.submit();' <?php //echo $hidemenu; ?> >
 						<form name='createdecree' method='post' action="create_decree.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
@@ -146,13 +150,13 @@
 						<form name='managerole' method='post' action="manage_role.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>
-						<a href="javascript:document.managerole.submit();">Gestion des autorisations</a>
+						<a href="javascript:document.managerole.submit();">Autorisations</a>
 					</li>
 					<li onclick='document.managemodel.submit();' <?php //echo $hidemenu; ?> >
 						<form name='managemodel' method='post' action="manage_model.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>
-						<a href="javascript:document.managemodel.submit();">Gestion des modèles</a>
+						<a href="javascript:document.managemodel.submit();">Modèles</a>
 					</li>
 					<?php } ?>	
 					<li onclick='document.usurpe.submit();' <?php //echo $hidemenu; ?> >
@@ -162,7 +166,5 @@
 						<a href="javascript:document.ursurpe.submit();">Changer d'utilisateur</a>
 					</li>	
 				</ul>
-			</li>
-		</ul>
-</div>
-<br> <br> <br>
+			</nav>
+		</header>

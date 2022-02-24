@@ -1,0 +1,50 @@
+ 
+body { font-family: arial, verdana ; font-size : 14px;}
+
+.containerApp {
+    width: 96%; max-width: 1170px;
+    margin-right: auto; margin-left: auto;
+     clear: both;
+}
+
+header#header-zorro { border: 1px dotted #0B4FF2; margin-top: 35px;  }
+ 
+nav.navigat  {  
+    margin-top: 35px; background: #727780; 
+   padding : 2px;  
+}
+
+nav.navigat ul {  
+     height: 14px;  text-align: center; margin-top: 0;   
+}
+
+nav.navigat ul li { 
+	display: inline-block; -float: left;  
+	width:150px;  
+	border-left : 1px #FFFFFF4F solid;  
+	background: #00000030;
+	text-align: center;   
+	padding-top:6px; 
+	padding-bottom: 6px; 
+	color: white; 
+}
+
+nav.navigat ul li a {  
+     color: white; 
+     text-decoration: none;
+}
+
+
+#contenu1, #contenu2 {
+clear : both;  background: #eeeeee8a; padding:11px;
+         margin-top: 20px; display: block;  }
+
+ 
+
+div.contenu1 form {  background: green;  height:  25px;  display: block;  clear:both;  } 
+.gauche { background:#FAF5D7; min-height: 40px; float :left;  width: calc(100% - 305px); margin-bottom:15px; } 
+.droite { background:#DDF1FB; min-height: 40px; float :right; width:300px; margin-bottom:15px; }
+
+
+
+ 

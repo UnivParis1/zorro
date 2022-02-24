@@ -14,12 +14,19 @@
 	 header('Location: index.php');
 	 exit();
 	 }
-	 if (isset($_POST['newuser']))
+	 if (isset($_POST['newuser']) && $_POST['newuser'] != null)
 	 {
 	 	$ldap = new ldap();
 	 	$ldap->setUser($_POST['newuser']);
 	 	$ldap->getInfos($_POST['newuser']);
 	 	$userid = $_POST['newuser'];
+	 	require_once('./class/user.php');
+	 	require_once('./class/reference.php');
+	 	$ref = new reference($dbcon, $rdbApo);
+	 	$user = new user($dbcon, $userid);
+	 	$allgroups = $ref->getAllGroupes();
+	 	$groups = $user->getUserGroupes($allgroups);
+	 	$_SESSION['groupes'] = $groups;
 	 }
 	require ("include/menu.php");
 

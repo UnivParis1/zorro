@@ -15,50 +15,46 @@ class ldap {
 		$this->_con_ldap = $con_ldap;
 	}
 	
-	/*function isMemberOf($groupname)
+	function isMemberOf($uid, $groupname)
 	{
-		$retour = FALSE;
-		$uid = phpCAS::getUser();
+		$retour = FALSE; 
 		$r = ldap_bind($this->_con_ldap, LDAP_BIND_LOGIN, LDAP_BIND_PASS);
-		$filtre = "(uid=$uid)";
-
-		$dn = LDAP_SEARCH_BASE;
+		$filtre = "member=uid=$uid,".LDAP_SEARCH_BASE_PEOPLE;
+		
+		$base = "cn=$groupname,".LDAP_SEARCH_BASE_GROUPS;
 		$restriction = array(
-				LDAP_MEMBER_ATTR
+				'cn'
 		);
-		$sr = ldap_search($this->_con_ldap, $dn, $filtre, $restriction);
+		$sr = ldap_search($this->_con_ldap, $base, $filtre, $restriction);
 		$info = ldap_get_entries($this->_con_ldap, $sr);
 		// echo "<br>Info = " . print_r($info,true) . "<br>";
 		// Si l'utilisateur est au moins dans un groupe
-		if (isset($info[0][$restriction[0]])) {
-			if (in_array($groupname, $info[0][$restriction[0]])) {
-				// L'utilisateur est dans le groupe recherché, on peut continuer
-				$retour = TRUE;
-			} else {
-				$errlog = "Le groupe $groupname n'est pas défini pour l'utilisateur) !!!";
-				elog($errlog);
-			}
-		}    // Pas de groupe pour cet utilisateur => On doit s'arréter
-		else {
-			$errlog = "L'utilisateur ne fait parti d'aucun groupe LDAP....";
+		if (isset($info[0][$restriction[0]])) 
+		{
+			$retour = TRUE;
+		}
+		else 
+		{
+			$errlog = "L'utilisateur $uid ne fait pas parti du groupe $groupname...";
 			elog($errlog);
 		}
 		return $retour;
-	}*/
+	}
 	
 	
-	// récupérationd des noms, prénoms, adresse email, structure d'affectation
-	function getInfos($uid)
+	// récupération des noms, prénoms, adresse email, structure d'affectation
+	function getInfos($uid, $temUserApp = true)
 	{
 		$r = ldap_bind($this->_con_ldap);
 		$filtre = "(uid=$uid)";
 		$attributs = array('uid', 'displayName', 'mail', 'supannEntiteAffectation');
-		$result = ldap_search($this->_con_ldap, "ou=people,dc=univ-paris1,dc=fr", $filtre, $attributs);
+		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
 		$infos_ldap = array('displayname' => $entries[0]['displayname'][0],
 				'mail' => $entries[0]['mail'][0],
-				'supannentiteaffectation' => $entries[0]['supannentiteaffectation'][0]);
-		$result2 = ldap_search($this->_con_ldap, "ou=structures,dc=univ-paris1,dc=fr", "(supannCodeEntite=".$entries[0]['supannentiteaffectation'][0].")", array('ou', 'supannRefId')); 
+				'supannentiteaffectation' => $entries[0]['supannentiteaffectation'][0]
+		);
+		$result2 = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$entries[0]['supannentiteaffectation'][0].")", array('ou', 'supannRefId')); 
 		$entries2 = ldap_get_entries($this->_con_ldap, $result2);
 		$infos_ldap['ou'] = $entries2[0]['ou'][0];
 		$supannrefid = $entries2[0]['supannrefid'];
@@ -69,9 +65,12 @@ class ldap {
 				$infos_ldap['supannrefid'] = substr($value, 12);
 			}
 		}
-		foreach ($infos_ldap as $cle => $valeur)
+		if ($temUserApp)
 		{
-			$_SESSION[$cle] = $valeur;
+			foreach ($infos_ldap as $cle => $valeur)
+			{
+				$_SESSION[$cle] = $valeur;
+			}
 		}
 		return $infos_ldap;
 	}
@@ -81,5 +80,75 @@ class ldap {
 	{
 		$_SESSION['uid'] = $uid;
 		unset($_SESSION['issuperadmin']);
+		unset($_SESSION['groupes']);
+	}
+	
+	function getSupannCodeEntiteFromAPO($codApogee)
+	{
+		// ldapsearch -b ou=structures,dc=univ-paris1,dc=fr '(supannRefId={APOGEE.CMP}02)' supannCodeEntite
+		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannRefId={APOGEE.CMP}$codApogee)", array("supannCodeEntite"));
+		$entries = ldap_get_entries($this->_con_ldap, $result);
+		if ($entries !== FALSE && $entries['count'] > 0)
+		{
+			return $entries[0]['supanncodeentite'][0];
+		}
+		else
+		{
+			return NULL;
+		}
+	}
+	
+	function getStructureResp($structure)
+	{
+		// $structure est le supannCodeEntite 
+		$retour = array();
+		$curl = curl_init();
+		$params = array('key' => 'structures-'.$structure, 'attrs' => 'roles');
+		$walk = function( $item, $key, $parent_key = '' ) use ( &$output, &$walk ) {
+			is_array( $item )
+			? array_walk( $item, $walk, $key )
+			: $output[] = http_build_query( array( $parent_key ?: $key => $item ) );
+			
+		};
+		array_walk( $params, $walk );
+		$params_string = implode( '&', $output );
+		$curl_opt_url = WSGROUPS_URL_GROUP.$params_string;
+		//echo "<br>Output = " . $params_string . '<br><br>';
+		
+		$opts = [
+				CURLOPT_URL => $curl_opt_url,
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_PROXY => ''
+		];
+		curl_setopt_array($curl, $opts);
+		$json = curl_exec($curl);
+		$error = curl_error ($curl);
+		curl_close($curl);
+		if ($error != "")
+		{
+			elog( "Erreur Curl = " . $error );
+		}
+		//print_r2($json);
+		$tab = json_decode($json, true);
+		if (is_array($tab) && key_exists('roles', $tab))
+		{
+			$roles = $tab['roles'];
+			foreach($roles as $role)
+			{
+				if (!key_exists('mail', $role))
+				{
+					$ldap_infos = $this->getInfos($role['uid'], false);
+					$retour[] = array('name' => $role['displayName'], 'mail' => $ldap_infos['mail'], 'role' => $role["supannRoleGenerique"][0]);
+				}
+				else 
+				{
+					$retour[] = array('name' => $role['displayName'], 'mail' => $role['mail'], 'role' => $role["supannRoleGenerique"][0]);
+				}
+			}
+		}
+		//print_r2($retour);
+		return $retour;
 	}
 }
