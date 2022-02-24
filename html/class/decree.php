@@ -163,7 +163,7 @@ class decree {
 	
 	function setIdEsignature($id)
 	{
-		$update = "UPDATE decree SET idesignature = ".$id." WHERE iddecree = ".$this->getId();
+		$update = "UPDATE decree SET idesignature = ".$id.", status = 'p' WHERE iddecree = ".$this->getId();
 		mysqli_query($this->_dbcon, $update);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -194,11 +194,11 @@ class decree {
 		return $decree;
 	}*/
 	
-	function save($iduser, $idmodel, $structure, $idesignature=null, $status = 'p')
+	function save($iduser, $idmodel, $structure, $idesignature=null, $status = 'b')
 	{
 		if ($idesignature != null)
 		{
-			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `idesignature`, `status`, `structure`) VALUES ($this->_year, $this->_number, NOW(), ".inval($iduser).", ".intval($idmodel).", ".intval($idesignature).", '$status', '$structure')";
+			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `idesignature`, `status`, `structure`) VALUES ($this->_year, $this->_number, NOW(), ".inval($iduser).", ".intval($idmodel).", ".intval($idesignature).", 'p', '$structure')";
 		}
 		else 
 		{
