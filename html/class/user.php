@@ -173,22 +173,27 @@ class user {
 	
 	function isAdmin()
 	{
-		// TODO : Revoir => Admin = RA LDAP
-		$select = "SELECT iduser_role FROM user_role WHERE iduser = '".$this->getid()."' AND active = 'O' AND idrole = 1";
-		$res = mysqli_query($this->_dbcon, $select);
-		if ( !mysqli_error($this->_dbcon))
+		if (isset($_SESSION['supannentiteaffectation']))
 		{
-			if (mysqli_num_rows($res) > 0)
+			$structure = $_SESSION['supannentiteaffectation'];
+			$ldap = new ldap();
+			$resp = $ldap->getStructureResp($structure);
+			//print_r2($resp);
+			if (isset($_SESSION['uid']) && key_exists($_SESSION['uid'], $resp) && $resp[$_SESSION['uid']]['role'] == 'Responsable administratif')
 			{
-				elog("L'utilisateur est admin <br>");
+				elog("L'utilisateur ".$_SESSION['uid']." est responsable administratif de sa structure");
 				return TRUE;
 			}
+			else 
+			{
+				elog("L'utilisateur ".$_SESSION['uid']." n'est pas responsable administratif de sa structure");
+			}
 		}
-		elog( "L'utilisateur n'est pas admin <br>");
+		elog( "L'utilisateur n'a pas d'affectation <br>");
 		return FALSE;
 	}
 	
-	function getStructure()
+	function getStructureCodApo()
 	{
 		$ldap = new ldap();
 		return $ldap->getInfos($this->_uid, false)['supannrefid'];
@@ -247,7 +252,7 @@ class user {
 		}
 		elseif ($this->isAdmin())
 		{
-			$select .= " WHERE d.structure = ".$this->getStructure();
+			$select .= " WHERE d.structure = ".$this->getStructureCodApo();
 		}
 		else // user lambda
 		{
@@ -277,18 +282,10 @@ class user {
 		}
 		else {
 			// L'utilisateur appartient à la structure pour laquelle le document a été créé
-			if ($this->getStructure() == $decree['structure'])
+			if ($this->getStructureCodApo() == $decree['structure'])
 			{
-				// TODO : Contrôler si l'utilisateur est RA
-				$select = "SELECT * FROM user_role WHERE iduser = ".$this->getId()." AND idmodel = ".intval($decree['idmodel'])." AND idrole = 1 AND active = 'O'" ;
-				$res = mysqli_query($this->_dbcon, $select);
-				if ( !mysqli_error($this->_dbcon))
-				{
-					if (mysqli_num_rows($res) > 0)
-					{
-						return true;
-					}
-				}
+				// L'utilisateur est RA
+				return $this->isAdmin();
 			}
 		}
 		return false;

@@ -168,7 +168,7 @@
 						if (is_int($id))
 						{
 							$mod_decree->setIdEsignature($id);
-							// TODO : Affichage de la création réussie
+							$message = "La demande a été envoyée à eSignature.";
 						}
 						else 
 						{
@@ -350,7 +350,7 @@
     					}
     				}
     			}
-    			// print_r2($body);
+    			// print_r2($body);// TODO : Affichage de la création réussie
     			// enregistrement du xml modifié
     			$doc->save(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml");
     			fclose($content);
@@ -493,9 +493,7 @@ function supprimerValeur(cellid)
 </script>
 <div id="contenu1">
 <?php 
-if ($mode == 'modif') { ?>
-	<p style="color:DodgerBlue;"><b>MODIFICATION DU DOCUMENT <?php echo $mod_year.'/'.$mod_num;?></b></p>
-	<?php 
+if ($mode == 'modif') { 
 	// RÉCUPÉRATION DU DOCUMENT ET DE SES PARAMÈTRES
 	$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
 	//print_r2($mod_decree);
@@ -506,15 +504,24 @@ if ($mode == 'modif') { ?>
 		if ($user->hasAccessDecree($mod_select_decree))
 		{
 			$mod_decree_fields = $mod_decree->getFields();
+			$access = true;
+			?>
+			<p style="color:DodgerBlue;"><b>MODIFICATION DU DOCUMENT <?php echo $mod_year.'/'.$mod_num;?></b></p>
+			<?php 
 			//print_r2($mod_decree_fields);
 		}
 		else 
 		{
-			echo "Utilisateur non autorisé à modifier le document.";
+			elog("Utilisateur non autorisé à modifier le document.");
+			$access = false;
+			unset($mod_decree);
+			unset($mod_select_decree);
 			$mode = 'create';
 		}
 	} else {
 		echo "Erreur de paramètres : annee $mod_year et numero $mod_num.";
+		$access = false;
+		unset($mod_decree);
 		$mode = 'create';
 	}
 }?>
@@ -539,7 +546,7 @@ if ($mode == 'modif') { ?>
 	        			</optgroup> 
 	        		<?php } $type = $model['iddecree_type']; ?>
 		        	<optgroup label="<?php echo $model['namedecree_type'];?>">
-	        	<?php } if ((isset($post_selectarrete) && $post_selectarrete == $model['idmodel']) || (isset($mod_select_decree) && $mod_select_decree['idmodel'] == $model['idmodel'])) { ?>
+	        	<?php } if ((isset($post_selectarrete) && $post_selectarrete == $model['idmodel']) || (isset($mod_select_decree) && $access && $mod_select_decree['idmodel'] == $model['idmodel'])) { ?>
 		            	<option value="<?php echo $model['idmodel'];?>" selected="selected"><?php echo $model['name'];?></option>
 		            	<?php } else { ?>
 		            	<option value="<?php echo $model['idmodel'];?>"><?php echo $model['name'];?></option>
@@ -548,7 +555,7 @@ if ($mode == 'modif') { ?>
 	</select>
 	</form>
 	<?php } ?>
-	<?php if (isset($post_selectarrete) && $post_selectarrete != '' || isset($mod_select_decree)) 
+	<?php if (isset($post_selectarrete) && $post_selectarrete != '' || (isset($mod_select_decree) && $access)) 
 		{ 
 			$selectarrete = isset($mod_select_decree) ? $mod_select_decree['idmodel'] : $post_selectarrete;
 			$modelselected = new model($dbcon, $selectarrete); 
@@ -688,6 +695,9 @@ if ($mode == 'modif') { ?>
 		<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ?')">
 		<input type='submit' name='duplique' value='Dupliquer'>
 		<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
+		<?php if (isset($message)) { ?>
+		<p><?php echo $message;?></p>
+		<?php } ?>
 		<br>
 		<?php } else {?>
 		<br><input type='submit' name='valide' value='Valider'><br>
@@ -719,7 +729,11 @@ if ($mode == 'modif') { ?>
 		}
 		?>
 		</div>
-<?php } ?>
+<?php } 
+else 
+{ ?>
+	<p> Vous n'avez pas accès à ce document. </p>
+<?php }?>
 
 </div>
 </body>

@@ -140,11 +140,11 @@ class ldap {
 				if (!key_exists('mail', $role))
 				{
 					$ldap_infos = $this->getInfos($role['uid'], false);
-					$retour[] = array('name' => $role['displayName'], 'mail' => $ldap_infos['mail'], 'role' => $role["supannRoleGenerique"][0]);
+					$retour[$role['uid']] = array('uid' => $role['uid'], 'name' => $role['displayName'], 'mail' => $ldap_infos['mail'], 'role' => $role["supannRoleGenerique"][0]);
 				}
 				else 
 				{
-					$retour[] = array('name' => $role['displayName'], 'mail' => $role['mail'], 'role' => $role["supannRoleGenerique"][0]);
+					$retour[$role['uid']] = array('uid' => $role['uid'], 'name' => $role['displayName'], 'mail' => $role['mail'], 'role' => $role["supannRoleGenerique"][0]);
 				}
 			}
 		}
