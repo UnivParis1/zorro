@@ -322,6 +322,7 @@ class user {
 		{
 			$select .= " AND role.scope = '".$scope."'";
 		}
+		$select .= " ORDER BY model.iddecree_type, grr.idmodel";
 		$res = mysqli_query($this->_dbcon, $select);
 		if ( !mysqli_error($this->_dbcon))
 		{
