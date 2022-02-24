@@ -218,8 +218,12 @@
     			if ($mod_decree_infos != NULL && $mod_decree->getStatus() != 'v')
     			{
     				elog("Suppression du numero...");
+    				$oldyear = $mod_decree->getYear();
     				$mod_decree->unsetNumber($user->getId());
-    				$numero_dispo = $ref->getNumDispo($year);
+    				if ($oldyear == $year)
+    				{
+    					$numero_dispo = $ref->getNumDispo($year);
+    				}
     				// TODO : Supprimer le PDF qui avait été créé
     			}
     			// TODO : Si l'année n'a pas changé, conserver le numéro de l'arrêté
