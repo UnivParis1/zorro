@@ -175,6 +175,63 @@ class decree {
 		}
 	}
 	
+	
+	function getIdEsignature()
+	{
+		$select = "SELECT idesignature FROM decree WHERE iddecree = ".$this->getId();
+		$result = mysqli_query($this->_dbcon, $select);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				return $res['idesignature'];
+			}
+		}
+		else
+		{
+			elog("Erreur select idesignature pour le decree id : ".$this->getId()." ".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
+	
+	function setStatus($status)
+	{
+		$update = "UPDATE decree SET status = '".$status."' WHERE iddecree = ".$this->getId();
+		mysqli_query($this->_dbcon, $update);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("status esignature : ".$status." pour le decree id : ".$this->getId());
+		}
+		else
+		{
+			elog("Erreur update status esignature : ".$status." pour le decree id : ".$this->getId()." ".mysqli_error($this->_dbcon));
+		}
+	}
+	
+	
+	function getStatus()
+	{
+		$select = "SELECT status FROM decree WHERE iddecree = ".$this->getId();
+		$result = mysqli_query($this->_dbcon, $select);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$status = $res['status'];
+				if ($status == 'p')
+				{
+					return $this->synchroEsignatureStatus($status);
+				}
+				return $status;
+			}
+		}
+		else
+		{
+			elog("Erreur select status pour le decree id : ".$this->getId()." ".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
+	
 	/*function getDecreeById()
 	{
 		$select = "SELECT * FROM decree WHERE iddecree = ".$this->getId();
@@ -284,8 +341,98 @@ class decree {
 		return $filename;
 	}
 	
-	function getEsignatureStatus()
+	function synchroEsignatureStatus($status)
 	{
-		// TODO
+		$idesignature = $this->getIdEsignature();
+		if ($idesignature == 0) 
+		{
+			elog("Pas de synchronisation du document ".$this->getId()." pas d'identifiant eSignature.");
+		}
+		else 
+		{
+			elog("Synchronisation... ".ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+			$curl = curl_init();
+			$opts = [
+					CURLOPT_URL => ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_SSL_VERIFYPEER => false,
+					CURLOPT_PROXY => ''
+			];
+			curl_setopt_array($curl, $opts);
+			//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			$json = curl_exec($curl);
+			
+			$error = curl_error ($curl);
+			curl_close($curl);
+			if ($error != "")
+			{
+				elog(" Erreur Curl =>  " . $error);
+			}
+			//echo "<br>" . print_r($json,true) . "<br>";
+			$response = json_decode($json, true);
+			//print_r2($response);
+			
+			//elog("Le json est =>  " . var_export($json,true));
+			
+			//elog("La réponse est =>  " . var_export($response,true));
+			
+			if (stristr(substr($json,0,20),'HTML') === false)
+			{
+				if (! isset($response['error']))
+				{
+					elog ("Succès. setStatus...");
+					if (isset($response['parentSignBook']['status']))
+					{
+						$current_status = $response['parentSignBook']['status'];
+					}
+					else
+					{
+						$current_status = '';
+					}
+					elog("current status ".$current_status);
+					switch (strtolower($current_status))
+					{
+						//draft, pending, canceled, checked, signed, refused, deleted, completed, exported, archived, cleaned
+						case 'draft' :
+						case 'pending' :
+						case 'signed' :
+						case 'checked' :
+							$new_status = 'p'; // pending
+							break;
+						case 'completed' :
+						case 'exported' :
+						case 'archived' :
+						case 'cleaned' :
+							$new_status = 'v'; // validated
+							break;
+						case 'refused':
+							$new_status = 'r'; // refused
+							break;
+						case 'deleted' : // TODO : Attention le document est dans la corbeille
+						case 'canceled' :
+						case '' :
+							$new_status = 'a'; // aborted
+							break;
+						default :
+							$new_status = 'e'; // error
+					}
+					elog ("Nouveau statut de la demande : ".$new_status);
+					if ($status != $new_status)
+					{
+						$this->setStatus($new_status);
+						return $new_status;
+					}
+				}
+				else 
+				{
+					elog("La réponse est en erreur.");
+				}
+			}
+			else 
+			{
+				elog("Le json est du HTML.");
+			}
+		}
+		return null;
 	}
 }

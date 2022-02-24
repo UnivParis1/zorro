@@ -104,7 +104,7 @@
 		}
 	}
 	
-	if (isset($_POST['sign'])) {
+	if (isset($_POST['sign']) && isset($mod_decree) && $mod_decree->getStatus() == 'b') {
 		$ldap = new ldap();
 		elog('on est dans la signature...');
 		if (isset($_POST["composantecod1"]))
@@ -132,7 +132,7 @@
 							elog("mail du responsable : ".$responsable['mail']);
 							//$params['recipientEmails'] .= "1*".$responsable['mail'].",";
 						}
-						$params['recipientEmails'] = "1*elodie.briere@univ-paris1.fr,2*canica.sar@univ-paris1.fr,";//,"1*canica.sar@univ-paris1.fr","2*canica.sar@univ-paris1.fr");
+						$params['recipientEmails'] = "1*elodie.briere@univ-paris1.fr,2*elodie.briere@univ-paris1.fr,";//,"1*canica.sar@univ-paris1.fr","2*canica.sar@univ-paris1.fr");
 						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
 						elog($params['recipientEmails']);
 						$params['targetEmails'] = "elodie.briere@univ-paris1.fr";
@@ -215,10 +215,11 @@
     		{
     			$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
     			$mod_decree_infos = $mod_decree->getDecree();
-    			if ($mod_decree_infos != NULL && $mod_decree_infos['status'] != 'v')
+    			if ($mod_decree_infos != NULL && $mod_decree->getStatus() != 'v')
     			{
+    				elog("Suppression du numero...");
     				$mod_decree->unsetNumber($user->getId());
-    				elog("Suppression du numero");
+    				$numero_dispo = $ref->getNumDispo($year);
     				// TODO : Supprimer le PDF qui avait été créé
     			}
     			// TODO : Si l'année n'a pas changé, conserver le numéro de l'arrêté
@@ -691,15 +692,22 @@ if ($mode == 'modif') {
 			<input type="hidden" id='mod_num' name='mod_num' value='<?php echo $mod_num;?>'>
 			<input type="hidden" id='mod_id' name='mod_id' value='<?php echo $mod_decree_id;?>'>
 		<br>
-		<?php // TODO : Contrôler l'état de la demande dans esignature ?>
-		<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ?')">
-		<input type='submit' name='duplique' value='Dupliquer'>
-		<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
+		<?php // TODO : Contrôler l'état de la demande dans esignature 
+		if (isset($mod_decree))
+		{
+			$status = $mod_decree->getStatus(); 
+			if ($status != 'v') {?>
+				<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ?')">
+			<?php } ?>
+			<input type='submit' name='duplique' value='Dupliquer'>
+		<?php if ($status == 'b') { ?>
+			<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
+		<?php } ?>
 		<?php if (isset($message)) { ?>
 		<p><?php echo $message;?></p>
 		<?php } ?>
 		<br>
-		<?php } else {?>
+		<?php } } else {?>
 		<br><input type='submit' name='valide' value='Valider'><br>
 		<?php } ?>
 		</div>
@@ -716,7 +724,6 @@ if ($mode == 'modif') {
 				$contenu_pdf = fread($doc_pdf, filesize($filename));
 				$encodage = base64_encode($contenu_pdf); 
 				?>
-				<!-- <a href="files/<?php echo substr($modelselected->getfile(), 0, -4).$year.'_'.$numero_dispo.".pdf";?>" target="_blank" ><b>ICI</b></a><br> -->
 				<?php echo '<iframe src=data:application/pdf;base64,' . $encodage . ' width="100%" height="500px">';
 				echo "</iframe>";?>
 	
