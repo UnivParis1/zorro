@@ -420,8 +420,8 @@ class decree {
 					if ($status != $new_status)
 					{
 						$this->setStatus($new_status);
-						return $new_status;
 					}
+					return $new_status;
 				}
 				else 
 				{
