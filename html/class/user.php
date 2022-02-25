@@ -59,7 +59,7 @@ class user {
 				}
 			}
 			else {
-				elog("Utilisateur existant : ".$this->_uid);
+				//elog("Utilisateur existant : ".$this->_uid);
 			}
 		}
 		else 
@@ -187,6 +187,7 @@ class user {
 			else 
 			{
 				elog("L'utilisateur ".$_SESSION['uid']." n'est pas responsable administratif de sa structure");
+				return FALSE;
 			}
 		}
 		elog( "L'utilisateur n'a pas d'affectation <br>");

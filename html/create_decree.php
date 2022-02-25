@@ -95,6 +95,7 @@
     {
     	// RÉCUPÉRATION DU DOCUMENT ET DE SES PARAMÈTRES
 		$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
+		$mod_status = $mod_decree->getStatus();
 		$mod_num = $mod_decree->getNumber();
 		$mod_year = $mod_decree->getYear();
 		if ($mod_decree_id != NULL)
@@ -104,7 +105,22 @@
 		}
 	}
 	
-	if (isset($_POST['sign']) && isset($mod_decree) && $mod_decree->getStatus() == 'b') {
+	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE) 
+	{
+		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
+		{
+			// TODO : Supprimer d'esignature
+		}
+		elog("Suppression du numero...");
+		$mod_decree->unsetNumber($user->getId());
+		$message = 'Le document a été supprimé.';
+		$mode= 'create';
+		unset($post_selectarrete);
+		unset($mod_select_decree);
+		unset($post_arrete);
+	}
+	elseif (isset($_POST['sign']) && isset($mod_decree) && $mod_status == STATUT_BROUILLON) 
+	{
 		$ldap = new ldap();
 		elog('on est dans la signature...');
 		if (isset($_POST["composantecod1"]))
@@ -121,7 +137,7 @@
 						$curl = curl_init();
 						$params = array
 						(
-								'createByEppn' => "system",
+								'createByEppn' => "ebriere@univ-paris1.fr",//"system",
 								//'targetEmails' => $ref->getUserMail()
 								//'targetUrls' => array()
 						);
@@ -169,6 +185,7 @@
 						{
 							$mod_decree->setIdEsignature($id);
 							$message = "La demande a été envoyée à eSignature.";
+							$mod_status = $mod_decree->getStatus();
 						}
 						else 
 						{
@@ -215,8 +232,12 @@
     		{
     			$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
     			$mod_decree_infos = $mod_decree->getDecree();
-    			if ($mod_decree_infos != NULL && $mod_decree->getStatus() != 'v')
+    			if ($mod_decree_infos != NULL && $mod_decree->getStatus() != STATUT_VALIDE)
     			{
+    				if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
+    				{
+    					// TODO : Supprimer d'esignature
+    				}
     				elog("Suppression du numero...");
     				$oldyear = $mod_decree->getYear();
     				$mod_decree->unsetNumber($user->getId());
@@ -226,7 +247,6 @@
     				}
     				// TODO : Supprimer le PDF qui avait été créé
     			}
-    			// TODO : Si l'année n'a pas changé, conserver le numéro de l'arrêté
     		}
     		$idmodel_field_numero = $modelselected->getNumeroId();
     		$decreefields[] = array('idmodel_field' => $idmodel_field_numero, 'value' => $numero_dispo);
@@ -355,7 +375,7 @@
     					}
     				}
     			}
-    			// print_r2($body);// TODO : Affichage de la création réussie
+    			// print_r2($body);
     			// enregistrement du xml modifié
     			$doc->save(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml");
     			fclose($content);
@@ -430,12 +450,18 @@
     				elog( "stdout : \n");
     				elog($stdout);
     				elog( "La création du document PDF a échoué. <br>");
-    			}
-    			if ($stderr != "")
+    				$message = "La création du document a échoué.";
+    			} 
+    			elseif ($stderr != "")
     			{
     				elog( "stderr :\n");
     				elog($stderr);
     				elog( "La création du document PDF a échoué. <br>");
+    				$message = "La création du document a échoué.";
+    			}
+    			else 
+    			{
+    				$message = "Document enregistré.";
     			}
     			?>
 		<?php }
@@ -498,7 +524,8 @@ function supprimerValeur(cellid)
 </script>
 <div id="contenu1">
 <?php 
-if ($mode == 'modif') { 
+if ($mode == 'modif') 
+{ 
 	// RÉCUPÉRATION DU DOCUMENT ET DE SES PARAMÈTRES
 	$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
 	//print_r2($mod_decree);
@@ -523,7 +550,9 @@ if ($mode == 'modif') {
 			unset($mod_select_decree);
 			$mode = 'create';
 		}
-	} else {
+	} 
+	else 
+	{
 		echo "Erreur de paramètres : annee $mod_year et numero $mod_num.";
 		$access = false;
 		unset($mod_decree);
@@ -695,24 +724,34 @@ if ($mode == 'modif') {
 			<input type="hidden" id='mod_year' name='mod_year' value='<?php echo $mod_year;?>'>
 			<input type="hidden" id='mod_num' name='mod_num' value='<?php echo $mod_num;?>'>
 			<input type="hidden" id='mod_id' name='mod_id' value='<?php echo $mod_decree_id;?>'>
-		<br>
-		<?php // TODO : Contrôler l'état de la demande dans esignature 
-		if (isset($mod_decree))
-		{
-			$status = $mod_decree->getStatus(); 
-			if ($status != 'v') {?>
-				<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ?')">
-			<?php } ?>
-			<input type='submit' name='duplique' value='Dupliquer'>
-		<?php if ($status == 'b') { ?>
-			<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
-		<?php } ?>
-		<?php if (isset($message)) { ?>
-		<p><?php echo $message;?></p>
-		<?php } ?>
-		<br>
-		<?php } } else {?>
-		<br><input type='submit' name='valide' value='Valider'><br>
+			<br>
+			<?php // Contrôler l'état de la demande dans esignature 
+			if (isset($mod_decree))
+			{ ?>
+				<p><?php echo $mod_year.'/'.$mod_num.' '.$mod_status;?></p>
+				<?php if ($mod_status == STATUT_BROUILLON) {?>
+					<input type='submit' name='duplique' value='Dupliquer'>
+					<input type='submit' name='valide' value='Remplacer'>	
+					<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
+					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
+				<?php } elseif ($mod_status != STATUT_VALIDE) { ?>
+					<input type='submit' name='duplique' value='Dupliquer'>
+					<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+					<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+				<?php } else { ?>
+					<input type='submit' name='duplique' value='Dupliquer'>
+					<input type='submit' name='valide' value='Remplacer' disabled>
+					<input type='submit' name='supprime' value='Supprimer' disabled>
+					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+				<?php } ?>
+				<?php if (isset($message)) { ?>
+				<p><?php echo $message;?></p>
+				<?php } ?>
+				<br>
+			<?php } 
+		} else {?>
+		<br><input type='submit' name='valide' value='Enregistrer'><br>
 		<?php } ?>
 		</div>
 		</form>
@@ -735,7 +774,7 @@ if ($mode == 'modif') {
 					            
 			<?php }
 			else {	?>
-				<p> pas de document PDF.</p>
+				<!-- <p> pas de document PDF.</p> -->
 			<?php }
 		}
 		?>
