@@ -97,7 +97,7 @@ class model {
 	
 	function getModelFields()
 	{
-		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = $this->_idmodel";
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = $this->_idmodel ORDER BY mfi.order";
 		$result = mysqli_query($this->_dbcon, $select);
 		$fields = array();
 		if ( !mysqli_error($this->_dbcon))

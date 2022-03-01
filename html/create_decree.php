@@ -1,4 +1,4 @@
-<?php 
+<?php
     require_once ('CAS.php');
     include './include/casconnection.php';
     require_once ('./include/fonctions.php');
@@ -8,7 +8,6 @@
     require_once ('./class/model.php');
     require_once ('./class/reference.php');
     require_once ('./class/ldap.php');
-	
     
     /*if (isset($_POST["userid"]))
         $userid = $_POST["userid"];
@@ -604,10 +603,14 @@ if ($mode == 'modif')
 		<input type="hidden" name='userid' value='<?php echo $userid;?>'>
 		<input type="hidden" name='selectarrete' value='<?php echo isset($post_selectarrete) ? $post_selectarrete : $mod_select_decree['idmodel'];?>'>
 		<?php foreach ($modelfields as $modelfield)
-		{
-			if ($modelfield['auto'] != 'O')
-				echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];?> 
+		{ 
+			//if ($modelfield['auto'] != 'O')
+			//	echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];?>
 			<div id='<?php echo $modelfield['name'].'_div';?>'>
+			<?php if ($modelfield['auto'] != 'O')
+			{?>
+				<label><?php echo $modelfield['web_name'];?></label>
+			<?php } ?>
 			<input type="hidden" id='<?php echo $modelfield['name'].'_number';?>' value=1>
 			<?php 
 			switch ($modelfield['number']) {
@@ -625,7 +628,7 @@ if ($mode == 'modif')
 			{
 				if ($modelfield['auto'] == 'O')
 				{?>
-					<label><?php echo $modelfield['web_name'];?> : </label>Automatique
+					<!-- <label><?php echo $modelfield['web_name'];?> : </label>Automatique -->
 				<?php }
 				else {
 					switch ($modelfield['datatype']) {
@@ -755,6 +758,7 @@ if ($mode == 'modif')
 		<?php } ?>
 		</div>
 		</form>
+		</div>
 		<div class="contenu2">
 		<?php 
 		if (isset($mod_decree))
