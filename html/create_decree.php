@@ -104,19 +104,18 @@
 		}
 	}
 	
-	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE) 
+	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPRIME)
 	{
 		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
 		{
-			// TODO : Supprimer d'esignature
+			// Supprimer d'esignature
+			$mod_decree->deleteSignRequest($user->getId());
 		}
 		elog("Suppression du numero...");
 		$mod_decree->unsetNumber($user->getId());
+		$mod_num = 0;
+		$mod_status = STATUT_ANNULE;
 		$message = 'Le document a été supprimé.';
-		$mode= 'create';
-		unset($post_selectarrete);
-		unset($mod_select_decree);
-		unset($post_arrete);
 	}
 	elseif (isset($_POST['sign']) && isset($mod_decree) && $mod_status == STATUT_BROUILLON) 
 	{
@@ -183,7 +182,7 @@
 						if (is_int($id))
 						{
 							$mod_decree->setIdEsignature($id);
-							$message = "La demande a été envoyée à eSignature.";
+							$message = "Le document a été envoyé à eSignature.";
 							$mod_status = $mod_decree->getStatus();
 						}
 						else 
@@ -236,6 +235,7 @@
     				if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
     				{
     					// TODO : Supprimer d'esignature
+	 					$mod_decree->deleteSignRequest($user->getId());
     				}
     				elog("Suppression du numero...");
     				$oldyear = $mod_decree->getYear();
@@ -553,7 +553,7 @@ if ($mode == 'modif')
 	} 
 	else 
 	{
-		echo "Erreur de paramètres : annee $mod_year et numero $mod_num.";
+		elog ("Erreur de paramètres : annee $mod_year et numero $mod_num.");
 		$access = false;
 		unset($mod_decree);
 		$mode = 'create';
@@ -742,6 +742,11 @@ if ($mode == 'modif')
 					<input type='submit' name='duplique' value='Dupliquer'>
 					<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
 					<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+				<?php } elseif ($mod_status != STATUT_ANNULE) { ?>
+					<input type='submit' name='duplique' value='Dupliquer'>
+					<input type='submit' name='valide' value='Remplacer' disabled>
+					<input type='submit' name='supprime' value='Supprimer' disabled>
 					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
 				<?php } else { ?>
 					<input type='submit' name='duplique' value='Dupliquer'>

@@ -180,6 +180,21 @@ class decree {
 		}
 	}
 	
+	function unsetIdEsignature($userid)
+	{
+		$update = "UPDATE decree SET idesignature = NULL, status = 'a', idmajuser = ?, majdate = NOW() WHERE iddecree = ?";
+		$params = array($userid, $this->getId());
+		$result = prepared_query($this->_dbcon, $update, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("identifiant esignature supprime pour le decree id : ".$this->getId());
+		}
+		else
+		{
+			elog("Erreur suppression idesignature pour le decree id : ".$this->getId()." ".mysqli_error($this->_dbcon));
+		}
+	}
+	
 	
 	function getIdEsignature()
 	{
@@ -427,5 +442,47 @@ class decree {
 			}
 		}
 		return null;
+	}
+	
+	function deleteSignRequest($userid)
+	{
+		/*$eSignature_url = $fonctions->liredbconstante("ESIGNATUREURL"); //"https://esignature-test.univ-paris1.fr";
+		$url = $eSignature_url.'/ws/signrequests/'.$esignatureid_annule;
+		$params = array('id' => $esignatureid_annule);
+		$walk = function( $item, $key, $parent_key = '' ) use ( &$output, &$walk ) {
+			is_array( $item )
+			? array_walk( $item, $walk, $key )
+			: $output[] = http_build_query( array( $parent_key ?: $key => $item ) );
+			
+		};
+		array_walk( $params, $walk );
+		$json = implode( '&', $output );*/
+		$ch = curl_init();
+		$idesignature = $this->getIdEsignature();
+		curl_setopt($ch, CURLOPT_URL, ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+		//curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		//curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		$json = curl_exec($ch);
+		$result = json_decode($json);
+		error_log(basename(__FILE__) . " -- RETOUR ESIGNATURE SUPPRESSION DECREE ".$this->getId()." - id esignature : ".$idesignature."-- " . var_export($result, true));
+		$error = curl_error ($ch);
+		curl_close($ch);
+		$errlog = '';
+		if ($error != "")
+		{
+			elog("Erreur Curl = " . $error);
+		}
+		if (!is_null($result))
+		{
+			elog(" Erreur lors de la suppression de l arrete dans Esignature : ".var_export($result, true));
+		}
+		else
+		{
+			$this->unsetIdEsignature($userid);
+			elog("Demande de signature supprimée pour le decree  ".$this->getId()." par l'utilisateur ".$userid);
+		}
 	}
 }
