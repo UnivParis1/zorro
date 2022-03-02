@@ -36,8 +36,9 @@ class decree {
 		{
 			return $this->_id;
 		}
-		$select = "SELECT iddecree FROM decree WHERE number = '".$this->getNumber()."' AND year = '".$this->getYear()."'";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT iddecree FROM decree WHERE number = ? AND year = ?";
+		$params = array($this->getNumber(), $this->getYear());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -64,8 +65,9 @@ class decree {
 		{
 			return $this->_number;
 		}
-		$select = "SELECT number FROM decree WHERE iddecree = '".$this->getId()."'";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT number FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -92,8 +94,9 @@ class decree {
 		{
 			return $this->_year;
 		}
-		$select = "SELECT year FROM decree WHERE iddecree = '".$this->getId()."'";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT year FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -120,8 +123,9 @@ class decree {
 		{
 			return $this->_idmodel;
 		}
-		$select = "SELECT idmodel FROM decree WHERE iddecree = ".$this->getId();
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT idmodel FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -143,9 +147,9 @@ class decree {
 	
 	function getDecree()
 	{
-		//$select = "SELECT * FROM decree WHERE number = ".$this->getNumber()." AND year = ".$this->getYear();
-		$select = "SELECT * FROM decree WHERE iddecree = ".$this->getid();
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT * FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		$decree = NULL;
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -163,8 +167,9 @@ class decree {
 	
 	function setIdEsignature($id)
 	{
-		$update = "UPDATE decree SET idesignature = ".$id.", status = 'p' WHERE iddecree = ".$this->getId();
-		mysqli_query($this->_dbcon, $update);
+		$update = "UPDATE decree SET idesignature = ?, status = 'p' WHERE iddecree = ?";
+		$params = array($id, $this->getId());
+		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			elog("identifiant esignature : ".$id." pour le decree id : ".$this->getId());
@@ -178,8 +183,9 @@ class decree {
 	
 	function getIdEsignature()
 	{
-		$select = "SELECT idesignature FROM decree WHERE iddecree = ".$this->getId();
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT idesignature FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -196,8 +202,9 @@ class decree {
 	
 	function setStatus($status)
 	{
-		$update = "UPDATE decree SET status = '".$status."' WHERE iddecree = ".$this->getId();
-		mysqli_query($this->_dbcon, $update);
+		$update = "UPDATE decree SET status = ? WHERE iddecree = ?";
+		$params = array($status, $this->getId());
+		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			elog("status esignature : ".$status." pour le decree id : ".$this->getId());
@@ -211,8 +218,9 @@ class decree {
 	
 	function getStatus()
 	{
-		$select = "SELECT status FROM decree WHERE iddecree = ".$this->getId();
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT status FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -232,37 +240,19 @@ class decree {
 		return 0;
 	}
 	
-	/*function getDecreeById()
-	{
-		$select = "SELECT * FROM decree WHERE iddecree = ".$this->getId();
-		$result = mysqli_query($this->_dbcon, $select);
-		$decree = NULL;
-		if ( !mysqli_error($this->_dbcon))
-		{
-			if ($res = mysqli_fetch_assoc($result))
-			{
-				$decree = $res;
-			}
-		}
-		else
-		{
-			elog("erreur SELECT * FROM decree WHERE id = $this->_number AND year = $this->_year.".mysqli_error($this->_dbcon));
-		}
-		return $decree;
-	}*/
-	
 	function save($iduser, $idmodel, $structure, $idesignature=null, $status = 'b')
 	{
 		if ($idesignature != null)
 		{
-			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `idesignature`, `status`, `structure`) VALUES ($this->_year, $this->_number, NOW(), ".inval($iduser).", ".intval($idmodel).", ".intval($idesignature).", 'p', '$structure')";
+			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `idesignature`, `status`, `structure`) VALUES (?, ?, NOW(), ?, ?, ?, 'p', ?)";
+			$params = array($this->_year, $this->_number, $iduser, $idmodel, $idesignature, $structure);
 		}
 		else 
 		{
-			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `status`, `structure`) VALUES ($this->_year, $this->_number, NOW(), ".intval($iduser).", ".intval($idmodel).", '$status', '$structure')";
+			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `status`, `structure`) VALUES (?, ?, NOW(), ?, ?, ?, ?)";
+			$params = array($this->_year, $this->_number, $iduser, $idmodel, $status, $structure);
 		}
-		elog(var_export($insert, true));
-		mysqli_query($this->_dbcon, $insert);
+		$result = prepared_query($this->_dbcon, $insert, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			elog("Decree cree : ".$this->_number." / ".$this->_year);
@@ -277,8 +267,9 @@ class decree {
 	{
 		foreach ($fields as $field)
 		{
-			$insert = "INSERT INTO decree_field (`iddecree`, `idmodel_field`, `value`) VALUES (".$this->getid().", ".intval($field['idmodel_field']).", '".mysqli_escape_string($this->_dbcon, $field['value'])."')";
-			mysqli_query($this->_dbcon, $insert);
+			$insert = "INSERT INTO decree_field (`iddecree`, `idmodel_field`, `value`) VALUES (?, ?, ?)";
+			$params = array($this->getid(), $field['idmodel_field'], $field['value']);
+			$result = prepared_query($this->_dbcon, $insert, $params);
 			if ( !mysqli_error($this->_dbcon))
 			{
 				elog("Field cree pour le decree ".$this->getNumber()." : ".var_export($field, true));
@@ -291,8 +282,9 @@ class decree {
 	}
 	function getFields()
 	{
-		$select = "SELECT * FROM decree_field WHERE iddecree = ".$this->getid();
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT * FROM decree_field WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -310,8 +302,9 @@ class decree {
 	
 	function unsetNumber($iduser)
 	{
-		$update = "UPDATE decree SET number = NULL, idmajuser = ".intval($iduser).", majdate = NOW(), status = 'a' WHERE iddecree = ".$this->getid();
-		mysqli_query($this->_dbcon, $update);
+		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW(), status = 'a' WHERE iddecree = ?";
+		$params = array($iduser, $this->getid());
+		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			$this->_number = null;

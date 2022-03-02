@@ -19,8 +19,9 @@ class user {
 	
 	function getid()
 	{
-		$select = "SELECT iduser FROM user WHERE uid = '$this->_uid'";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT iduser FROM user WHERE uid = ?";
+		$params = array($this->_uid);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -41,14 +42,16 @@ class user {
 	
 	function save()
 	{
-		$select = "SELECT uid FROM user WHERE uid = '".$this->_uid."'";
-		$res = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT uid FROM user WHERE uid = ?";
+		$params = array($this->_uid);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
-			if (mysqli_num_rows($res) == 0)
+			if (mysqli_num_rows($result) == 0)
 			{
-				$insert = "INSERT INTO user (`uid`) VALUES ('".$this->_uid."')";
-				mysqli_query($this->_dbcon, $insert);
+				$insert = "INSERT INTO user (`uid`) VALUES (?)";
+				$params = array($this->_uid);
+				$result = prepared_query($this->_dbcon, $insert, $params);
 				if ( !mysqli_error($this->_dbcon))
 				{
 					elog("Utilisateur cree : ".$this->_uid);
@@ -70,15 +73,18 @@ class user {
 	
 	function getRoles($active = true)
 	{
-		$select = "SELECT uro.idrole, uro.idmodel, uro.active, model.iddecree_type FROM user_role uro LEFT JOIN model ON model.idmodel = uro.idmodel WHERE uro.iduser = ".$this->getid()." ";
+		$select = "SELECT uro.idrole, uro.idmodel, uro.active, model.iddecree_type FROM user_role uro LEFT JOIN model ON model.idmodel = uro.idmodel WHERE uro.iduser = ? ";
 		$roles = array();
 		if ($active)
+		{
 			$select .= " AND uro.active = 'O'";
+		}
 		$select .= " ORDER BY model.iddecree_type ";
-		$res = mysqli_query($this->_dbcon, $select);
+		$params = array($this->getid());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
-			while ($row = mysqli_fetch_assoc($res))
+			while ($row = mysqli_fetch_assoc($result))
 			{
 				$roles[] = array('idrole' => $row['idrole'], 'idmodel' => $row['idmodel'], 'iddecree_type' => $row['iddecree_type'], 'active' => $row['active']);
 			}
@@ -88,20 +94,23 @@ class user {
 	
 	function getModelRoles($active = true)
 	{
-		$select = "SELECT uro.idrole, uro.idmodel, uro.active, model.iddecree_type FROM role INNER JOIN user_role uro ON uro.idrole = role.idrole LEFT JOIN model ON model.idmodel = uro.idmodel WHERE role.scope = 'model' AND uro.iduser = ".$this->getid()." ";
+		$select = "SELECT uro.idrole, uro.idmodel, uro.active, model.iddecree_type FROM role INNER JOIN user_role uro ON uro.idrole = role.idrole LEFT JOIN model ON model.idmodel = uro.idmodel WHERE role.scope = 'model' AND uro.iduser = ? ";
 		$roles = array();
 		if ($active)
+		{
 			$select .= " AND uro.active = 'O'";
-			$select .= " ORDER BY model.iddecree_type ";
-			$res = mysqli_query($this->_dbcon, $select);
-			if ( !mysqli_error($this->_dbcon))
+		}
+		$select .= " ORDER BY model.iddecree_type ";
+		$params = array($this->getid());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
 			{
-				while ($row = mysqli_fetch_assoc($res))
-				{
-					$roles[] = array('idrole' => $row['idrole'], 'idmodel' => $row['idmodel'], 'iddecree_type' => $row['iddecree_type'], 'active' => $row['active']);
-				}
+				$roles[] = array('idrole' => $row['idrole'], 'idmodel' => $row['idmodel'], 'iddecree_type' => $row['iddecree_type'], 'active' => $row['active']);
 			}
-			return $roles;
+		}
+		return $roles;
 	}
 	
 	function setRoles($tab_roles)
@@ -111,15 +120,17 @@ class user {
 		{
 			$idrole = intval($role['idrole']);
 			$idmodel = intval($role['idmodel']);
-			$select = "SELECT * FROM user_role WHERE iduser = ". $this->getid() ." AND idrole = ".$idrole." AND idmodel = ".$idmodel;
-			$result = mysqli_query($this->_dbcon, $select);
+			$select = "SELECT * FROM user_role WHERE iduser = ? AND idrole = ? AND idmodel = ?";
+			$params = array($this->getid(), $idrole, $idmodel);
+			$result = prepared_select($this->_dbcon, $select, $params);
 			if ( !mysqli_error($this->_dbcon))
 			{
 				if (mysqli_num_rows($result) == 0)
 				{
 					$insert = "INSERT INTO user_role (`iduser`,`idrole`, `idmodel`, `createdate`, `createuserid`) ";
-					$insert .= "VALUES (".$this->getid().", ".$idrole.", ".$idmodel.", NOW(), '".intval($role['createuserid'])."')";
-					mysqli_query($this->_dbcon, $insert);
+					$insert .= " VALUES (?, ?, ?, NOW(), ?)";
+					$params = array($this->getid(), $idrole, $idmodel, $role['createuserid']);
+					$result = prepared_query($this->_dbcon, $insert, $params);
 					if (mysqli_error($this->_dbcon))
 					{
 						elog("erreur à l'insert du role ".var_export($role)." ".mysqli_error($this->_dbcon));
@@ -131,9 +142,10 @@ class user {
 				}
 				else 
 				{
-					$update = "UPDATE user_role SET updatedate = NOW(), updateuserid = ".intval($role['updateuserid']).", active = '".$role['active']."'";
-					$update .= " WHERE iduser = ".$this->getid()." AND idrole = ".$idrole." AND idmodel = ".$idmodel;
-					mysqli_query($this->_dbcon, $update);
+					$update = "UPDATE user_role SET updatedate = NOW(), updateuserid = ?, active = ?";
+					$update .= " WHERE iduser = ? AND idrole = ? AND idmodel = ?";
+					$params = array($role['updateuserid'], $role['active'], $this->getid(), $idrole, $idmodel);
+					$result = prepared_query($this->_dbcon, $update, $params);
 					if (mysqli_error($this->_dbcon))
 					{
 						elog("erreur à l'update du role ".var_export($role)." ".mysqli_error($this->_dbcon));
@@ -155,12 +167,13 @@ class user {
 	{
 		if (!isset($_SESSION['issuperadmin']))
 		{
-			$select = "SELECT iduser_role FROM user_role WHERE iduser = '".$this->getid()."' AND active = 'O' AND idrole = 3";
-			$res = mysqli_query($this->_dbcon, $select);
+			$select = "SELECT iduser_role FROM user_role WHERE iduser = ? AND active = 'O' AND idrole = 3";
+			$params = array($this->getid());
+			$result = prepared_select($this->_dbcon, $select, $params);
 			$_SESSION['issuperadmin'] = FALSE;
 			if ( !mysqli_error($this->_dbcon))
 			{
-				if (mysqli_num_rows($res) > 0)
+				if (mysqli_num_rows($result) > 0)
 				{
 					elog("L'utilisateur est super admin <br>".$this->_uid);
 					$_SESSION['issuperadmin'] = TRUE;
@@ -203,12 +216,13 @@ class user {
 	// Pas utilisé
 	function getModelsAdmin()
 	{
-		$select = "SELECT idmodel FROM user_role WHERE iduser = '".$this->getid()."' AND active = 'O' AND idrole = 1";
+		$select = "SELECT idmodel FROM user_role WHERE iduser = ? AND active = 'O' AND idrole = 1";
+		$params = array($this->getid());
+		$result = prepared_select($this->_dbcon, $select, $params);
 		$models = array();
-		$res = mysqli_query($this->_dbcon, $select);
 		if ( !mysqli_error($this->_dbcon))
 		{
-			while ($row = mysqli_fetch_assoc($res))
+			while ($row = mysqli_fetch_assoc($result))
 			{
 				$models[] = $row['idmodel'];
 			}
@@ -228,6 +242,7 @@ class user {
 	{
 		$listdecrees = array();
 		$iduser = $this->getid();
+		$params = array();
 		$select = " SELECT DISTINCT
 						d.iddecree,
 						d.number,
@@ -253,20 +268,29 @@ class user {
 		}
 		elseif ($this->isAdmin())
 		{
-			$select .= " WHERE d.structure = ".$this->getStructureCodApo();
+			$select .= " WHERE d.structure = ?";
+			$params[] = $this->getStructureCodApo();
 		}
 		else // user lambda
 		{
-			$select .= " WHERE d.iduser = ".$iduser;
+			$select .= " WHERE d.iduser = ?";
+			$params[] = $iduser;
 		}
 		if ($idmodel != null)
 		{
-			$select .= " AND d.idmodel = ".intval($idmodel);
+			$select .= " AND d.idmodel = ?";
+			$params[] = $idmodel;
 		}
-		$res = mysqli_query($this->_dbcon, $select);
+		if (sizeof($params) == 0)
+		{
+			$result = mysqli_query($this->_dbcon, $select);
+		}
+		else {
+			$result = prepared_select($this->_dbcon, $select, $params);
+		}
 		if ( !mysqli_error($this->_dbcon))
 		{
-			while ($row = mysqli_fetch_assoc($res))
+			while ($row = mysqli_fetch_assoc($result))
 			{
 				$listdecrees[] = $row;
 			}
@@ -309,29 +333,35 @@ class user {
 	function getGroupeRoles($listGroupes, $scope = NULL)
 	{
 		$roles = array();
-		$listidgroupes = "(";
-		foreach ($listGroupes as $idgroupe => $groupe)
+		$nbgroupes = sizeof($listGroupes);
+		if ($nbgroupes > 0)
 		{
-			$listidgroupes .= $idgroupe.", ";
-		}
-		$listidgroupes .= "0)";
-		$select = "SELECT DISTINCT grr.idmodel, model.iddecree_type FROM groupe_role grr INNER JOIN role ON role.idrole = grr.idrole INNER JOIN model ON model.idmodel = grr.idmodel WHERE grr.active = 'O' AND grr.idgroupe IN ".$listidgroupes;
-		if ($scope != NULL)
-		{
-			$select .= " AND role.scope = '".$scope."'";
-		}
-		$select .= " ORDER BY model.iddecree_type, grr.idmodel";
-		$res = mysqli_query($this->_dbcon, $select);
-		if ( !mysqli_error($this->_dbcon))
-		{
-			while ($row = mysqli_fetch_assoc($res))
+			$listidgroupes = "(?";
+			for($i = 1; $i < $nbgroupes; $i++)
 			{
-				$roles[] = $row;
+				$listidgroupes .= ', ?';
 			}
-		}
-		else 
-		{
-			elog("Erreur select groupe_role : ".$this->_uid." liste des groupes ".$listidgroupes." ".mysqli_error($this->_dbcon));
+			$listidgroupes .= ')';
+			$params = array_keys($listGroupes);
+			$select = "SELECT DISTINCT grr.idmodel, model.iddecree_type FROM groupe_role grr INNER JOIN role ON role.idrole = grr.idrole INNER JOIN model ON model.idmodel = grr.idmodel WHERE grr.active = 'O' AND grr.idgroupe IN ".$listidgroupes;
+			if ($scope != NULL)
+			{
+				$select .= " AND role.scope = ?";
+				$params[] = $scope;
+			}
+			$select .= " ORDER BY model.iddecree_type, grr.idmodel";
+			$result = prepared_select($this->_dbcon, $select, $params);
+			if ( !mysqli_error($this->_dbcon))
+			{
+				while ($row = mysqli_fetch_assoc($result))
+				{
+					$roles[] = $row;
+				}
+			}
+			else 
+			{
+				elog("Erreur select groupe_role : ".$this->_uid." liste des groupes ".var_export($params, true)." ".mysqli_error($this->_dbcon));
+			}
 		}
 		return $roles;
 	}
@@ -341,15 +371,17 @@ class user {
 		$this->save();
 		foreach ($tab_roles as $role)
 		{
-			$select = "SELECT * FROM groupe_role WHERE idrole = ".intval($role['idrole'])." AND idmodel = ".intval($role['idmodel'])." AND idgroupe = ".intval($role['idgroupe']);
-			$result = mysqli_query($this->_dbcon, $select);
+			$select = "SELECT * FROM groupe_role WHERE idrole = ? AND idmodel = ? AND idgroupe = ?";
+			$params = array($role['idrole'], $role['idmodel'], $role['idgroupe']);
+			$result = prepared_select($this->_dbcon, $select, $params);
 			if ( !mysqli_error($this->_dbcon))
 			{
 				if (mysqli_num_rows($result) == 0)
 				{
 					$insert = "INSERT INTO groupe_role (`idgroupe`,`idrole`, `idmodel`, `createdate`, `createuserid`, `active`) ";
-					$insert .= "VALUES ('".intval($role['idgroupe'])."', ".intval($role['idrole']).", ".intval($role['idmodel']).", NOW(), '".intval($role['createuserid'])."', '".$role['active']."')";
-					mysqli_query($this->_dbcon, $insert);
+					$insert .= "VALUES (?, ?, ?, NOW(), ?, ?)";
+					$params = array($role['idgroupe'], $role['idrole'], $role['idmodel'], $role['createuserid'], $role['active']);
+					$result = prepared_query($this->_dbcon, $insert, $params);
 					if (mysqli_error($this->_dbcon))
 					{
 						elog("erreur à l'insert du groupe role ".var_export($role)." ".mysqli_error($this->_dbcon));
@@ -361,9 +393,10 @@ class user {
 				}
 				else
 				{
-					$update = "UPDATE groupe_role SET updatedate = NOW(), updateuserid = ".$role['updateuserid'].", active = '".$role['active']."'";
-					$update .= " WHERE idgroupe = ".intval($role['idgroupe'])." AND idrole = ".intval($role['idrole'])." AND idmodel = ".intval($role['idmodel']);
-					mysqli_query($this->_dbcon, $update);
+					$update = "UPDATE groupe_role SET updatedate = NOW(), updateuserid = ?, active = ?";
+					$update .= " WHERE idgroupe = ? AND idrole = ? AND idmodel = ?";
+					$params = array($role['updateuserid'], $role['active'], $role['idgroupe'], $role['idrole'], $role['idmodel']);
+					$result = prepared_query($this->_dbcon, $update, $params);
 					if (mysqli_error($this->_dbcon))
 					{
 						elog("erreur à l'update du groupe role ".var_export($role)." ".mysqli_error($this->_dbcon));

@@ -31,8 +31,9 @@ class model {
 	
 	function getModelInfo()
 	{
-		$select = "SELECT model.*, dty.name as namedecree_type FROM model INNER JOIN decree_type dty ON dty.iddecree_type = model.iddecree_type WHERE model.idmodel = $this->_idmodel";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT model.*, dty.name as namedecree_type FROM model INNER JOIN decree_type dty ON dty.iddecree_type = model.iddecree_type WHERE model.idmodel = ?";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -53,8 +54,9 @@ class model {
 	
 	function getDecreeType()
 	{
-		$select = "SELECT dty.* FROM model mod INNER JOIN decree_type dty ON dtY.iddecree_type = mod.iddecree_type WHERE mod.idmodel = $this->_idmodel";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT dty.* FROM model mod INNER JOIN decree_type dty ON dtY.iddecree_type = mod.iddecree_type WHERE mod.idmodel = ?";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -75,8 +77,9 @@ class model {
 	
 	function getfile()
 	{
-		$select = "SELECT model_path FROM model WHERE idmodel = $this->_idmodel";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT model_path FROM model WHERE idmodel = ?";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
 			if ($res = mysqli_fetch_assoc($result))
@@ -97,8 +100,9 @@ class model {
 	
 	function getModelFields()
 	{
-		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = $this->_idmodel ORDER BY mfi.order";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -116,8 +120,9 @@ class model {
 	
 	function getQueryField($field_type)
 	{
-		$select = "SELECT qfi.schema, qfi.query, qmf.query_clause FROM query_field qfi LEFT JOIN query_model_field qmf ON qmf.idquery_field = qfi.idquery_field  AND qmf.idmodel = ".$this->_idmodel." WHERE qfi.idfield_type = ".intval($field_type);
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT qfi.schema, qfi.query, qmf.query_clause FROM query_field qfi LEFT JOIN query_model_field qmf ON qmf.idquery_field = qfi.idquery_field  AND qmf.idmodel = ? WHERE qfi.idfield_type = ?";
+		$params = array($this->_idmodel, $field_type);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -135,8 +140,9 @@ class model {
 	
 	function getNumeroId()
 	{
-		$select = "SELECT idmodel_field FROM model_field WHERE idmodel = ".$this->_idmodel." AND idfield_type = 1";
-		$result = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT idmodel_field FROM model_field WHERE idmodel = ? AND idfield_type = 1";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		$numeroid = 0;
 		if ( !mysqli_error($this->_dbcon))
 		{

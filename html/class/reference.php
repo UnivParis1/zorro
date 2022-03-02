@@ -36,10 +36,21 @@ class reference {
 	function getListModel($iddecree_type = null)
 	{
 		$select = "SELECT * FROM model ";
+		$params = array();
 		if ($iddecree_type != null)
-			$select .= " WHERE iddecree_type = ".intval($iddecree_type);
+		{
+			$select .= " WHERE iddecree_type = ?";
+			$params = array($iddecree_type);
+		}
 		$select .= " ORDER BY iddecree_type, name";
-		$result = mysqli_query($this->_dbcon, $select);
+		if (sizeof($params) > 0)
+		{
+			$result = prepared_select($this->_dbcon, $select, $params);
+		}
+		else
+		{
+			$result = mysqli_query($this->_dbcon, $select);
+		}
 		$list = array();
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -142,10 +153,11 @@ class reference {
 	{
 		$sql_num_dispo = "SELECT
 							number + 1 AS numero_dispo
-						FROM (SELECT d.number FROM decree d INNER JOIN number num ON num.year = d.year WHERE d.year = ".intval($year)." AND num.low_number <= d.number UNION SELECT num.low_number - 1 AS number FROM number num WHERE num.year = ".intval($year).") AS d
-						WHERE NOT EXISTS (SELECT d2.number FROM decree d2 WHERE d2.number = d.number + 1 AND (d2.status <> 'a' OR d2.status IS NULL) AND d2.year = ".intval($year).")
+						FROM (SELECT d.number FROM decree d INNER JOIN number num ON num.year = d.year WHERE d.year = ? AND num.low_number <= d.number UNION SELECT num.low_number - 1 AS number FROM number num WHERE num.year = ?) AS d
+						WHERE NOT EXISTS (SELECT d2.number FROM decree d2 WHERE d2.number = d.number + 1 AND (d2.status <> 'a' OR d2.status IS NULL) AND d2.year = ?)
 						ORDER BY number LIMIT 1";
-		$result = mysqli_query($this->_dbcon, $sql_num_dispo);
+		$params = array($year, $year, $year);
+		$result = prepared_select($this->_dbcon, $sql_num_dispo, $params);
 		$numero_dispo = -1;
 		if (mysqli_error($this->_dbcon))
 		{
@@ -178,17 +190,56 @@ class reference {
 	
 	function getGroupeById($idgroupe)
 	{
-		$select = "SELECT idgroupe, name, grouper FROM groupe WHERE idgroupe = ".intval($idgroupe);
-		$res = mysqli_query($this->_dbcon, $select);
+		$select = "SELECT idgroupe, name, grouper FROM groupe WHERE idgroupe = ?";
+		$params = array($idgroupe);
+		$result = prepared_select($this->_dbcon, $select, $params);
 		$groupe = NULL;
 		if ( !mysqli_error($this->_dbcon))
 		{
-			while ($row = mysqli_fetch_assoc($res))
+			while ($row = mysqli_fetch_assoc($result))
 			{
 				$groupe = $row;
 			}
 		}
 		return $groupe;
+	}
+
+	function getGroupesRoles()
+	{
+		$lstGroupesRoles = array();
+		$select_allgroupes = "SELECT
+								g.idgroupe,
+							    g.name,
+							    r.idrole,
+							    r.name as rolename,
+							    gr.idmodel,
+							    m.name as modelname,
+								dt.iddecree_type,
+							    dt.name as decreetypename,
+								gr.active
+							FROM
+								groupe g
+							    LEFT JOIN groupe_role gr
+									ON g.idgroupe = gr.idgroupe
+								LEFT JOIN role r
+									ON r.idrole = gr.idrole
+							    LEFT JOIN model m
+									ON m.idmodel = gr.idmodel
+								LEFT JOIN decree_type dt
+									ON m.iddecree_type = dt.iddecree_type
+							ORDER BY g.name";
+		$result = mysqli_query($this->_dbcon, $select_allgroupes);
+		if (mysqli_error($this->_dbcon))
+		{
+			elog("Erreur a l'execution de la requete select all groupes.");
+		}
+		else {
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$lstGroupesRoles[] = $res;
+			}
+		}
+		return $lstGroupesRoles;
 	}
 
 }

@@ -37,30 +37,6 @@ function changerole(idgroupe, i){
 <div> Gestion des autorisations </div><br>
 <?php 	// Récupération des utilisateurs
 
-
-
-$select_allgroupes = "SELECT
-	g.idgroupe,
-    g.name,
-    r.idrole,
-    r.name as rolename,
-    gr.idmodel,
-    m.name as modelname,
-	dt.iddecree_type,
-    dt.name as decreetypename,
-	gr.active
-FROM
-	groupe g
-    LEFT JOIN groupe_role gr
-		ON g.idgroupe = gr.idgroupe
-	LEFT JOIN role r
-		ON r.idrole = gr.idrole
-    LEFT JOIN model m
-		ON m.idmodel = gr.idmodel
-	LEFT JOIN decree_type dt
-		ON m.iddecree_type = dt.iddecree_type
-ORDER BY g.name";
-
 $ref = new reference($dbcon, $rdbApo);
 $list_decree_type = $ref->getListDecreeType();
 $list_roles = $ref->getListRole();
@@ -108,25 +84,18 @@ $list_model = array();
 <?php 	
 } 
 $listgroupesroles = array();
-$result = mysqli_query($dbcon, $select_allgroupes);
-if (mysqli_error($dbcon))
+$result = $ref->getGroupesRoles();
+foreach($result as $res)
 {
-	elog("Erreur a l'execution de la requete select all groupes.");
-}
-else {
-	
-	while ($res = mysqli_fetch_assoc($result))
+	// emplacement du droit dans le tableau somme(iddecree_type * nb_model) + somme(idmodel * nb_roles) + pos(role, list_roles)
+	$position = 0;
+	for ($i = 1; $i < $res['iddecree_type']; $i++)
 	{
-		// emplacement du droit dans le tableau somme(iddecree_type * nb_model) + somme(idmodel * nb_roles) + pos(role, list_roles)
-		$position = 0;
-		for ($i = 1; $i < $res['iddecree_type']; $i++)
-		{
-			$position += $nb_roles * $list_decree_type[$i]['nb_model'];
-		}
-		$position += (array_search($res['idmodel'], array_keys($list_model[$res['iddecree_type']])) * $nb_roles);
-		$position += array_search($res['idrole'], array_keys($list_roles)) + 1;
-		$listgroupesroles[$res['idgroupe']][$position] = $res;
+		$position += $nb_roles * $list_decree_type[$i]['nb_model'];
 	}
+	$position += (array_search($res['idmodel'], array_keys($list_model[$res['iddecree_type']])) * $nb_roles);
+	$position += array_search($res['idrole'], array_keys($list_roles)) + 1;
+	$listgroupesroles[$res['idgroupe']][$position] = $res;
 }
 ?>
 </tr><tr>
