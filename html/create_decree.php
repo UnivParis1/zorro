@@ -496,11 +496,11 @@ function ajouterValeur(divname, value='')
 	if(value != '') {
 		name.setAttribute("value", value);
 	} else {	
-		name.setAttribute("value", document.getElementById(divname+"1").nextSibling.innerText);
+		name.setAttribute("value", document.getElementById(divname+"1").value);
 	}
 	name.setAttribute("readonly", true);
-	document.getElementById(divname+"1").nextSibling.innerText = '';
 	document.getElementById(divname+"1").value = '';
+	document.getElementById(divname+"1").focus();
 	cell0.appendChild(name);
 	var cell1 = row.insertCell(1);
 	row.setAttribute("id", "row"+divname+nameindex);
