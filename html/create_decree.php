@@ -469,6 +469,7 @@
 				$mod_num = $numero_dispo;
 				$mod_year = $year;
 				$mod_decree_id = $decree->getId();
+				$mod_status = STATUT_BROUILLON;
 				$mode = 'modif';
 			}
 		}
