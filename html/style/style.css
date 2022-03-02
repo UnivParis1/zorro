@@ -1,550 +1,183 @@
-@CHARSET "ISO-8859-1";
 
-/*<group=Navigation principale>*/
+/* Zorro mars 2022 */ 
+ 
+body { font-family: arial, verdana ; font-size : 14px;  color: #444;  } 
+ 
+a { color: #2055bb ;  text-decoration: none; }
+a:hover { color: #2055ee ;  text-decoration: underline; } 
 
-#menuprincipal {
-	position: absolute;
-	top:  21px;
-	left:  25px; /* 123 */
-	width: 990px; /* 690 */
-	height: 17px;
-	z-index: 7;
-	float: left;
-	clear: right;
-	margin: 0px;
-	padding: 0px;
-   list-style-type: none;
-   font-family: Arial;
+.containerApp {
+    width: 96%; -max-width: 1170px;
+    margin-right: auto; margin-left: auto;clear: both;
 }
 
-#menuprincipal a {
-	width: 500px; /* 500 */
+header#header-zorro { border: 1px dotted #0B4FF2; margin-top: 5px;  }
+ 
+nav.navigat  {  margin-top: 9px; background: #727780; padding : 2px;  }
+
+nav.navigat ul {  height: 14px;  text-align: center; padding: 0px; margin-top: 0;  }
+
+nav.navigat ul li { 
+	display: inline-block;   
+	border-left : 1px #FFFFFF4F solid;  
+	background: #575a61;
+	text-align: center;  
+     padding : 6px 12px;  
+	color: white; 
 }
 
-#menuprincipal dl {
-	float: left;
-	width: 247px ;/* 190px; */
-   list-style-type: none;
-}
+nav.navigat ul li:hover {  background: #00326e; } 
 
-#menuprincipal dt {
-   width: 247px;  /* 200 */
-	text-align: center;
-	background-color: #336699;   /* #EF001F;   */
-   list-style-type: none;
-}
+nav.navigat ul li a {  color: white;  text-decoration: none;} 
 
-#menuprincipal dd {
-	display: none;
-	float: left; 
-	background-color: white; /* #D2D2D2 */
-	width: 247px; /* 257 */
-	border: 1px solid; /* ajout MS */
-	border-color: gray;  /* ajout MS */
-   list-style-type: none;
-}
+#contenu1, #contenu2 {
+         clear : both;   padding:11px;
+         margin-top: 20px; display: block;  }
 
-#smenuprincipal1, #smenuprincipal2, #smenuprincipal3, #smenuprincipal4, #smenuprincipal5 {
-	display: none;
-	text-align: left;
-	float: left;
-	font-size: 11px;
-	line-height: 15px;;
-	font-family: Arial;
-	padding: 0px;
-	margin: 0px;
-   list-style-type: none;
-}
+#contenu1 { max-width : 1200px; margin-left:auto; margin-right:auto; } 
 
-#smenuprincipal1 li, #smenuprincipal2 li, #smenuprincipal3 li, #smenuprincipal4 li, #smenuprincipal5 li,
-#smenuprincipal1 dl, #smenuprincipal2 dl, #smenuprincipal3 dl, #smenuprincipal4 dl, #smenuprincipal5 dl,
-#smenuprincipal1 dt, #smenuprincipal2 dt, #smenuprincipal3 dt, #smenuprincipal4 dt, #smenuprincipal5 dt,
-#smenuprincipal1 dd, #smenuprincipal2 dd, #smenuprincipal3 dd, #smenuprincipal4 dd, #smenuprincipal5 dd,
-#smenuprincipal1 ul, #smenuprincipal2 ul, #smenuprincipal3 ul, #smenuprincipal4 ul, #smenuprincipal5 ul
-{
-	width:  100%; 
-	float: left;
-   margin: 0px;
-   padding: 0px;
-   list-style-type: none;
+
+.gauche { background:#FAF5D7; background: white; 
+    min-height: 40px; float :left;  width: calc(100% - 285px); margin-bottom:15px; } 
+
+.droite { background:#DDF1FB75; background: white; 
+	min-height: 40px; float :right; width:280px; margin-bottom:15px; } 
+
+
+h2 { font-style: normal; font-weight: normal; font-size: 25px ; margin-bottom: 25px; padding-left: 8px; }
+
+form {   line-height: 25px; font-weight: 700; color: #555;  font-size: 13px; ;
+     -text-transform: capitalize ; 
 } 
 
-#smenuprincipal1 a, #smenuprincipal2 a, #smenuprincipal3 a, #smenuprincipal4 a, #smenuprincipal5 a {
-	text-decoration: none;
-	float:  left; 
-	font-size: 11px;
-	font-weight: bold;
-	text-align: center; /* left; */
-	padding: 0px;
-	margin: 0px;
-	padding-left: 0px; /*12px; */
-	width: 245px;  /* 245px; */
-	display: block;	
-  	/*background: url(images/accueil_btn.gif) 2px 5px no-repeat; */
-  	border-top: 1px solid; /* ajout MS */
-	border-color: gray;  /* ajout MS */
-   list-style-type: none;
+
+form select,form input {  font-size: 13px; color: #20558a; color: #00326e; border: 1px solid #00326e5c; margin-bottom: 3px; } 
+.gauche input { line-height: 22px; }
+.gauche button { width: 44px; font-size : 17px; padding: 0px;border:1px solid #bbb; height :25px; background: #f3f6f9;  } 
+.gauche button:hover {  border:1px solid #2055AA; color: #2055aa;  font-weight : 700; } 
+
+#table_membre {
+    margin-left: 140px;
 }
-#smenuprincipal1 a:hover, #smenuprincipal2 a:hover, #smenuprincipal3 a:hover, #smenuprincipal4 a:hover, #smenuprincipal5 a:hover {
-	color: #EF001F; /* white */
-	/* background: url(images/accueil_btn.gif) 2px 5px no-repeat; */
-	background-color: white; /* #EF001F */
+label { 
+    display: inline-block;
+    width: 140px;
+    border-bottom: 1px dotted #888; 
+	margin-bottom: 6px; 
 }
 
-/*</group>*/
+#numero_div label { width:  0px; padding-left: 5px; border:none; } 
 
-/*******************************************************/
-/* NOUVELLE VERSION DE LA CSS                          */
-/*******************************************************/
-
-/*******************************************************/
-/* DEFINITION DU BODY (Police, taille, couleur, ...)   */
-/*******************************************************/
-.bodyhtml {
-	FONT-SIZE: 14px; 
-	FONT-FAMILY: trebuchet ms,arial,tahoma,verdana,sans-serif; 
-	COLOR: #000000; 
-	background-color: white;
-	margin-left:10px;
-	margin-right:10px;
+select {
+    background: #f3f6f9; 
+    border: 1px solid #ccc;
+    padding: 4px 3px;
 }
 
-/*******************************************************/
-/* Tableau simple (bordure fine, noire etc)            */
-/*******************************************************/
-.tableausimple {
-	border-width:1px; 
-	border-style:solid; 
-	border-color:#888B8A;
-   border-collapse:collapse;
-/*	width:50%; */
- }
-.cellulesimple{
-	border-width:1px;
-	border-style:solid; 
-	border-color:#888B8A;
-   padding-left:10px;
-   padding-right:10px;
-/*	width:50%; */
-}
-.titresimple{
-   FONT-WEIGHT: bold ; 
-   color : #BF3021; 
-	border-width:1px;
-   border-style:solid; 
-   border-color:#888B8A;
-   padding-left:10px;
-   padding-right:10px;
-   text-align : center;
-/* width:50%; */
+
+
+.droite input[type="submit"] {
+    padding: 8px 8px;
+    font-size: 16px; 
+    text-align: left; 
+    font-family: inherit;
+    margin: 2px;
+    border-radius: 2px;
+    background: #e3e6e9;     
+    border: 1px solid #00326e5c; 
+    color: #00326e;  
+    background-color : rgb(222, 228, 240);
+    padding-left:38px; 
+    background-repeat: no-repeat; 
+    background-position: top 8px left 8px; 
+    background-size: 19px; 
+} 
+
+  .droite input[type="submit"]:hover { background-color: #ecc258; } 
+  .droite input[type="submit"]:disabled {  opacity: 0.4; filter: contrast( .8);  } 
+
+.droite input[name="duplique"] {  
+       background-image: url("../img/window-restore-regular.svg");  
+       width: 130px;  
 }
 
-/****************************************************
-/ MENU PRINCIPAL
-/****************************************************/
-#mainmenu {
-   FONT-WEIGHT: bold; 
-   FONT-SIZE: 12px; 
-   FONT-FAMILY: trebuchet ms,arial,tahoma,verdana,sans-serif; 
-   border-collapse : collapse; 
-   COLOR: #336699; 
-}
-#mainmenu UL UL {
-/*	BORDER-RIGHT: #888B8A 1px solid; BORDER-TOP: #888B8A 1px solid; BORDER-LEFT: #888B8A 1px solid; BORDER-BOTTOM: #888B8A 1px solid;*/ 
-   PADDING-RIGHT: 0px; 
-   DISPLAY: none; 
-   PADDING-LEFT: 0px; 
-   LEFT: 254px; 
-   PADDING-BOTTOM: 0px;
-   MARGIN: 0px; 
-   PADDING-TOP: 0px; 
-   POSITION: absolute; 
-   TOP: -1px;
-   Z-INDEX: 1
-}
-#mainmenu LI {
-   PADDING-RIGHT: 2px; 
-   PADDING-LEFT: 2px; 
-   PADDING-BOTTOM: 5px; 
-   MARGIN: 0px; 
-   WIDTH: 250px; 
-   PADDING-TOP: 5px;
-   LIST-STYLE-TYPE: none; 
-   POSITION: relative; 
-   BACKGROUND-COLOR: #E5EAE9;  
-   float: left; 
-   text-align: center; 
-}
-#mainmenu LI a:hover {
-   cursor:pointer; /*  COLOR: #A4405B; */
-}
-#mainmenu LI:hover {
-   BACKGROUND-COLOR: #ffff70; 
-   cursor:pointer; /* COLOR: #A4405B !important;*/
-}
-#mainmenu LI A {
-   TEXT-DECORATION: none; 
-   COLOR: #336699;
-}
-#mainmenu UL.niveau1 LI {
-/*   BACKGROUND-COLOR: #336699; */ 
-   TEXT-DECORATION: none;  
-   BORDER-BOTTOM: #888B8A 1px solid;  
-   BORDER-TOP: #888B8A 1px solid; 
-   BORDER-LEFT: #888B8A 1px solid;  
-   BORDER-RIGHT: #888B8A 1px solid; 
-}
-#mainmenu UL.niveau2 LI {
-/*   BACKGROUND-COLOR: #ffffff; */ 
-   TEXT-DECORATION: none; 
-   BORDER-BOTTOM: #888B8A 1px solid;  
-   BORDER-TOP: #888B8A 1px solid;  
-   BORDER-LEFT: #888B8A 1px solid;  
-   BORDER-RIGHT: #888B8A 1px solid; 
-}
-#mainmenu UL.niveau1 {
-   DISPLAY: block;
-}
-#mainmenu LI:hover UL.niveau2 {
-   DISPLAY: block;  
-   FONT-SIZE: 11px; 
-   LEFT: 0px; 
-   TOP:24px; /* TOP: 18px; */
-}
-/*
-#mainmenu ul.niveau1 li ul.niveau2 li:hover {
-   BACKGROUND-COLOR: #ffff70; cursor:pointer; COLOR: #A4405B !important;
-}
-#mainmenu ul.niveau1 li ul.niveau2 a.li:hover {
-   BACKGROUND-COLOR: #ffff70; cursor:pointer; COLOR: #A4405B !important;
-}
-*/
-#mainmenu LI LI:hover UL.niveau3 {
-   DISPLAY: block;
-}
-#mainmenu LI.sfhover UL.niveau2 {
-   DISPLAY: block;  
-   FONT-SIZE: 11px; 
-   LEFT: 0px; 
-   TOP: 18px;  
-}
-#mainmenu LI LI.sfhover UL.niveau3 {
-   DISPLAY: block;
-}
-#mainmenu LI.plus {
-   COLOR: #336699; 
-   BACKGROUND-POSITION: right 50%; 
-   BACKGROUND-IMAGE: url(../images/fdroite.gif); 
-   BORDER-BOTTOM: #888B8A 1px solid; 
-   BACKGROUND-REPEAT: no-repeat;
+.droite input[name="supprime"] {  
+       background-image: url("../img/trash-alt-solid.svg");  
+       width: 130px; 
+    background-size: 17px; 
 }
 
-/****************************************************
-/ TABLEAU DES SOLDES DE CONGES 
-/****************************************************/
-#soldeconges {
-   FONT-WEIGHT: normal ;
-}
-#soldeconges table {
-   border-collapse : collapse; 
-   border-spacing : 0px; 
-   text-align : center; 
-}
-#soldeconges TR.titre TD {
-	FONT-WEIGHT: bold ; 
-	color : #BF3021; 
-	BORDER-RIGHT: #888B8A 1px solid; 
-	PADDING-RIGHT: 4px; 
-	BORDER-TOP: #888B8A 1px solid; 
-	PADDING-LEFT: 4px; 
-	PADDING-BOTTOM: 2px; 
-	MARGIN: 0px; 
-	BORDER-LEFT: #888B8A 1px solid; 
-	PADDING-TOP: 2px; 
-	BORDER-BOTTOM: #888B8A 1px solid;
-}
-#soldeconges TR.entete TD, #soldeconges TR.element TD {
-   color: black; 
-   BORDER-RIGHT: #888B8A 1px solid; 
-   PADDING-RIGHT: 4px; 
-   BORDER-TOP: #888B8A 1px solid; 
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px; 
-   MARGIN: 0px; 
-   BORDER-LEFT: #888B8A 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: #888B8A 1px solid;
+
+.droite input[name="valide"] {  
+       background-image: url("../img/arrow-alt-circle-down-solid.svg");  
+       width: 268px; 
 }
 
-/****************************************************
-/ TABLEAU DE L'HISTORIQUE DES DEMANDES 
-/****************************************************/
-#demandeliste {
-   FONT-WEIGHT: normal ;
-}
-#demandeliste table {
-   border-collapse : collapse; 
-   border-spacing : 0px; 
-   text-align : center; 
-}
-#demandeliste TR.titre TD {
-   FONT-WEIGHT: bold ; 
-   color : #BF3021; 
-   BORDER-RIGHT: #888B8A 1px solid; 
-   PADDING-RIGHT: 4px; BORDER-TOP: #888B8A 1px solid; 
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px; 
-   MARGIN: 0px; 
-   BORDER-LEFT: #888B8A 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: #888B8A 1px solid;
-}
-#demandeliste TR.entete TD, #demandeliste TR.element TD {
-   color: black; 
-   BORDER-RIGHT: #888B8A 1px solid; 
-   PADDING-RIGHT: 4px; 
-   BORDER-TOP: #888B8A 1px solid; 
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px; 
-   MARGIN: 0px; 
-   BORDER-LEFT: #888B8A 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: #888B8A 1px solid;
+
+.droite input[name="sign"] { 
+       background-image: url("../img/paper-plane-solid.svg");  
+       background-size: 18px;  
+       width: 268px;
+	   
+} 
+
+
+
+
+#numero_div { color: #00326e; font-size: 25px; margin-bottom: 22px;   text-align:left; } 
+
+#numero_div img{ padding-left: 30px; } 
+
+
+ 
+/* table-grouper.html */ 
+
+.tableausimple { border:1px #ccc solid; border-collapse: collapse; } 
+
+.tableausimple  th.titresimple  { 
+    background : #fddfbe; background: #f2e9e4; background: #ced9e8; background: #d4def1;
+	border:1px #aaa solid; 
+    line-height: 30px; padding :4px; } 
+
+.tableausimple TR:nth-child(even) {  background: #f3f6f9; } 
+.tableausimple TR:hover { background-color: #f5c95c82; background: #eaaa0c73; color:black; } 
+
+.tableausimple  td.cellulesimple  {  font-size: 13px;  line-height: 30px; padding:6px;
+padding-top:2px; padding-bottom:2px; border:1px #999 dotted; } 
+
+
+
+/*** ----------------------- ***/  
+
+
+ @media (max-width: 700px) { 
+     
+       nav.navigat ul li { 
+	        font-size : 13px; 
+            padding : 6px;  
+	        color: white; 
+     }
+     
+     
+    .droite {  
+         display:block; 
+	     clear : both; 
+	     width:100%;
+        margin-top: 17px; margin-bottom : 30px; padding-top: 15px;
+        border : 1px #999 dotted; background: #f3f6f9;  
+	 } 
+     
+     .containerApp {
+    width: 99%;  
+       }
+     
+     #contenu1, #contenu2 {
+          padding:5px;
+           }
 }
 
-/****************************************************
-/ PLANNING D'UN AGENT 
-/****************************************************/
-#planning {
-   FONT-WEIGHT: normal ;
-}
-#planning table.tableau {
-   border-collapse : collapse; 
-   border-spacing : 0px; 
-}
-#planning TR.entete TD {
-   color: black; 
-   BORDER-RIGHT: black 1px solid; 
-   PADDING-RIGHT: 4px;
-   BORDER-TOP: black 1px solid; 
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px; 
-   MARGIN: 0px; 
-   BORDER-LEFT: black 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: black 1px solid;  
-   text-align : center; 
-}
-#planning TR.ligneplanning TD {
-   color: black;
-   BORDER-RIGHT: black 1px solid; 
-   ADDING-RIGHT: 4px; 
-   BORDER-TOP: black 1px solid; 
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px; 
-   MARGIN: 0px; 
-   BORDER-LEFT: black 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: black 1px solid;  
-   text-align : left; 
-   height:15px;
-}
-#planning TR.ligneplanning TD.planningelement_matin {
-   cursor:pointer; 
-   border-left:2px solid black; 
-   border-top:2px solid black; 
-   border-right:0px solid black; 
-   border-bottom:2px solid black; 
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-/*	width:250px; */   
-}
-#planning TR.ligneplanning TD.planningelement_aprem {
-   cursor:pointer; 
-   border-left:0px solid black; 
-   border-top:2px solid black; 
-   border-right:2px solid black; 
-   border-bottom:2px solid black;  
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-/*	width:250px; */   
-}
-#planning TR.ligneplanning TD.planningelement_jour_matin {
-   cursor:pointer; 
-   border-left:3px solid red; 
-   border-top:3px solid red; 
-   border-right:0px solid red; 
-   border-bottom:3px solid red; 
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-}
-#planning TR.ligneplanning TD.planningelement_jour_aprem {
-   cursor:pointer; 
-   border-left:0px solid red; 
-   border-top:3px solid red; 
-   border-right:3px solid red; 
-   border-bottom:3px solid red; 
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-}
-/****************************************************
-/ PLANNING D'UNE STRUCTURE
-/****************************************************/
-#structplanning {
-   FONT-WEIGHT: normal ;
-}
-#structplanning table.tableau {
-   border-collapse : collapse;
-   border-spacing : 0px; 
-}
-#structplanning TR.entete TD {
-   color: black; 
-   BORDER-RIGHT: black 1px solid; 
-   PADDING-RIGHT: 4px; 
-   BORDER-TOP: black 1px solid;
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px; 
-   MARGIN: 0px; 
-   BORDER-LEFT: black 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: black 1px solid;  
-   text-align : center; 
-}
-#structplanning TR.entete_mois TD {
-   color: black; 
-   FONT-WEIGHT: bold ; 
-   BORDER-RIGHT: black 1px solid; 
-   PADDING-RIGHT: 4px; 
-   BORDER-TOP: black 1px solid; 
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px; 
-   MARGIN: 0px; 
-   BORDER-LEFT: black 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: black 1px solid;  
-   text-align : center; 
-}
-#structplanning TR.ligneplanning TD {
-   color: black; 
-   BORDER-RIGHT: black 1px solid; 
-   PADDING-RIGHT: 4px; 
-   BORDER-TOP: black 1px solid; 
-   PADDING-LEFT: 4px; 
-   PADDING-BOTTOM: 2px;
-   MARGIN: 0px; 
-   BORDER-LEFT: black 1px solid; 
-   PADDING-TOP: 2px; 
-   BORDER-BOTTOM: black 1px solid;  
-   text-align : left; 
-}
-#structplanning TR.ligneplanning TD.planningelement_matin {
-   cursor:pointer; 
-   border-left:2px solid black; 
-   border-top:2px solid black; 
-   border-right:0px solid black; 
-   border-bottom:2px solid black; 
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-}
 
-#structplanning TR.ligneplanning TD.planningelement_jour_matin {
-   cursor:pointer; 
-   border-left:2px solid black; 
-   border-top:2px solid black; 
-   border-right:0px solid black; 
-   border-bottom:2px solid black; 
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-}
 
-#structplanning TR.ligneplanning TD.planningelement_aprem {
-   cursor:pointer; 
-   border-left:0px solid black; 
-   border-top:2px solid black; 
-   border-right:2px solid black; 
-   border-bottom:2px solid black; 
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-}
 
-#structplanning TR.ligneplanning TD.planningelement_jour_aprem {
-   cursor:pointer; 
-   border-left:0px solid black; 
-   border-top:2px solid black; 
-   border-right:2px solid black; 
-   border-bottom:2px solid black; 
-   PADDING-RIGHT: 1px; 
-   PADDING-LEFT: 1px;
-}
 
-.rayureplanning {
-  background: repeating-linear-gradient(
-    45deg,
-    #606dbc,
-    #606dbc 2px,
-    #465298 2px,
-    #465298 4px
-  );
-}
 
-/****************************************************
-/ BULLE D'INFORMATION
-/****************************************************/
-span[data-tip]{
-/*
-  border-bottom: 2px dotted #888; 
-
-  cursor:default; /* help; */
- */
-}
-
-[data-tip]{
-  display: inline-block;
-  position: relative;
-  width: 100%;
-}
-
-[data-tip]:hover:before{
-  content: attr(data-tip);
-  position: absolute;
-  padding: 0 8px;  
-  height: 28px;
-  line-height: 28px; 
-  background-color: rgba(0, 0, 0, 0.8);
-  left: -10px; 
-  top: -38px;
-/*  font-size: 14px; */
-  border-radius: 3px; 
-/*  border-radius: 15px; -- Permet d'arrondir les angles*/
-  white-space: nowrap;
-  color: #fff;
-  font-size: 11px;
-}
-
-[data-tip]:hover:after {
-  content: "";
-  position: absolute;
-/*
-  border-top: 8px solid rgba(0, 0, 0, 0.8);
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  left: 0; 
-*/
-  border-top: 8px solid rgba(0, 0, 0, 0.8);
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  left: -5px; 
-  top: -10px;
-}
-
-/*************************************************
-/ CSS SIHAM pour affichage CET dans module agent de l'ENT
-/*************************************************/
-.siham_css {
-	font-family: Verdana;
-	font-size: 8pt;
-	text-align: left;
-	color: #616162; 
-	background: inherit; 
-	border-width: 0;
-}
