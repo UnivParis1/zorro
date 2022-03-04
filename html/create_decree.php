@@ -640,17 +640,26 @@ else
 				else {
 					switch ($modelfield['datatype']) {
 						case 'user':
-						?>
-						
-				<?php findPerson($modelfield['name'],$i);
-				if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
-				{
-					echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
-					echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
-
-				}?>
-		
-						<?php break;
+								findPerson($modelfield['name'],$i);
+								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+								{
+									echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+									echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+								}
+								break;
+						case 'group':
+								findGroup($modelfield['name'],$i);
+								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+								{
+									$structurename = $ldap->getStructureName($mod_decree_fields[$modelfield['idmodel_field']][0]['value']);
+									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$structurename."';</script>";
+									echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+								}
+								elseif (isset($_SESSION['ou'])) 
+								{
+									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$_SESSION['ou']."';</script>";
+								}
+								break;
 						case 'year':
 							$defaultyear = (isset($mod_year)) ? date('Y', mktime(0,0,0,1,1,$mod_year)): date('Y'); ?>
 							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">

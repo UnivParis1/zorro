@@ -18,6 +18,18 @@ function findPerson($name, $id = '')
 
 }
 
+function findGroup($name, $id = '')
+{
+	echo "<input id='".$name.$id."_ref' name='".$name.$id."_ref' placeholder='Service référent'/>";
+	echo "<input type='hidden' id='".$name.$id."' name='".$name.$id."' class='".$name.$id."_ref'/>";
+	echo "<script>";
+	echo "$( '#".$name.$id."_ref' ).autocompleteGroup(
+			'https://wsgroups.univ-paris1.fr/searchGroup', { select: completionAgent, wantedAttr: 'key',
+			wsParams: { filter_category: 'structures' } });
+	";
+	echo "</script>";
+}
+
 function print_r2($val){
 	echo '<pre>';
 	print_r($val);

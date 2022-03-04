@@ -23,6 +23,7 @@
 	    echo '<html><body class="bodyhtml">';
 	    $ldap = new ldap();
 	    $infos_ldap = $ldap->getInfos($userid);
+	    $ldap->getUserAndStructureInfos($userid);
 	    //print_r2($infos_ldap);
 	    
 	    foreach ($infos_ldap as $cle => $info)

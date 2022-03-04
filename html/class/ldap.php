@@ -151,4 +151,119 @@ class ldap {
 		//print_r2($retour);
 		return $retour;
 	}
+
+	function getStructureInfos($structure)
+	{
+		$retour = '';
+		$curl = curl_init();
+		$params = array('key' => 'structures-'.$structure, 'depth' => '10', 'filter_category' => 'structures');
+		$walk = function( $item, $key, $parent_key = '' ) use ( &$output, &$walk ) {
+			is_array( $item )
+			? array_walk( $item, $walk, $key )
+			: $output[] = http_build_query( array( $parent_key ?: $key => $item ) );
+		};
+		array_walk( $params, $walk );
+		$params_string = implode( '&', $output );
+		$curl_opt_url = "https://wsgroups-test.univ-paris1.fr/getSubAndSuperGroups?".$params_string;
+		//echo "<br>Output = " . $params_string . '<br><br>';
+
+		$opts = [
+				CURLOPT_URL => $curl_opt_url,
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_PROXY => ''
+		];
+		curl_setopt_array($curl, $opts);
+		$json = curl_exec($curl);
+		$error = curl_error ($curl);
+		curl_close($curl);
+		if ($error != "")
+		{
+			elog( "Erreur Curl = " . $error );
+		}
+		//print_r2($json);
+		$tab = json_decode($json, true);
+		if (is_array($tab) )
+		{
+			$retour = $tab;
+		}
+		return $retour;
+	}
+
+	function getUserAndStructureInfos($uid, $temUserApp = true)
+	{
+		$retour = array();
+		$curl = curl_init();
+		$curl_opt_url = "https://wsgroups-test.univ-paris1.fr/searchUser?filter_uid=".$uid;
+
+		$opts = [
+				CURLOPT_URL => $curl_opt_url,
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_PROXY => ''
+		];
+		curl_setopt_array($curl, $opts);
+		$json = curl_exec($curl);
+		$error = curl_error ($curl);
+		curl_close($curl);
+		if ($error != "")
+		{
+			elog( "Erreur Curl = " . $error );
+		}
+		//print_r2($json);
+		$tab = json_decode($json, true);
+		if (is_array($tab))
+		{
+			//print_r2($tab);
+			$retour['affectation'] = isset($tab[0]['supannEntiteAffectationPrincipale-all']) ? $tab[0]['supannEntiteAffectationPrincipale-all'] : array();
+			$retour['mail'] = isset($tab[0]['mail']) ? $tab[0]['mail'] : '';
+			$retour['roles'] = isset($tab[0]['supannEntiteAffectationPrincipale-all']['key']) ? $this->getStructureResp($tab[0]['supannEntiteAffectationPrincipale-all']['key']): array();
+			$retour['subsuper'] = isset($tab[0]['supannEntiteAffectationPrincipale-all']['key']) ? $this->getStructureInfos($tab[0]['supannEntiteAffectationPrincipale-all']['key']): array();
+			if (isset($retour['subsuper']['superGroups']))
+			{
+				$retour['codeapo'] = '';
+				foreach($retour['subsuper']['superGroups'] as $structuremere => $descrStruct)
+				{
+					$codeApo = $this->getInfoApo($structuremere);
+					if ($codeApo != '')
+					{
+						$retour['codeapo'] = $codeApo;
+						break;
+					}
+				}
+			}
+		}
+		if ($temUserApp)
+		{
+			foreach ($retour as $cle => $valeur)
+			{
+				$_SESSION[$cle] = $valeur;
+			}
+		}
+		//print_r2($retour);
+		return $retour;
+	}
+
+	function getInfoApo($structure)
+	{
+		if (substr($structure, 0, 11) == 'structures-')
+		{
+			$structure = substr($structure, 11);
+		}
+		$codeapo = '';
+		$r = ldap_bind($this->_con_ldap);
+		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$structure.")", array('supannRefId'));
+		$entries = ldap_get_entries($this->_con_ldap, $result);
+		$supannrefid = $entries[0]['supannrefid'];
+		foreach($supannrefid as $value)
+		{
+			if (substr($value, 0, 12) == '{APOGEE.CMP}')
+			{
+				$codeapo = substr($value, 12);
+			}
+		}
+		return $codeapo;
+	}
 }
