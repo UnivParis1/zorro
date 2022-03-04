@@ -188,11 +188,14 @@ class user {
 	{
 		if (isset($_SESSION['supannentiteaffectation']))
 		{
-			$structure = $_SESSION['supannentiteaffectation'];
+			$structure = 'structures-'.$_SESSION['supannentiteaffectation'];
+			//print_r2($structure);
 			$ldap = new ldap();
-			$resp = $ldap->getStructureResp($structure);
-			//print_r2($resp);
-			if (isset($_SESSION['uid']) && key_exists($_SESSION['uid'], $resp) && $resp[$_SESSION['uid']]['role'] == 'Responsable administratif')
+			$infostruct = $ldap->getStructureInfos($structure);
+			//print_r2($infostruct);
+			if (array_key_exists('superGroups', $infostruct) && array_key_exists($structure, $infostruct['superGroups']) 
+					&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($_SESSION['uid']) && array_key_exists($_SESSION['uid'], $infostruct['superGroups'][$structure]['roles'])
+					&& ($infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable administratif' || $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable'))
 			{
 				elog("L'utilisateur ".$_SESSION['uid']." est responsable administratif de sa structure");
 				return TRUE;
@@ -206,7 +209,37 @@ class user {
 		elog( "L'utilisateur n'a pas d'affectation <br>");
 		return FALSE;
 	}
-	
+
+	function getAdminSubStructs()
+	{
+		$retour = array();
+		if (isset($_SESSION['supannentiteaffectation']))
+		{
+			$structure = 'structures-'.$_SESSION['supannentiteaffectation'];
+			$retour[] = $structure;
+			$ldap = new ldap();
+			$infostruct = $ldap->getStructureInfos($structure);
+			//print_r2($resp);
+			if (array_key_exists('superGroups', $infostruct) && array_key_exists($structure, $infostruct['superGroups'])
+					&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($_SESSION['uid']) && array_key_exists($_SESSION['uid'], $infostruct['superGroups'][$structure]['roles'])
+					&& $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable administratif')
+			{
+				foreach($infostruct['subGroups'] as $sousStruct)
+				{
+					$retour[] = $sousStruct['key'];
+				}
+				return $retour;
+			}
+			else
+			{
+				elog("L'utilisateur ".$_SESSION['uid']." n'est pas responsable administratif de sa structure");
+				return $retour;
+			}
+		}
+		elog( "L'utilisateur n'a pas d'affectation <br>");
+		return $retour;
+	}
+
 	function getStructureCodApo()
 	{
 		$ldap = new ldap();
@@ -268,8 +301,15 @@ class user {
 		}
 		elseif ($this->isAdmin())
 		{
-			$select .= " WHERE d.structure = ?";
-			$params[] = $this->getStructureCodApo();
+			$listStructuresFilles = $this->getAdminSubStructs();
+			$select .= " WHERE d.structure IN (?";
+			$params[] = $listStructuresFilles[0];
+			for($i = 1; $i < sizeof($listStructuresFilles); $i++)
+			{
+				$select .= ', ?';
+				$params[] = $listStructuresFilles[$i];
+			}
+			$select .= ')';
 		}
 		else // user lambda
 		{
@@ -307,10 +347,13 @@ class user {
 		}
 		else {
 			// L'utilisateur appartient à la structure pour laquelle le document a été créé
-			if ($this->getStructureCodApo() == $decree['structure'])
+			if ($this->isAdmin())
 			{
-				// L'utilisateur est RA
-				return $this->isAdmin();
+				$listStructuresFilles = $this->getAdminSubStructs();
+				if (in_array($decree['structure'], $listStructuresFilles))
+				{
+					return true;
+				}
 			}
 		}
 		return false;

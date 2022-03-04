@@ -102,6 +102,10 @@ class ldap {
 	{
 		// $structure est le supannCodeEntite 
 		$retour = array();
+		if (substr($structure, 0, 11) == 'structures-')
+		{
+			$structure = substr($structure, 11);
+		}
 		$curl = curl_init();
 		$params = array('key' => 'structures-'.$structure, 'attrs' => 'roles');
 		$walk = function( $item, $key, $parent_key = '' ) use ( &$output, &$walk ) {
@@ -154,7 +158,7 @@ class ldap {
 
 	function getStructureInfos($structure)
 	{
-		$retour = '';
+		$retour = array();
 		$curl = curl_init();
 		if (substr($structure, 0, 11) == 'structures-')
 		{
@@ -192,6 +196,27 @@ class ldap {
 		{
 			$retour = $tab;
 		}
+		if (isset($retour['superGroups']))
+		{
+			$retour['codeapo'] = '';
+			foreach($retour['superGroups'] as $structuremere => $descrStruct)
+			{
+				$codeApo = $this->getInfoApo($structuremere);
+				if ($codeApo != '')
+				{
+					$retour['codeapo'] = $codeApo;
+					break;
+				}
+			}
+			foreach($retour['superGroups'] as $structuremere => $descrStruct)
+			{
+				$retour['superGroups'][$structuremere]['roles'] = $this->getStructureResp($structuremere);
+			}
+			foreach($retour['subGroups'] as $structurefille => $descrStruct)
+			{
+				$retour['subGroups'][$structurefille]['roles'] = $this->getStructureResp($descrStruct['key']);
+			}
+		}
 		return $retour;
 	}
 
@@ -199,7 +224,7 @@ class ldap {
 	{
 		$retour = array();
 		$curl = curl_init();
-		$curl_opt_url = "https://wsgroups-test.univ-paris1.fr/searchUser?filter_uid=".$uid;
+		$curl_opt_url = "https://wsgroups.univ-paris1.fr/searchUser?filter_uid=".$uid;
 
 		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
@@ -218,6 +243,7 @@ class ldap {
 		}
 		//print_r2($json);
 		$tab = json_decode($json, true);
+		//print_r2($tab);
 		if (is_array($tab))
 		{
 			//print_r2($tab);
@@ -246,7 +272,7 @@ class ldap {
 				$_SESSION[$cle] = $valeur;
 			}
 		}
-		//print_r2($retour);
+		print_r2($retour);
 		return $retour;
 	}
 
