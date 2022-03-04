@@ -766,7 +766,7 @@ else
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
 								<?php break;
 							case STATUT_VALIDE : ?>
-								<img src="img/window-restore-regular.svg" alt="signé" width="40px">
+								<img src="img/valide_OK.svg" alt="signé" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' disabled>
@@ -774,7 +774,7 @@ else
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
 								<?php break;
 							case STATUT_REFUSE : ?>
-								<img src="img/window-restore-regular.svg" alt="refusé" width="40px">
+								<img src="img/non_refuse.svg" alt="refusé" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
