@@ -41,21 +41,21 @@
 	    	$listModels[] = $model->getModelInfo();
 	    }
     }
-    
+    $menuItem = "menu_manage";
     require ("include/menu.php");
 ?>
-
-<div> Consultation des arrêtés</div>
+<div id="contenu1">
+<h2> Consultation des arrêtés</h2>
 <?php 
 	//print_r2($roles);
-	echo "<br>";
+	// echo "<br>";
 	//print_r2($listModels);
-	echo "<br>";
+	// echo "<br>";
 ?>
 <?php if (sizeof($listModels) == 0 ) { ?>
 Vous n'avez accès à aucun modèle d'arrêté. <br>
 <?php } else { ?>
-Sélection du modèle : 
+<label>Sélection du modèle</label> 
 <form name="formselectdecree" action="manage_decree.php" method="post">
 <input type="hidden" name='userid' value='<?php echo $userid;?>'>
 <select style="width:26em" name="selectarrete" id="selectarrete" onchange="this.form.submit()">			             		
@@ -82,9 +82,9 @@ Sélection du modèle :
 </form>
 <?php } ?>
 
-<br><br>
-Affichage des arrêtés pour le modèle et l'utilisateur
-<br><br>
+
+<p>Affichage des arrêtés pour le modèle et l'utilisateur</p>
+
 <?php 
 $alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees(); 
 if (sizeof($alldecrees) > 0) { ?>
@@ -119,7 +119,7 @@ if (sizeof($alldecrees) > 0) { ?>
 </table>
 <?php } ?>
 
-
+</div>
 </body>
 </html>
 

@@ -14,12 +14,12 @@ if (isset($_POST["userid"]))
 		}
 		
 		// Récupération des modeles auxquels à accès l'utilisateur
-		
+		$menuItem = 'menu_model';
 		require ("include/menu.php");
 ?>
-
-<div> Gestion des modèles </div>
-
+<div id="contenu1">
+	<h2> Gestion des modèles </h2>
+</div>
 </body>
 </html>
 

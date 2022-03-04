@@ -54,6 +54,8 @@
     	$post_duplique = $_POST['duplique'];
     }
     
+    $ldap = new ldap();
+    
     /*if (isset($_POST['mod_year']) && isset($_POST['mod_num']))
     {
     	$mode = 'modif';
@@ -89,7 +91,9 @@
 	    }
     }
     
+    $menuItem = 'menu_create';
     require ("include/menu.php");
+
     if ($mode == 'modif') 
     {
     	// RÉCUPÉRATION DU DOCUMENT ET DE SES PARAMÈTRES
@@ -280,7 +284,7 @@
     		
     		$idmodel = $post_selectarrete;
     		$decree = new decree($dbcon, $year, $numero_dispo);
-    		$structure = htmlspecialchars($_POST['composantecod1']);
+    		$structure = htmlspecialchars($_POST['structure1']);
     		$decree->save($user->getid(), $idmodel, $structure);
     		$decree->setFields($decreefields);
     		$modelselected = new model($dbcon, $idmodel);
@@ -538,7 +542,7 @@ if ($mode == 'modif')
 			$mod_decree_fields = $mod_decree->getFields();
 			$access = true;
 			?>
-			<p style="color:DodgerBlue;"><b>MODIFICATION DU DOCUMENT <?php echo $mod_year.'/'.$mod_num;?></b></p>
+			<h2>Modification d'un document <?php echo $mod_year.'/'.$mod_num;?></h2>
 			<?php 
 			//print_r2($mod_decree_fields);
 		}
@@ -558,7 +562,11 @@ if ($mode == 'modif')
 		unset($mod_decree);
 		$mode = 'create';
 	}
-}?>
+}
+else 
+{ ?>
+	<h2>Nouveau document</h2>
+<?php } ?>
 	<div class="gauche">
 	<?php if (sizeof($listModels) == 0 ) { ?>
 		Vous n'avez accès à aucun modèle de document. <br>
@@ -595,9 +603,7 @@ if ($mode == 'modif')
 			$modelselected = new model($dbcon, $selectarrete); 
 			$urlselected = $modelselected->getfile();
 		?>
-		<br>
-		<b>Paramétrage du document</b>
-		<br><br>
+		<h2>Paramétrage du document</h2>
 		<?php $modelfields = $modelselected->getModelFields();
 		 ?>
 		<form name='find_person' method='post' action='create_decree.php'>
@@ -732,30 +738,52 @@ if ($mode == 'modif')
 			<?php // Contrôler l'état de la demande dans esignature 
 			if (isset($mod_decree))
 			{ ?>
-				<p><?php echo $mod_year.'/'.$mod_num.' '.$mod_status;?></p>
-				<?php if ($mod_status == STATUT_BROUILLON) {?>
-					<input type='submit' name='duplique' value='Dupliquer'>
-					<input type='submit' name='valide' value='Remplacer'>	
-					<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
-					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
-				<?php } elseif ($mod_status != STATUT_VALIDE) { ?>
-					<input type='submit' name='duplique' value='Dupliquer'>
-					<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-					<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
-					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
-				<?php } elseif ($mod_status != STATUT_ANNULE) { ?>
-					<input type='submit' name='duplique' value='Dupliquer'>
-					<input type='submit' name='valide' value='Remplacer' disabled>
-					<input type='submit' name='supprime' value='Supprimer' disabled>
-					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
-				<?php } else { ?>
-					<input type='submit' name='duplique' value='Dupliquer'>
-					<input type='submit' name='valide' value='Remplacer' disabled>
-					<input type='submit' name='supprime' value='Supprimer' disabled>
-					<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
-				<?php } ?>
+				<div id="numero_div"><?php echo $mod_year.' / '.$mod_num;?>
+				<?php switch ($mod_status) {
+							case STATUT_BROUILLON : ?>
+								<img src="img/file-signature-solid.svg" alt="brouillon" width="40px">
+							</div>
+							<input type='submit' name='duplique' value='Dupliquer'>	
+							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
+							<input type='submit' name='valide' value='Remplacer'>
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
+								<?php break;
+							case STATUT_EN_COURS : ?>
+								<img src="img/clock-solid.svg" alt="signature en cours" width="40px">
+							</div>
+							<input type='submit' name='duplique' value='Dupliquer'>
+							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+							<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+								<?php break;
+							case STATUT_VALIDE : ?>
+								<img src="img/window-restore-regular.svg" alt="signé" width="40px">
+							</div>
+							<input type='submit' name='duplique' value='Dupliquer'>
+							<input type='submit' name='supprime' value='Supprimer' disabled>
+							<input type='submit' name='valide' value='Remplacer' disabled>
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+								<?php break;
+							case STATUT_REFUSE : ?>
+								<img src="img/window-restore-regular.svg" alt="refusé" width="40px">
+							</div>
+							<input type='submit' name='duplique' value='Dupliquer'>
+							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+							<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+								<?php break;
+							case STATUT_ANNULE : ?>
+								<img src="img/trash-alt-solid.svg" alt="supprimé" width="40px">
+							</div>
+							<input type='submit' name='duplique' value='Dupliquer'>
+							<input type='submit' name='supprime' value='Supprimer' disabled>
+							<input type='submit' name='valide' value='Remplacer' disabled>
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+								<?php break;
+							default : break;
+				}?>
 				<?php if (isset($message)) { ?>
-				<p><?php echo $message;?></p>
+				<p class='alerte-info'><?php echo $message;?></p>
 				<?php } ?>
 				<br>
 			<?php } 
@@ -790,7 +818,7 @@ if ($mode == 'modif')
 		?>
 		</div>
 <?php } 
-else 
+elseif (isset($access))
 { ?>
 	<p> Vous n'avez pas accès à ce document. </p>
 <?php }?>

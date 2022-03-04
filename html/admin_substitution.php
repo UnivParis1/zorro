@@ -28,17 +28,18 @@
 	 	$groups = $user->getUserGroupes($allgroups);
 	 	$_SESSION['groupes'] = $groups;
 	 }
+	 $menuItem = 'menu_admin';
 	require ("include/menu.php");
 
 ?>
-
-<br>
-<form name='subst_agent' method='post' action='admin_substitution.php'>
-	<input id="newuser" name="newuser" placeholder="login" autofocus/> 
-	<input type="hidden" id ="userid" name="userid" value="<?php echo $userid;?>">
-	<input type='submit' value='Se faire passer pour...'>
-</form>
-
+<div id="contenu1">
+	<h2>Changer d'utilisateur</h2>
+	<form name='subst_agent' method='post' action='admin_substitution.php'>
+		<input id="newuser" name="newuser" placeholder="login" autofocus/> 
+		<input type="hidden" id ="userid" name="userid" value="<?php echo $userid;?>">
+		<input type='submit' value='Se faire passer pour...'>
+	</form>
+</div>
 </body>
 </html>
 

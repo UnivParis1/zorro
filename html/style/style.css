@@ -30,6 +30,8 @@ nav.navigat ul li:hover {  background: #00326e; }
 
 nav.navigat ul li a {  color: white;  text-decoration: none;} 
 
+ul li.navcourant { background: #20558a !important; } 
+
 #contenu1, #contenu2 {
          clear : both;   padding:11px;
          margin-top: 20px; display: block;  }

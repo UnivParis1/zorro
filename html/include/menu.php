@@ -91,13 +91,8 @@
 <script
 	src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
-<script>$(document).ready(function() {
-    $('#structureid').select2();
-    $('#esignatureid').select2();
-});</script>
-
 <script src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser.js"></script>
-
+<script src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
 
 <script>
     var completionAgent = function (event, ui)
@@ -111,6 +106,8 @@
 
 		return false;
     };
+
+	
 </script>
 
 <!-- On rend la CSS "dynamique" en lui passant en paramètre le timestamp Unix de dernière modification du fichier -->
@@ -118,27 +115,24 @@
 
 <link rel="stylesheet" type="text/css" href="style/jquery-ui.css"
 	media="screen"></link>
-<link rel="stylesheet" type="text/css"
-	href="style/css33.css?<?php echo filemtime('style/css33.css')  ?>"
-	media="screen"></link>
 	<link rel="stylesheet" type="text/css"
 	href="style/style.css?<?php echo filemtime('style/style.css')  ?>"
 	media="screen"></link>
 </head>
-
+<?php if (!isset($menuItem)) { $menuItem = ''; }?>
 <body>
 	<div class="containerApp"> 
 		<header id="header-zorro">
 			<nav class="navigat" >
 				<ul >
 					<?php if ($user->isSuperAdmin() || (isset($_SESSION['groupes']) && sizeof($_SESSION['groupes']) > 0) || $user->isAdmin()) { ?>
-					<li onclick='document.createdecree.submit();' <?php //echo $hidemenu; ?> >
+					<li id='menu_create' <?php  echo ($menuItem == 'menu_create') ? "class='navcourant'" : '';?> onclick='document.createdecree.submit();' <?php //echo $hidemenu; ?> >
 						<form name='createdecree' method='post' action="create_decree.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>
 						<a href="javascript:document.createdecree.submit();">Nouveau document</a>
 					</li>
-					<li onclick='document.managedecree.submit();' <?php //echo $hidemenu; ?> >
+					<li id='menu_manage' <?php echo ($menuItem == 'menu_manage') ? "class='navcourant'" : '';?> onclick='document.managedecree.submit();' <?php //echo $hidemenu; ?> >
 						<form name='managedecree' method='post' action="manage_decree.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>
@@ -146,20 +140,20 @@
 					</li>
 					<?php } ?>
 					<?php if ($user->isSuperAdmin()) { ?>
-					<li onclick='document.managerole.submit();' <?php //echo $hidemenu; ?> >
+					<li id='menu_role' <?php echo ($menuItem == 'menu_role') ? "class='navcourant'" : '';?> onclick='document.managerole.submit();' <?php //echo $hidemenu; ?> >
 						<form name='managerole' method='post' action="manage_role.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>
 						<a href="javascript:document.managerole.submit();">Autorisations</a>
 					</li>
-					<li onclick='document.managemodel.submit();' <?php //echo $hidemenu; ?> >
+					<li id='menu_model' <?php echo ($menuItem == 'menu_model') ? "class='navcourant'" : '';?> onclick='document.managemodel.submit();' <?php //echo $hidemenu; ?> >
 						<form name='managemodel' method='post' action="manage_model.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>
 						<a href="javascript:document.managemodel.submit();">Modèles</a>
 					</li>
 					<?php } ?>	
-					<li onclick='document.usurpe.submit();' <?php //echo $hidemenu; ?> >
+					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> onclick='document.usurpe.submit();' <?php //echo $hidemenu; ?> >
 						<form name='usurpe' method='post' action="admin_substitution.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>

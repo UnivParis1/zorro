@@ -20,7 +20,8 @@ if (is_null($userid) or ($userid == "")) {
 	header('Location: index.php');
 	exit();
 }
-	
+
+$menuItem = 'menu_role';
 require ("include/menu.php");
 ?>	
 <script>
@@ -33,8 +34,8 @@ function changerole(idgroupe, i){
 	document.getElementById('value').form.submit();
 }
 </script>
-
-<div> Gestion des autorisations </div><br>
+<div id="contenu1">
+<h2> Gestion des autorisations </h2>
 <?php 	// Récupération des utilisateurs
 
 $ref = new reference($dbcon, $rdbApo);
@@ -154,7 +155,7 @@ foreach($result as $res)
 	<input type="hidden" name='value' id='value' value=''>
 	<input id="submitrole" type="submit" value=''>
 </form>	 
-
+</div>
 </body>
 </html>
 
