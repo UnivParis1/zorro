@@ -651,7 +651,7 @@ else
 								findGroup($modelfield['name'],$i);
 								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 								{
-									$structurename = $ldap->getStructureName($mod_decree_fields[$modelfield['idmodel_field']][0]['value']);
+									$structurename = $ldap->getStructureInfos($mod_decree_fields[$modelfield['idmodel_field']][0]['value'])['superGroups'][$mod_decree_fields[$modelfield['idmodel_field']][0]['value']]['name'];
 									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$structurename."';</script>";
 									echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
 								}

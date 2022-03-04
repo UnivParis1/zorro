@@ -156,6 +156,10 @@ class ldap {
 	{
 		$retour = '';
 		$curl = curl_init();
+		if (substr($structure, 0, 11) == 'structures-')
+		{
+			$structure = substr($structure, 11);
+		}
 		$params = array('key' => 'structures-'.$structure, 'depth' => '10', 'filter_category' => 'structures');
 		$walk = function( $item, $key, $parent_key = '' ) use ( &$output, &$walk ) {
 			is_array( $item )
