@@ -115,13 +115,13 @@ class ldap {
 		$curl_opt_url = WSGROUPS_URL_GROUP.$params_string;
 		//echo "<br>Output = " . $params_string . '<br><br>';
 		
-		$opts = [
+		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
 				CURLOPT_POST => true,
 				CURLOPT_RETURNTRANSFER => true,
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_PROXY => ''
-		];
+		);
 		curl_setopt_array($curl, $opts);
 		$json = curl_exec($curl);
 		$error = curl_error ($curl);
@@ -171,13 +171,13 @@ class ldap {
 		$curl_opt_url = "https://wsgroups-test.univ-paris1.fr/getSubAndSuperGroups?".$params_string;
 		//echo "<br>Output = " . $params_string . '<br><br>';
 
-		$opts = [
+		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
 				CURLOPT_POST => true,
 				CURLOPT_RETURNTRANSFER => true,
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_PROXY => ''
-		];
+		);
 		curl_setopt_array($curl, $opts);
 		$json = curl_exec($curl);
 		$error = curl_error ($curl);
@@ -201,13 +201,13 @@ class ldap {
 		$curl = curl_init();
 		$curl_opt_url = "https://wsgroups-test.univ-paris1.fr/searchUser?filter_uid=".$uid;
 
-		$opts = [
+		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
 				CURLOPT_POST => true,
 				CURLOPT_RETURNTRANSFER => true,
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_PROXY => ''
-		];
+		);
 		curl_setopt_array($curl, $opts);
 		$json = curl_exec($curl);
 		$error = curl_error ($curl);

@@ -360,12 +360,12 @@ class decree {
 		{
 			elog("Synchronisation... ".ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
 			$curl = curl_init();
-			$opts = [
+			$opts = array(
 					CURLOPT_URL => ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
 					CURLOPT_RETURNTRANSFER => true,
 					CURLOPT_SSL_VERIFYPEER => false,
 					CURLOPT_PROXY => ''
-			];
+			);
 			curl_setopt_array($curl, $opts);
 			//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			$json = curl_exec($curl);

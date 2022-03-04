@@ -156,7 +156,7 @@
 						$params['targetEmails'] = "elodie.briere@univ-paris1.fr";
 						$params['targetUrls'] = array(TARGET_URL."arreteMaitrise");
 						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
-						$opts = [
+						$opts = array(
 								CURLOPT_URL => ESIGNATURE_CURLOPT_URL."286037".ESIGNATURE_CURLOPT_URL2,
 								CURLOPT_CUSTOMREQUEST => "POST",
 								CURLOPT_VERBOSE => true,
@@ -164,7 +164,7 @@
 								CURLOPT_POSTFIELDS => $params,
 								CURLOPT_RETURNTRANSFER => true,
 								CURLOPT_SSL_VERIFYPEER => false
-						];
+						);
 						curl_setopt_array($curl, $opts);
 						//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 						$json = curl_exec($curl);
