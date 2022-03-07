@@ -54,9 +54,10 @@ class ldap {
 				'mail' => $entries[0]['mail'][0],
 				'supannentiteaffectation' => $entries[0]['supannentiteaffectation'][0]
 		);
-		$result2 = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$entries[0]['supannentiteaffectation'][0].")", array('ou', 'supannRefId')); 
+		$result2 = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$entries[0]['supannentiteaffectation'][0].")", array('ou', 'description', 'supannRefId')); 
 		$entries2 = ldap_get_entries($this->_con_ldap, $result2);
 		$infos_ldap['ou'] = $entries2[0]['ou'][0];
+		$infos_ldap['description'] = $entries2[0]['description'][0];
 		$supannrefid = $entries2[0]['supannrefid'];
 		foreach($supannrefid as $value)
 		{

@@ -657,7 +657,9 @@ else
 								}
 								elseif (isset($_SESSION['ou'])) 
 								{
-									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$_SESSION['ou']."';</script>";
+									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$_SESSION['description']."';</script>";
+									echo "<script>document.getElementById('".$modelfield['name']."1').value = 'structures-".$_SESSION['supannentiteaffectation']."';</script>";
+									echo "<script>majComposante(document.getElementById('".$modelfield['name']."1'));</script>";
 								}
 								break;
 						case 'year':
