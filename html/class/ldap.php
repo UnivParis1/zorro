@@ -144,11 +144,11 @@ class ldap {
 				if (!key_exists('mail', $role))
 				{
 					$ldap_infos = $this->getInfos($role['uid'], false);
-					$retour[$role['uid']] = array('uid' => $role['uid'], 'name' => $role['displayName'], 'mail' => $ldap_infos['mail'], 'role' => $role["supannRoleGenerique"][0]);
+					$retour[$role['uid']] = array('uid' => $role['uid'], 'name' => $role['displayName'], 'mail' => $ldap_infos['mail'], 'role' => array_key_exists("supannRoleGenerique", $role) ? $role["supannRoleGenerique"][0] : '');
 				}
 				else 
 				{
-					$retour[$role['uid']] = array('uid' => $role['uid'], 'name' => $role['displayName'], 'mail' => $role['mail'], 'role' => $role["supannRoleGenerique"][0]);
+					$retour[$role['uid']] = array('uid' => $role['uid'], 'name' => $role['displayName'], 'mail' => $role['mail'], 'role' => array_key_exists("supannRoleGenerique", $role) ? $role["supannRoleGenerique"][0] : '');
 				}
 			}
 		}
@@ -198,15 +198,27 @@ class ldap {
 		}
 		if (isset($retour['superGroups']))
 		{
-			$retour['codeapo'] = '';
+			$retour['codeapo'] = array();
 			foreach($retour['superGroups'] as $structuremere => $descrStruct)
 			{
 				$codeApo = $this->getInfoApo($structuremere);
 				if ($codeApo != '')
 				{
-					$retour['codeapo'] = $codeApo;
+					$retour['codeapo'][] = $codeApo;
 					break;
 				}
+			}
+			if (sizeof($retour['subGroups']) > 0)
+			{
+				if (sizeof($retour['codeapo']) > 0)
+				{
+					$retour['codeapo'][] = $this->getCodeApoSubGroups($retour['subGroups']);
+				}
+				else
+				{
+					$retour['codeapo'] = $this->getCodeApoSubGroups($retour['subGroups']);
+				}
+				//$retour['subGroups'][$structurefille]['roles'] = $this->getStructureResp($descrStruct['key']);
 			}
 			foreach($retour['superGroups'] as $structuremere => $descrStruct)
 			{
@@ -217,6 +229,7 @@ class ldap {
 				$retour['subGroups'][$structurefille]['roles'] = $this->getStructureResp($descrStruct['key']);
 			}
 		}
+		//print_r2($retour);
 		return $retour;
 	}
 
@@ -272,7 +285,7 @@ class ldap {
 				$_SESSION[$cle] = $valeur;
 			}
 		}
-		print_r2($retour);
+		//print_r2($retour);
 		return $retour;
 	}
 
@@ -295,5 +308,31 @@ class ldap {
 			}
 		}
 		return $codeapo;
+	}
+
+	function getCodeApoSubGroups($subgroups)
+	{
+		$tabApo = array();
+		foreach($subgroups as $subgroup)
+		{
+			if (key_exists('subGroups', $subgroup))
+			{
+				$tmp = $this->getCodeApoSubGroups($subgroup['subGroups']);
+				if (sizeof($tabApo) > 0)
+				{
+					$tabApo[] = $tmp;
+				} 
+				else
+				{
+					$tabApo = $tmp;
+				}
+			}
+			$codApo = $this->getInfoApo($subgroup['key']);
+			if ($codApo != '')
+			{
+				$tabApo[] = $codApo;
+			}
+		}
+		return $tabApo;
 	}
 }

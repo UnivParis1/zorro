@@ -25,6 +25,8 @@
     	require_once "./include/dbconnection.php";
     	$user = new user($dbcon, $userid);
     }
+    require_once('./class/ldap.php');
+    $ldap = new ldap();
 
 ?>
 
@@ -84,6 +86,7 @@
 	src="https://esup-data.univ-paris1.fr/esup/outils/postMessage-resize-iframe-in-parent.js"></script>
 <script src="javascripts/jquery-1.8.3.js"></script>
 <script src="javascripts/jquery-ui.js"></script>
+<script type="text/javascript" src="javascripts/ajax.js"></script>
 
 <link
 	href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css"
@@ -103,10 +106,19 @@
 		form.find("[id='" + selectedInput.name + "']").val(ui.item.label);
 		form.find("[class='" + selectedInput.name + "']").val (ui.item.value);
 
-
 		return false;
     };
 
+    var completionStructure = function (event, ui)
+    {
+		// NB: this event is called before the selected value is set in the "input"
+		var form = $(this).closest("form");
+		var selectedInput = document.activeElement;
+		form.find("[id='" + selectedInput.name + "']").val(ui.item.label);
+		form.find("[class='" + selectedInput.name + "']").val (ui.item.value);
+		majComposante(form.find("[class='" + selectedInput.name + "']"));
+		return false;
+    };
 	
 </script>
 

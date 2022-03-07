@@ -21,10 +21,10 @@ function findPerson($name, $id = '')
 function findGroup($name, $id = '')
 {
 	echo "<input id='".$name.$id."_ref' name='".$name.$id."_ref' placeholder='Service référent'/>";
-	echo "<input type='hidden' id='".$name.$id."' name='".$name.$id."' class='".$name.$id."_ref'/>";
+	echo "<input type='hidden' id='".$name.$id."' name='".$name.$id."' class='".$name.$id."_ref' onchange='majComposante(this)'/>";
 	echo "<script>";
 	echo "$( '#".$name.$id."_ref' ).autocompleteGroup(
-			'https://wsgroups.univ-paris1.fr/searchGroup', { select: completionAgent, wantedAttr: 'key',
+			'https://wsgroups.univ-paris1.fr/searchGroup', { select: completionStructure, wantedAttr: 'key',
 			wsParams: { filter_category: 'structures' } });
 	";
 	echo "</script>";

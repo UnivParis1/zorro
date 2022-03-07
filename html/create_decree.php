@@ -542,7 +542,7 @@ if ($mode == 'modif')
 			$mod_decree_fields = $mod_decree->getFields();
 			$access = true;
 			?>
-			<h2>Modification d'un document <?php echo $mod_year.'/'.$mod_num;?></h2>
+			<h2>Modification d'un document</h2>
 			<?php 
 			//print_r2($mod_decree_fields);
 		}
@@ -653,7 +653,7 @@ else
 								{
 									$structurename = $ldap->getStructureInfos($mod_decree_fields[$modelfield['idmodel_field']][0]['value'])['superGroups'][$mod_decree_fields[$modelfield['idmodel_field']][0]['value']]['name'];
 									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$structurename."';</script>";
-									echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+									//echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
 								}
 								elseif (isset($_SESSION['ou'])) 
 								{
@@ -674,22 +674,23 @@ else
 							$result = $ref->executeQuery($query);
 							if ($modelfield['idfield_type'] == 10)
 							{ // C'est le choix de la composante
+								// TODO : calculer la composante au submit à partir de la structure référente
 								$comps = array();
 								foreach ($result as $value)
 								{
-									$comps[$value] = $ref->executeQuery(array('schema'=>'APOGEE',
-																		'query' => "SELECT cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$value."'"))[0];
+									$comps[$value['code']] = $ref->executeQuery(array('schema'=>'APOGEE',
+											'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$value['code']."'"))[0];
 								}
 								$structuser = $ref->getUserStructureCodeAPO();?>
 								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
 								<?php
 								foreach ($comps as $num => $comp)
 								{
-									if ((!isset($mod_select_decree) && $structuser == $num) || (isset($mod_select_decree) && $mod_select_decree['structure'] == $num))
+									if (/*(!isset($mod_select_decree) && $structuser == $num) ||*/ (isset($mod_select_decree) && $mod_select_decree['structure'] == $num))
 									{ ?>
-										<option value="<?php echo $num;?>" selected="selected"><?php echo $comp;?></option>
+										<option value="<?php echo $num;?>" selected="selected"><?php echo $comp['value'];?></option>
 									<?php } else { ?>
-										<option value="<?php echo $num;?>"><?php echo $comp;?></option>
+										<option value="<?php echo $num;?>"><?php echo $comp['value'];?></option>
 									<?php } 
 								}?>
 								</select>
@@ -699,11 +700,11 @@ else
 							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
 							<?php foreach($result as $value)
 							{ 
-								if (isset($mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value) 
+								if (isset($mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
 								{?>
-									<option value="<?php echo $value;?>" selected="selected"><?php echo $value;?></option>
+									<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
 								<?php } else { ?>
-									<option value="<?php echo $value;?>"><?php echo $value;?></option>
+									<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
 								<?php } 
 							} ?>
 							</select>
@@ -833,6 +834,7 @@ elseif (isset($access))
 <?php }?>
 
 </div>
+
 </body>
 </html>
 

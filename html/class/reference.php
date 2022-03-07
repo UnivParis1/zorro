@@ -135,7 +135,7 @@ class reference {
 					{
 						while ($res = oci_fetch_row($sth))
 						{
-							$fields[] = $res[0];
+							$fields[] = array ('code' => $res[0], 'value' => $res[1]);
 						}
 					}
 				}

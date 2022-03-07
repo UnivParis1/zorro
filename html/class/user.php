@@ -210,30 +210,26 @@ class user {
 		return FALSE;
 	}
 
-	function getAdminSubStructs()
+	function getAdminSubStructs($structure)
 	{
 		$retour = array();
-		if (isset($_SESSION['supannentiteaffectation']))
+		if (substr($structure, 0, 11) != 'structures-')
 		{
-			$structure = 'structures-'.$_SESSION['supannentiteaffectation'];
-			$retour[] = $structure;
-			$ldap = new ldap();
-			$infostruct = $ldap->getStructureInfos($structure);
-			//print_r2($resp);
-			if (array_key_exists('superGroups', $infostruct) && array_key_exists($structure, $infostruct['superGroups'])
-					&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($_SESSION['uid']) && array_key_exists($_SESSION['uid'], $infostruct['superGroups'][$structure]['roles'])
-					&& $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable administratif')
+			$structure = 'structures-'.$structure;
+		}
+		//$retour[] = $structure;
+		$ldap = new ldap();
+		$infostruct = $ldap->getStructureInfos($structure);
+		foreach($infostruct['subGroups'] as $sousStruct)
+		{
+			$retour[] = $sousStruct['key'];
+			if (array_key_exists('subGroups', $sousStruct))
 			{
-				foreach($infostruct['subGroups'] as $sousStruct)
+				$tmp = $this->getAdminSubStructs($sousStruct['key']);
+				foreach($tmp as $tmp2)
 				{
-					$retour[] = $sousStruct['key'];
+					$retour[] = $tmp2;
 				}
-				return $retour;
-			}
-			else
-			{
-				elog("L'utilisateur ".$_SESSION['uid']." n'est pas responsable administratif de sa structure");
-				return $retour;
 			}
 		}
 		elog( "L'utilisateur n'a pas d'affectation <br>");
@@ -301,7 +297,9 @@ class user {
 		}
 		elseif ($this->isAdmin())
 		{
-			$listStructuresFilles = $this->getAdminSubStructs();
+			$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
+			$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
+			print_r2($listStructuresFilles);
 			$select .= " WHERE d.structure IN (?";
 			$params[] = $listStructuresFilles[0];
 			for($i = 1; $i < sizeof($listStructuresFilles); $i++)
@@ -349,7 +347,8 @@ class user {
 			// L'utilisateur appartient à la structure pour laquelle le document a été créé
 			if ($this->isAdmin())
 			{
-				$listStructuresFilles = $this->getAdminSubStructs();
+				$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
+				print_r2($listStructuresFilles);
 				if (in_array($decree['structure'], $listStructuresFilles))
 				{
 					return true;
