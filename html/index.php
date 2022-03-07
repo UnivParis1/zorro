@@ -13,31 +13,21 @@
     elseif (isset($_POST["userid"]))
         $userid = htmlspecialchars($_POST["userid"]);
     require_once ('./class/ldap.php');
-    require_once ("./include/menu.php");
 
 
 	    $casversion = phpCAS::getVersion();
 	    $errlog = "Index.php => Version de CAS.php utilisée  : " . $casversion;
 	    //echo "<br><br>" . $errlog . "<br><br>";
 	    elog($errlog);
-	    echo '<html><body class="bodyhtml">';
 	    $ldap = new ldap();
 	    $infos_ldap = $ldap->getInfos($userid);
 	    $ldap->getUserAndStructureInfos($userid);
 	    //print_r2($infos_ldap);
-	    
-	    foreach ($infos_ldap as $cle => $info)
-	    {
-	    	echo $cle.' : '.$info." <br> ";
-	    }
-	    echo "<br>";
+
 	    //print_r2($infos_ldap['supannentiteaffectation']);
  
 	    $roles = $ldap->getStructureResp($infos_ldap['supannentiteaffectation']);
-	    foreach ($roles as $role)
-	    {
-	    	echo $role['role']." : ".$role['name']." ".$role['mail']."<br>";
-	    }
+
 	    if (!isset($_SESSION['groupes']))
 	    {
 	    	require_once('./class/user.php');
@@ -50,6 +40,17 @@
 	    	//print_r2($_SESSION['groupes']);
 	    }
 
+	    require_once ("./include/menu.php");
+	    echo '<html><body class="bodyhtml">';
+	    foreach ($infos_ldap as $cle => $info)
+	    {
+			echo $cle.' : '.$info." <br> ";
+	    }
+	    echo "<br>";
+	    foreach ($roles as $role)
+	    {
+			echo $role['role']." : ".$role['name']." ".$role['mail']."<br>";
+	    }
 ?>
 </body>
 </html>
