@@ -119,15 +119,15 @@
 		$mod_decree->unsetNumber($user->getId());
 		$mod_num = 0;
 		$mod_status = STATUT_ANNULE;
-		$message = 'Le document a été supprimé.';
+		$message = "<p class='alerte alerte-success'>Le document a été supprimé.</p>";
 	}
 	elseif (isset($_POST['sign']) && isset($mod_decree) && $mod_status == STATUT_BROUILLON) 
 	{
 		$ldap = new ldap();
 		elog('on est dans la signature...');
-		if (isset($_POST["composantecod1"]))
+		if (isset($_POST["structure1"]))
 		{
-			$supannCodeEntite = $ldap->getSupannCodeEntiteFromAPO($_POST["composantecod1"]);
+			$supannCodeEntite = $ldap->getSupannCodeEntiteFromAPO($_POST["structure1"]);
 			if ($supannCodeEntite != NULL)
 			{
 				$responsables = $ldap->getStructureResp($supannCodeEntite);
@@ -186,27 +186,29 @@
 						if (is_int($id))
 						{
 							$mod_decree->setIdEsignature($id);
-							$message = "Le document a été envoyé à eSignature.";
+							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature.</p>";
 							$mod_status = $mod_decree->getStatus();
 						}
 						else 
 						{
-							"Echec de création dans eSignature.";
+							$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature.</p>";
 						}
 					}
 					else
 					{
+						$message = "<p class='alerte alerte-danger'>Aucun responble n'est désigné sur la structure référente sélectionnée.</p>";
 						elog("pas de responsable de structure.");
 					}
 				}
 				else 
-				{
+				{	$message = "<p class='alerte alerte-danger'>Erreur de chargement du document.</p>";
 					elog ("fichier pdf absent ".PDF_PATH.$filename);
 				}
 			}
 		}
 		else
 		{
+			$message = "<p class='alerte alerte-danger'>La structure référente n'est pas renseignée.</p>";
 			elog("pas de code composante.");
 		}
 	}
@@ -453,18 +455,18 @@
     				elog( "stdout : \n");
     				elog($stdout);
     				elog( "La création du document PDF a échoué. <br>");
-    				$message = "La création du document a échoué.";
+					$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
     			} 
     			elseif ($stderr != "")
     			{
     				elog( "stderr :\n");
     				elog($stderr);
     				elog( "La création du document PDF a échoué. <br>");
-    				$message = "La création du document a échoué.";
+					$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
     			}
     			else 
     			{
-    				$message = "Document enregistré.";
+					$message = "<p class='alerte alerte-success'>Document enregistré.</p>";
     			}
     			?>
 		<?php }
@@ -477,11 +479,11 @@
 				$mode = 'modif';
 			}
 		}
-		?>
-	
-	<br><br>
-	<?php } else {
-	} ?>
+	}
+	else
+	{
+	}
+?>
 	
 <?php // ------------------------------------------------------- AFFICHAGE ------------------------------------------------------- ?>
 
@@ -793,10 +795,10 @@ else
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
 								<?php break;
 							default : break;
-				}?>
-				<?php if (isset($message)) { ?>
-				<p class='alerte-info'><?php echo $message;?></p>
-				<?php } ?>
+				}
+				if (isset($message)) {
+					echo $message;
+				} ?>
 				<br>
 			<?php } 
 		} else {?>
@@ -805,7 +807,7 @@ else
 		</div>
 		</form>
 		</div>
-		<div class="contenu2">
+		<div id="contenu2">
 		<?php 
 		if (isset($mod_decree))
 		{
@@ -832,7 +834,7 @@ else
 <?php } 
 elseif (isset($access))
 { ?>
-	<p> Vous n'avez pas accès à ce document. </p>
+	<p class="alerte alerte-warning"> Vous n'avez pas accès à ce document. </p>
 <?php }?>
 
 </div>
