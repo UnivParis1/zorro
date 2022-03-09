@@ -179,7 +179,10 @@ class user {
 					$_SESSION['issuperadmin'] = TRUE;
 				}
 			}
-			elog( "L'utilisateur n'est pas super admin <br>");
+			else
+			{
+				elog( "L'utilisateur n'est pas super admin <br>");
+			}
 		}
 		return $_SESSION['issuperadmin'];
 	}
