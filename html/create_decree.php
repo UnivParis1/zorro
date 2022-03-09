@@ -127,6 +127,7 @@
 		elog('on est dans la signature...');
 		if (isset($_POST["structure1"]))
 		{
+			$supannCodeEntite = $_POST["structure1"];
 			$supannCodeEntite = $ldap->getSupannCodeEntiteFromAPO($_POST["structure1"]);
 			if ($supannCodeEntite != NULL)
 			{
@@ -204,6 +205,10 @@
 				{	$message = "<p class='alerte alerte-danger'>Erreur de chargement du document.</p>";
 					elog ("fichier pdf absent ".PDF_PATH.$filename);
 				}
+			}
+			else
+			{
+				elog("supannCodeEntite NULL.");
 			}
 		}
 		else
@@ -653,15 +658,20 @@ else
 								findGroup($modelfield['name'],$i);
 								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 								{
-									$structurename = $ldap->getStructureInfos($mod_decree_fields[$modelfield['idmodel_field']][0]['value'])['superGroups'][$mod_decree_fields[$modelfield['idmodel_field']][0]['value']]['name'];
-									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$structurename."';</script>";
-									//echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+									$structurename = $ldap->getStructureInfos($mod_decree_fields[$modelfield['idmodel_field']][0]['value'])['superGroups'][$mod_decree_fields[$modelfield['idmodel_field']][0]['value']]['name'];?>
+									<script>document.getElementById('<?php echo $modelfield['name'];?>1_ref').value = "<?php echo $structurename;?>";</script>
+									<script>document.getElementById('<?php echo $modelfield['name'];?>1').value = "<?php echo $mod_decree_fields[$modelfield['idmodel_field']][0]['value']; ?>";</script>
+								<?php 	elog($structurename);
 								}
-								elseif (isset($_SESSION['ou'])) 
+								elseif (isset($_SESSION['description']) && isset($_SESSION['supannentiteaffectation']))
+								{ ?>
+									<script>document.getElementById('<?php echo $modelfield['name'];?>1_ref').value = "<?php echo $_SESSION['description'];?>";</script>
+									<script>document.getElementById('<?php echo $modelfield['name'];?>1').value = "structures-<?php echo $_SESSION['supannentiteaffectation'];?>";</script>
+									<script>majComposante(document.getElementById('<?php echo $modelfield['name'];?>1'));</script>
+								<?php }
+								else
 								{
-									echo "<script>document.getElementById('".$modelfield['name']."1_ref').value = '".$_SESSION['description']."';</script>";
-									echo "<script>document.getElementById('".$modelfield['name']."1').value = 'structures-".$_SESSION['supannentiteaffectation']."';</script>";
-									echo "<script>majComposante(document.getElementById('".$modelfield['name']."1'));</script>";
+									elog('pas de valeur pour la structure référente.');
 								}
 								break;
 						case 'year':
