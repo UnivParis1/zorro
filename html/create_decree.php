@@ -128,7 +128,6 @@
 		if (isset($_POST["structure1"]))
 		{
 			$supannCodeEntite = $_POST["structure1"];
-			$supannCodeEntite = $ldap->getSupannCodeEntiteFromAPO($_POST["structure1"]);
 			if ($supannCodeEntite != NULL)
 			{
 				$responsables = $ldap->getStructureResp($supannCodeEntite);
@@ -287,6 +286,10 @@
     					}
     				}
     			}
+				elseif ($modelfield['auto_value'] != NULL)
+				{
+					$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $modelfield['auto_value']);
+				}
     		}
     		
     		$idmodel = $post_selectarrete;
@@ -624,6 +627,8 @@ else
 			<?php if ($modelfield['auto'] != 'O')
 			{?>
 				<label><?php echo $modelfield['web_name'];?></label>
+			<?php } elseif ($modelfield['auto_value'] != NULL) { ?>
+				<label><?php echo $modelfield['web_name'];?></label> <?php echo $modelfield['auto_value'];?>
 			<?php } ?>
 			<input type="hidden" id='<?php echo $modelfield['name'].'_number';?>' value=1>
 			<?php 
