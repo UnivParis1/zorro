@@ -50,28 +50,44 @@ class ldap {
 		$attributs = array('uid', 'displayName', 'mail', 'supannEntiteAffectation');
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
-		$infos_ldap = array('displayname' => $entries[0]['displayname'][0],
-				'mail' => $entries[0]['mail'][0],
-				'supannentiteaffectation' => $entries[0]['supannentiteaffectation'][0]
-		);
-		$result2 = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$entries[0]['supannentiteaffectation'][0].")", array('ou', 'description', 'supannRefId')); 
-		$entries2 = ldap_get_entries($this->_con_ldap, $result2);
-		$infos_ldap['ou'] = $entries2[0]['ou'][0];
-		$infos_ldap['description'] = $entries2[0]['description'][0];
-		$supannrefid = $entries2[0]['supannrefid'];
-		foreach($supannrefid as $value)
+		$infos_ldap = array();
+		if (sizeof($entries) > 0)
 		{
-			if (substr($value, 0, 12) == '{APOGEE.CMP}')
+			$affectation = array_key_exists('supannentiteaffectation', $entries[0]) ? $entries[0]['supannentiteaffectation'][0] : null;
+			$infos_ldap = array('displayname' => $entries[0]['displayname'][0],
+					'mail' => $entries[0]['mail'][0],
+					'supannentiteaffectation' => $affectation
+			);
+			if ($affectation != null)
 			{
-				$infos_ldap['supannrefid'] = substr($value, 12);
+				$result2 = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$entries[0]['supannentiteaffectation'][0].")", array('ou', 'description', 'supannRefId')); 
+				$entries2 = ldap_get_entries($this->_con_ldap, $result2);
+				$infos_ldap['ou'] = $entries2[0]['ou'][0];
+				$infos_ldap['description'] = $entries2[0]['description'][0];
+				$supannrefid = $entries2[0]['supannrefid'];
+				foreach($supannrefid as $value)
+				{
+					if (substr($value, 0, 12) == '{APOGEE.CMP}')
+					{
+						$infos_ldap['supannrefid'] = substr($value, 12);
+					}
+				}
+			}
+			else
+			{
+				elog("L'utilisateur $uid n'a pas d'affectation.");
+			}
+			if ($temUserApp)
+			{
+				foreach ($infos_ldap as $cle => $valeur)
+				{
+					$_SESSION[$cle] = $valeur;
+				}
 			}
 		}
-		if ($temUserApp)
+		else
 		{
-			foreach ($infos_ldap as $cle => $valeur)
-			{
-				$_SESSION[$cle] = $valeur;
-			}
+			elog("Utilisateur $uid inconnu du ldap.");
 		}
 		return $infos_ldap;
 	}
