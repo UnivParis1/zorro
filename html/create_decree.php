@@ -629,6 +629,7 @@ else
 				<label><?php echo $modelfield['web_name'];?></label>
 			<?php } elseif ($modelfield['auto_value'] != NULL) { ?>
 				<label><?php echo $modelfield['web_name'];?></label> <?php echo $modelfield['auto_value'];?>
+				<input type="hidden" id='<?php echo $modelfield['name'].'1';?>' name='<?php echo $modelfield['name'].'1';?>' value="<?php echo $modelfield['auto_value'];?>">
 			<?php } ?>
 			<input type="hidden" id='<?php echo $modelfield['name'].'_number';?>' value=1>
 			<?php 
@@ -727,6 +728,23 @@ else
 								<?php } 
 							} ?>
 							</select>
+							<?php }
+							break;
+						case 'list':
+							$listFields = $modelselected->getListField($modelfield['idfield_type']);
+							if (sizeof($listFields) > 0)
+							{ ?>
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+								<?php foreach($listFields as $value)
+								{
+									if (isset($mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
+									{?>
+										<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
+									<?php } else { ?>
+										<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
+									<?php }
+								} ?>
+								</select>
 							<?php }
 							break;
 						default:

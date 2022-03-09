@@ -138,6 +138,26 @@ class model {
 		return $fields;
 	}
 	
+	function getListField($field_type)
+	{
+		$select = "SELECT idlist_field, value FROM list_field WHERE idfield_type = ?";
+		$params = array($field_type);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$fields = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$fields[] = array('key' => $res['idlist_field'], 'value' => $res['value']);
+			}
+		}
+		else
+		{
+			elog("erreur select list_fields. ".mysqli_error($this->_dbcon));
+		}
+		return $fields;
+	}
+
 	function getNumeroId()
 	{
 		$select = "SELECT idmodel_field FROM model_field WHERE idmodel = ? AND idfield_type = 1";
