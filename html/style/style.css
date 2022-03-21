@@ -50,19 +50,29 @@ nav.navigat ul li.navcourant { background: #9f6c07; }
 }
 
 
-h2 { font-style: normal; font-weight: normal; font-size: 25px ; margin-bottom: 25px; padding-left: 8px; }
+h2 { font-style: normal; font-weight: normal; font-size: 24px ;
+     padding-left: 0px; margin-top: 5px; margin-bottom: 25px; }
+h3 {
+     font-style: normal;
+     font-weight: normal;
+     font-size: 20px;
+     padding-left: 0px;
+     margin-top: 19px; margin-bottom: 24px;
+}
 
 form {   line-height: 25px; font-weight: 700; color: #555;  font-size: 13px; ;
      -text-transform: capitalize ;
 }
 
 
-form select,form input { font-size: 13px; color: #20558a; color: #00326e; border: 1px solid #00326e5c; margin-bottom: 3px; }
+form select,form input { font-size: 13px; color: #20558a; color: #00326e; border: 1px solid #00326e5c;
+                        margin-bottom: 3px; }
 
 form #structure_div input {
-    width: 17em;
+    width: 17em; width: 25.5em;
 }
 
+.gauche select#annee1 { width: 14.5em !important;}
 .gauche input { line-height: 22px; width: 14.5em; }
 
 .gauche button { width: 44px; font-size : 17px; padding: 0px;border:1px solid #bbb; height :25px; background: #f3f6f9;  } 
@@ -72,7 +82,7 @@ label {
     display: inline-block;
     width: 140px;
     border-bottom: 1px dotted #888; 
-	margin-bottom: 6px;
+	margin-bottom: 4px; margin-top: 3px;
 }
 #table_membre {
     margin-left: 140px;
@@ -85,29 +95,39 @@ select {
     background: #f3f6f9;
     border: 1px solid #ccc;
     padding: 4px 3px;
+	font-family: arial;
 }
 
+select#selectarrete {
+    background-color: #fdf5e2;  background-color: #f5c95c5e;
+    font-size : 14px;
+}
 
 
 .droite input[type="submit"] {
-    padding: 8px 8px;
+    padding: 8px 8px 8px 38px;
+    margin: 2px;
     font-size: 16px;
     text-align: left;
     font-family: inherit;
-    margin: 2px;
-    border-radius: 2px;
-    background: #e3e6e9;
-    border: 1px solid #00326e5c;
     color: #00326e;
-    background-color : rgb(222, 228, 240);
-    padding-left:38px;
+
+    background-color : #dee4f0;   /* rgb(222, 228, 240);  */
+    border: 1px solid #00326e2b;
+    border-bottom-color: #00236e6c;
+    border-right-color: #00326e6c;
+    border-radius: 2px;
+
     background-repeat: no-repeat;
     background-position: top 8px left 8px;
     background-size: 19px;
+
 }
 
-.droite input[type="submit"]:hover { background-color: #ecc258; }
-.droite input[type="submit"]:disabled {  opacity: 0.4; filter: contrast( .8);  }
+.droite input[type="submit"]:hover { --background-color: #ecc258; background-color :#f5c95c; }
+.droite input[type="submit"]:disabled,
+.droite input[type="submit"]:disabled:hover { background-color: #d0dade; opacity: 0.4; }
+
 
 .droite input[name="duplique"] {
        background-image: url("../img/window-restore-regular.svg");
@@ -122,7 +142,7 @@ select {
 
 
 .droite input[name="valide"] {
-       background-image: url("../img/arrow-alt-circle-down-solid.svg");
+       background-image: url("../img/saving.svg");
        width: 268px;
 }
 
@@ -136,7 +156,7 @@ select {
 
 #numero_div { color: #00326e; font-size: 25px; margin-bottom: 22px;   text-align:left; }
 
-#numero_div img{ padding-left: 75px; width: 35px; }
+#numero_div img{ padding-left: 75px; --width: 35px; }
 
 
  
@@ -151,10 +171,9 @@ select {
 }
 
 .tableausimple TR:nth-child(even) {  background: #f3f6f9; }
-.tableausimple TR:hover { background-color: #f5c95c82; background: #eaaa0c73; color:black; }
+.tableausimple TR:hover { background: #f5c95c5e; color:black; }
 
-.tableausimple  td.cellulesimple  {  font-size: 13px;  line-height: 30px; padding:6px;
-padding-top:2px; padding-bottom:2px; border:1px #999 dotted; }
+.tableausimple  td.cellulesimple { font-size: 13px;  padding: 9px 6px; border:1px #999 dotted; }
 
 
 

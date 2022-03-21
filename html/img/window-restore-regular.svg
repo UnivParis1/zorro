@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --><path d="M464 0H144c-26.5 0-48 21.5-48 48v48H48c-26.5 0-48 21.5-48 48v320c0 26.5 21.5 48 48 48h320c26.5 0 48-21.5 48-48v-48h48c26.5 0 48-21.5 48-48V48c0-26.5-21.5-48-48-48zm-96 464H48V256h320v208zm96-96h-48V144c0-26.5-21.5-48-48-48H144V48h320v320z"/></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.4.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#20558A;}
+</style>
+<path class="st0" d="M450.5,17.5H150.8c-24.8,0-44.9,20.1-44.9,44.9v44.9H60.9c-24.8,0-44.9,20.1-44.9,44.9v299.7
+	c0,24.8,20.1,44.9,44.9,44.9h299.7c24.8,0,44.9-20.1,44.9-44.9v-44.9h44.9c24.8,0,44.9-20.1,44.9-44.9V62.5
+	C495.5,37.7,475.3,17.5,450.5,17.5z M360.6,452.1H60.9V257.3h299.7V452.1z M450.5,362.2h-44.9V152.4c0-24.8-20.1-44.9-44.9-44.9
+	H150.8V62.5h299.7V362.2z"/>
+</svg>
