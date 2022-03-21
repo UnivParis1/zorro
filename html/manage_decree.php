@@ -101,7 +101,7 @@ if (sizeof($alldecrees) > 0) { ?>
 		</tr>
 <?php 	foreach ($alldecrees as $decree) { ?>
 		<tr>
-			<?php if ($decree['status'] == 'a') {?>
+			<?php if ($decree['status'] == STATUT_ANNULE) {?>
 				<td></td>
 			<?php } else {?>
 				<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
@@ -112,7 +112,35 @@ if (sizeof($alldecrees) > 0) { ?>
 			<td class="cellulesimple"><?php echo $decree['structure']; ?></td>
 			<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
 			<td class="cellulesimple"><?php echo $decree['createdate']; ?></td>
-			<td class="cellulesimple"><?php echo $decree['status']; ?></td>
+			<?php switch ($decree['status']) {
+				case STATUT_ANNULE :
+					$contenu = date('d/m/Y', strtotime($decree['majdate']));
+					$class = "red";
+					break;
+				case STATUT_REFUSE :
+					$contenu = date('d/m/Y', strtotime($decree['majdate']));
+					$class = "red";
+					break;
+				case STATUT_BROUILLON :
+					$contenu = "<img src='img/brouillon.svg' alt='brouillon' width='20px'>";
+					$class = "img";
+					break;
+				case STATUT_VALIDE :
+					$contenu = date('d/m/Y', strtotime($decree['majdate']));
+					$class = "green";
+					break;
+				case STATUT_EN_COURS :
+					$contenu = "<img src='img/enattente.svg' alt='signature en cours' width='20px'>";
+					$class = "img";
+					break;
+				case STATUT_ERREUR :
+					$contenu = "erreur";
+					$class = "red";
+					break;
+				default :
+					break;
+			}?>
+			<td class='<?php echo $class;?>'><?php echo $contenu; ?></td>
 			<td class="cellulesimple"><?php echo $decree['idesignature']; ?></td>
 		</tr>
 <?php } ?>

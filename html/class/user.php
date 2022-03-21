@@ -279,6 +279,7 @@ class user {
 						d.number,
 						d.year,
 						d.createdate,
+						d.majdate,
 						d.idesignature,
 						m.name as modelname,
 						dt.name as decreetypename,
