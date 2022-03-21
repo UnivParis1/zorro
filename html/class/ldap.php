@@ -45,7 +45,7 @@ class ldap {
 	// récupération des noms, prénoms, adresse email, structure d'affectation
 	function getInfos($uid, $temUserApp = true)
 	{
-		$r = ldap_bind($this->_con_ldap);
+		$r = ldap_bind($this->_con_ldap, LDAP_BIND_LOGIN, LDAP_BIND_PASS);
 		$filtre = "(uid=$uid)";
 		$attributs = array('uid', 'displayName', 'mail', 'supannEntiteAffectation');
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
@@ -53,6 +53,7 @@ class ldap {
 		$infos_ldap = array();
 		if (sizeof($entries) > 0)
 		{
+			elog($filtre);
 			$affectation = array_key_exists('supannentiteaffectation', $entries[0]) ? $entries[0]['supannentiteaffectation'][0] : null;
 			$infos_ldap = array('displayname' => $entries[0]['displayname'][0],
 					'mail' => $entries[0]['mail'][0],
@@ -351,5 +352,67 @@ class ldap {
 			}
 		}
 		return $tabApo;
+	}
+
+	function getEtuInfos($uid)
+	{
+		$retour = array();
+		$curl = curl_init();
+		$curl_opt_url = "https://wsgroups.univ-paris1.fr/searchUser?filter_uid=".$uid;
+		$opts = array(
+				CURLOPT_URL => $curl_opt_url,
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_PROXY => ''
+		);
+		curl_setopt_array($curl, $opts);
+		$json = curl_exec($curl);
+		$error = curl_error ($curl);
+		curl_close($curl);
+		if ($error != "")
+		{
+			elog( "Erreur Curl = " . $error );
+		}
+		//print_r2($json);
+		$tab = json_decode($json, true);
+		//print_r2($tab);
+		if (is_array($tab))
+		{
+			//print_r2($tab);
+			if (array_key_exists('supannEntiteAffectationPrincipale-all',$tab[0]) && array_key_exists('description',$tab[0]['supannEntiteAffectationPrincipale-all']))
+			{
+				$retour['infoetu'] = $tab[0]['supannEntiteAffectationPrincipale-all']['description'];
+				if (array_key_exists('supannEtuInscription-all',$tab[0]) && is_array($tab[0]['supannEtuInscription-all']))
+				{
+					foreach($tab[0]['supannEtuInscription-all'] as $inscription)
+					{
+						if (array_key_exists('affect', $inscription) && array_key_exists('key', $tab[0]['supannEntiteAffectationPrincipale-all']) 
+								&& $inscription['affect'] == $tab[0]['supannEntiteAffectationPrincipale-all']['key'] && array_key_exists('etape', $inscription))
+						{
+							$retour['infoetu'] = $inscription['etape'].' - '.$retour['infoetu'];
+						}
+					}
+				}
+			}
+			$retour['nometu'] = array_key_exists('sn', $tab[0]) ? $tab[0]['sn'] : '';
+			$retour['prenometu'] = array_key_exists('givenName', $tab[0]) ? $tab[0]['givenName'] : '';
+			$retour['displayname'] = array_key_exists('displayName', $tab[0]) ? $tab[0]['displayName'] : '';
+		}
+		$r = ldap_bind($this->_con_ldap, LDAP_BIND_LOGIN, LDAP_BIND_PASS);
+		$filtre = "(uid=$uid)";
+		$attributs = array('uid', 'supannEtuId');
+		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
+		$entries = ldap_get_entries($this->_con_ldap, $result);
+		elog(var_export($entries, true));
+		if (sizeof($entries) > 0)
+		{
+			if (array_key_exists('supannetuid', $entries[0]))
+			{
+				$retour['numetu'] = $entries[0]['supannetuid'][0];
+			}
+		}
+		//print_r2($retour);
+		return $retour;
 	}
 }

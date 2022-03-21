@@ -76,3 +76,61 @@ function readListeComposantes(data)
 		}
 	}
 }
+
+
+/* Met a jour l'etudiant' */
+function majEtudiant(select)
+{
+	var etu = document.getElementById("rechetu1").value;
+	var xhr = getXMLHttpRequest();
+	var params = "uid="+etu;
+	xhr.open("POST", "xml_ajax_etudiant.php", true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0))
+		{
+			readInfosEtu(xhr.responseXML);
+		}
+	}
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.send(params);
+}
+
+
+/* Recupere et cree la liste des infos de l etudiant a partir de la reponse xml */
+function readInfosEtu(data)
+{
+	var infos = data.getElementsByTagName("item");
+	//var listeinfos = document.getElementById("rechetu1_ref");
+	//if (listeinfos.length > 0)
+	//{
+	//	listeinfos.innerHTML = "";
+	//	var listeRes = ajouteLigneSelect (listeinfos, "", "");
+		for (var i=0, c=infos.length; i<c; i++)
+		{
+			var elem = document.getElementById(infos[i].getAttribute("id")+"1");
+			if (elem == null)
+			{
+				var oInput, oDiv;
+				oDiv = document.getElementById(infos[i].getAttribute("id")+"_div");
+				//alert(infos[i].getAttribute("id")+"_div");
+				if (oDiv != null)
+				{
+					oInput = document.createElement("input");
+					//oInner  = document.createTextNode(text);
+					oInput.setAttribute("id", infos[i].getAttribute("id")+"1");
+					oInput.setAttribute("name", infos[i].getAttribute("id")+"1");
+					oInput.setAttribute("type", "text");
+					oInput.setAttribute("value", infos[i].getAttribute("libelle"));
+					oInput.setAttribute("readonly", true);
+					//oInput.appendChild(oInner);
+					oDiv.appendChild(oInput);
+				}
+			}
+			else
+			{
+				elem.setAttribute("value", infos[i].getAttribute("libelle"));
+			}
+			//listeRes = ajouteLigneSelect (listeRes, infos[i].getAttribute("libelle"), infos[i].getAttribute("id"));
+		}
+	//}
+}

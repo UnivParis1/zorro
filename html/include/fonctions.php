@@ -30,6 +30,19 @@ function findGroup($name, $id = '')
 	echo "</script>";
 }
 
+function findStudent($name, $id = '')
+{
+	echo "<input id='".$name.$id."_ref' name='".$name.$id."_ref' placeholder='Nom et/ou prenom'/>";
+	echo "<input type='hidden' id='".$name.$id."' name='".$name.$id."' class='".$name.$id."_ref' onchange='majEtudiant(this)'/>";
+	echo "<script>";
+	//var input_elt = $( ".token-autocomplete input" );
+	echo "$( '#".$name.$id."_ref' ).autocompleteUser(
+			'https://wsgroups.univ-paris1.fr/searchUser', { select: completionStudent, wantedAttr: 'uid',
+			wsParams: { allowInvalidAccounts: 0, showExtendedInfo: 1, filter_eduPersonAffiliation: 'student' } });
+	";
+	echo "</script>";
+}
+
 function print_r2($val){
 	echo '<pre>';
 	print_r($val);

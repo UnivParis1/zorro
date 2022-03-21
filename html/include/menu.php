@@ -119,6 +119,17 @@
 		majComposante(form.find("[class='" + selectedInput.name + "']"));
 		return false;
     };
+
+    var completionStudent = function (event, ui)
+    {
+		// NB: this event is called before the selected value is set in the "input"
+		var form = $(this).closest("form");
+		var selectedInput = document.activeElement;
+		form.find("[id='" + selectedInput.name + "']").val(ui.item.label);
+		form.find("[class='" + selectedInput.name + "']").val (ui.item.value);
+		majEtudiant(form.find("[class='" + selectedInput.name + "']"));
+		return false;
+    };
 	
 </script>
 

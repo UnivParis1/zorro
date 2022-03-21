@@ -139,16 +139,16 @@
 						$curl = curl_init();
 						$params = array
 						(
-								'createByEppn' => "ebriere@univ-paris1.fr",//"system",
+								'createByEppn' => "system",
 								//'targetEmails' => $ref->getUserMail()
 								//'targetUrls' => array()
 						);
 						elog("mail du créateur : ".$ref->getUserMail());
-						$params['recipientEmails'] = '';
+						$responsables = '';
 						foreach ($responsables as $responsable)
 						{
 							elog("mail du responsable : ".$responsable['mail']);
-							//$params['recipientEmails'] .= "1*".$responsable['mail'].",";
+							$responsables .= "1*".$responsable['mail'].",";
 						}
 						$params['recipientEmails'] = "1*elodie.briere@univ-paris1.fr,2*elodie.briere@univ-paris1.fr,";//,"1*canica.sar@univ-paris1.fr","2*canica.sar@univ-paris1.fr");
 						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
@@ -186,7 +186,7 @@
 						if (is_int($id))
 						{
 							$mod_decree->setIdEsignature($id);
-							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature.</p>";
+							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables</p>";
 							$mod_status = $mod_decree->getStatus();
 						}
 						else 
@@ -286,12 +286,18 @@
     					}
     				}
     			}
-				elseif ($modelfield['auto_value'] != NULL)
+				elseif ($modelfield['auto_value'] !== NULL)
 				{
-					$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $modelfield['auto_value']);
+					if ($modelfield['auto_value'] == '')
+					{
+						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+					}
+					else
+					{
+						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $modelfield['auto_value']);
+					}
 				}
-    		}
-    		
+			}
     		$idmodel = $post_selectarrete;
     		$decree = new decree($dbcon, $year, $numero_dispo);
     		$structure = htmlspecialchars($_POST['structure1']);
@@ -417,6 +423,10 @@
     					{
     						$champsamodif[] = array("valeur" => "- ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
     					}
+						elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+						{
+							$champsamodif[] = array("valeur" => "[x]", "position" => $position1, "longueur" => (strlen($field)+6));
+						}
     					else
     					{
     						$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
@@ -424,9 +434,16 @@
     				}
     				else
     				{
-    					//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : vide <br>";
-    					$champsamodif[] = array("valeur" => '', "position" => $position1, "longueur" => (strlen($field)+6));
-    				}
+						if (array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+						{
+							$champsamodif[] = array("valeur" => '[ ]', "position" => $position1, "longueur" => (strlen($field)+6));
+						}
+						else
+						{
+							//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : vide <br>";
+							$champsamodif[] = array("valeur" => '', "position" => $position1, "longueur" => (strlen($field)+6));
+						}
+					}
     				$nb_field[$field] += 1;
     				$position1 = strpos($contenu, '$$$', $position2 + 4);
     				$position2 = strpos($contenu, '$$$', $position1 + 1);
@@ -613,7 +630,7 @@ else
 			$modelselected = new model($dbcon, $selectarrete); 
 			$urlselected = $modelselected->getfile();
 		?>
-		<h2>Paramétrage du document</h2>
+		<!-- <h2>Paramétrage du document</h2> -->
 		<?php $modelfields = $modelselected->getModelFields();
 		 ?>
 		<form name='find_person' method='post' action='create_decree.php'>
@@ -627,7 +644,7 @@ else
 			<?php if ($modelfield['auto'] != 'O')
 			{?>
 				<label><?php echo $modelfield['web_name'];?></label>
-			<?php } elseif ($modelfield['auto_value'] != NULL) { ?>
+			<?php } elseif ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] != '') { ?>
 				<label><?php echo $modelfield['web_name'];?></label> <?php echo $modelfield['auto_value'];?>
 				<input type="hidden" id='<?php echo $modelfield['name'].'1';?>' name='<?php echo $modelfield['name'].'1';?>' value="<?php echo $modelfield['auto_value'];?>">
 			<?php } ?>
@@ -644,12 +661,14 @@ else
 						
 					<?php break;
 				}
-				for ($i=1; $i <= $nb_field; $i++)
+			for ($i=1; $i <= $nb_field; $i++)
 			{
 				if ($modelfield['auto'] == 'O')
-				{?>
-					<!-- <label><?php echo $modelfield['web_name'];?> : </label>Automatique -->
+				{
+					if ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] == '') { ?>
+						<label><?php echo $modelfield['web_name'];?></label><!-- Automatique -->
 				<?php }
+				}
 				else {
 					switch ($modelfield['datatype']) {
 						case 'user':
@@ -667,7 +686,7 @@ else
 									$structurename = $ldap->getStructureInfos($mod_decree_fields[$modelfield['idmodel_field']][0]['value'])['superGroups'][$mod_decree_fields[$modelfield['idmodel_field']][0]['value']]['name'];?>
 									<script>document.getElementById('<?php echo $modelfield['name'];?>1_ref').value = "<?php echo $structurename;?>";</script>
 									<script>document.getElementById('<?php echo $modelfield['name'];?>1').value = "<?php echo $mod_decree_fields[$modelfield['idmodel_field']][0]['value']; ?>";</script>
-								<?php 	elog($structurename);
+								<?php
 								}
 								elseif (isset($_SESSION['description']) && isset($_SESSION['supannentiteaffectation']))
 								{ ?>
@@ -678,6 +697,17 @@ else
 								else
 								{
 									elog('pas de valeur pour la structure référente.');
+								}
+								break;
+						case 'student':
+								findStudent($modelfield['name'],$i);
+								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+								{
+									$nometu = $ldap->getEtuInfos($mod_decree_fields[$modelfield['idmodel_field']][0]['value'])['displayname'];?>
+									<script>document.getElementById('<?php echo $modelfield['name'];?>1_ref').value = "<?php echo $nometu;?>";</script>
+									<script>document.getElementById('<?php echo $modelfield['name'];?>1').value = "<?php echo $mod_decree_fields[$modelfield['idmodel_field']][0]['value']; ?>";</script>
+									<script>majEtudiant(document.getElementById('<?php echo $modelfield['name'];?>1'));</script>
+								<?php
 								}
 								break;
 						case 'year':
@@ -735,9 +765,10 @@ else
 							if (sizeof($listFields) > 0)
 							{ ?>
 								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+									<option value="">&nbsp;</option>
 								<?php foreach($listFields as $value)
 								{
-									if (isset($mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
+									if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
 									{?>
 										<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
 									<?php } else { ?>
@@ -747,9 +778,21 @@ else
 								</select>
 							<?php }
 							break;
+						case 'checkbox':
+							if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+							{
+								$selected = 'checked';
+							}
+							else
+							{
+								$selected = '';
+							}
+							?>
+							<input type="checkbox" id="<?php echo $modelfield['name'].$i;?>" name="<?php echo $modelfield['name'].$i;?>" value="yes" <?php echo $selected;?>>
+							<?php break;
 						default:
 							$value = (isset($_POST[$modelfield['name'].$i])) ? "value='".$_POST[$modelfield['name'].$i]."'" : '';
-							$value = (isset($mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
+							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
 							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' <?php echo $value;?>>
 						<?php break;
 					}

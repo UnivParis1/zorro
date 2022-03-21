@@ -200,7 +200,7 @@ class user {
 					&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($_SESSION['uid']) && array_key_exists($_SESSION['uid'], $infostruct['superGroups'][$structure]['roles'])
 					&& ($infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable administratif' || $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable'))
 			{
-				elog("L'utilisateur ".$_SESSION['uid']." est responsable administratif de sa structure");
+				elog("L'utilisateur ".$_SESSION['uid']." est responsable administratif de sa structure ".$_SESSION['supannentiteaffectation']);
 				return TRUE;
 			}
 			else 
@@ -235,7 +235,6 @@ class user {
 				}
 			}
 		}
-		elog( "L'utilisateur n'a pas d'affectation <br>");
 		return $retour;
 	}
 
@@ -302,7 +301,7 @@ class user {
 		{
 			$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
 			$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
-			print_r2($listStructuresFilles);
+			//print_r2($listStructuresFilles);
 			$select .= " WHERE d.structure IN (?";
 			$params[] = $listStructuresFilles[0];
 			for($i = 1; $i < sizeof($listStructuresFilles); $i++)
@@ -351,7 +350,8 @@ class user {
 			if ($this->isAdmin())
 			{
 				$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
-				print_r2($listStructuresFilles);
+				$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
+				//print_r2($listStructuresFilles);
 				if (in_array($decree['structure'], $listStructuresFilles))
 				{
 					return true;
