@@ -836,7 +836,7 @@ else
 							<input type='submit' name='duplique' value='Dupliquer'>	
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
 							<input type='submit' name='valide' value='Remplacer'>
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature">
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
 								<?php break;
 							case STATUT_EN_COURS : ?>
 								<img src="img/clock-solid.svg" alt="signature en cours" width="40px">
@@ -844,7 +844,7 @@ else
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
 							<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
 							case STATUT_VALIDE : ?>
 								<img src="img/valide_OK.svg" alt="signé" width="40px">
@@ -852,7 +852,7 @@ else
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' disabled>
 							<input type='submit' name='valide' value='Remplacer' disabled>
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
 							case STATUT_REFUSE : ?>
 								<img src="img/non_refuse.svg" alt="refusé" width="40px">
@@ -860,7 +860,7 @@ else
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
 							<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
 							case STATUT_ANNULE : ?>
 								<img src="img/trash-alt-solid.svg" alt="supprimé" width="40px">
@@ -868,7 +868,7 @@ else
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' disabled>
 							<input type='submit' name='valide' value='Remplacer' disabled>
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Poursuivre la signature" disabled>
+							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
 							default : break;
 				}
