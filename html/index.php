@@ -39,10 +39,11 @@
 	    	$_SESSION['groupes'] = $groupes;
 	    	//print_r2($_SESSION['groupes']);
 	    }
-
-	    require_once ("./include/menu.php");
-	    echo '<html><body class="bodyhtml">';
-	    foreach ($infos_ldap as $cle => $info)
+	    //$menuItem = 'menu_manage';
+	    //require_once ("./include/menu.php");
+	    //echo '<html><body class="bodyhtml">';
+	    include './manage_decree.php';
+	    /*foreach ($infos_ldap as $cle => $info)
 	    {
 			echo $cle.' : '.$info." <br> ";
 	    }
@@ -51,6 +52,5 @@
 	    {
 			echo $role['role']." : ".$role['name']." ".$role['mail']."<br>";
 	    }
+	    */
 ?>
-</body>
-</html>

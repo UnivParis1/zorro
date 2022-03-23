@@ -1,21 +1,21 @@
 <?php 
 	require_once ('CAS.php');
-	include './include/casconnection.php';
+	require_once './include/casconnection.php';
 	require_once ('./include/casconnection.php');
 	require_once ('./include/dbconnection.php');
 	require_once ('./class/user.php');
 	require_once ('./class/model.php');
 	require_once ('./class/reference.php');
 
-    if (isset($_POST["userid"]))
-        $userid = $_POST["userid"];
-    else
-        $userid = null;
-    if (is_null($userid) or ($userid == "")) {
-        elog("Redirection vers index.php (UID de l'utilisateur=" . $uid . ")");
-        header('Location: index.php');
-        exit();
-    }
+	$ref = new reference($dbcon, $rdbApo);
+	$userid = $ref->getUserUid();
+	if (is_null($userid) or ($userid == ""))
+	{
+		elog("Redirection vers index.php (UID de l'utilisateur=" . $uid . ")");
+		header('Location: index.php');
+		exit();
+	}
+
     if (isset($_POST['selectarrete']))
     {
     	$post_selectarrete = $_POST['selectarrete'];
