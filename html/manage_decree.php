@@ -88,66 +88,116 @@ Vous n'avez accès à aucun modèle d'arrêté. <br>
 <?php 
 $alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees(); 
 if (sizeof($alldecrees) > 0) { ?>
-	<table class="tableausimple">
-		<tr>
-			<th class="titresimple">Numéro</th>
-			<th class="titresimple">Document</th>
-			<th class="titresimple">Type</th>
-			<th class="titresimple">UFR</th>
-			<th class="titresimple">Créateur</th>
-			<th class="titresimple">Envoi</th>
-			<th class="titresimple">Statut</th>
-			<th class="titresimple">eSignature</th>
-		</tr>
-<?php 	foreach ($alldecrees as $decree) { ?>
-		<tr>
-			<?php if ($decree['status'] == STATUT_ANNULE) {?>
-				<td></td>
-			<?php } else {?>
-				<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
-			<?php } ?>
-			<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
-			<td class="cellulesimple"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>
-			<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
-			<td class="cellulesimple"><?php echo $decree['structure']; ?></td>
-			<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
-			<td class="cellulesimple"><?php echo $decree['createdate']; ?></td>
-			<?php switch ($decree['status']) {
-				case STATUT_ANNULE :
-					$contenu = date('d/m/Y', strtotime($decree['majdate']));
-					$class = "red";
-					break;
-				case STATUT_REFUSE :
-					$contenu = date('d/m/Y', strtotime($decree['majdate']));
-					$class = "red";
-					break;
-				case STATUT_BROUILLON :
-					$contenu = "<img src='img/brouillon.svg' alt='brouillon' width='20px'>";
-					$class = "img";
-					break;
-				case STATUT_VALIDE :
-					$contenu = date('d/m/Y', strtotime($decree['majdate']));
-					$class = "green";
-					break;
-				case STATUT_EN_COURS :
-					$contenu = "<img src='img/enattente.svg' alt='signature en cours' width='20px'>";
-					$class = "img";
-					break;
-				case STATUT_ERREUR :
-					$contenu = "erreur";
-					$class = "red";
-					break;
-				default :
-					break;
-			}?>
-			<td class='<?php echo $class;?>'><?php echo $contenu; ?></td>
-			<td class="cellulesimple"><?php echo $decree['idesignature']; ?></td>
-		</tr>
-<?php } ?>
+	<table id="tableau_documents" class="tableausimple">
+		<thead>
+			<tr>
+				<th class="titresimple" style='cursor: pointer;'>Numéro <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>Document <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>Type <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>UFR <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>Créateur <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>Création <font></font></th>
+				<th class="titresimple" >Statut</th>
+				<th class="titresimple" style='cursor: pointer;'>eSignature <font></font></th>
+			</tr>
+		</thead>
+		<tbody>
+	<?php 	foreach ($alldecrees as $decree) { ?>
+			<tr>
+				<?php if ($decree['status'] == STATUT_ANNULE) {?>
+					<td></td>
+				<?php } else {?>
+					<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
+				<?php } ?>
+				<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
+				<td class="cellulesimple"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>
+				<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
+				<td class="cellulesimple"><?php echo $decree['structure']; ?></td>
+				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
+				<td class="cellulesimple"><?php echo $decree['createdate']; ?></td>
+				<?php switch ($decree['status']) {
+					case STATUT_ANNULE :
+						$contenu = "<img src='img/supprimer.svg' alt='brouillon' width='20px'>";
+						$class = "img";
+						break;
+					case STATUT_REFUSE :
+						$contenu = date('d/m/Y', strtotime($decree['majdate']));
+						$class = "red";
+						break;
+					case STATUT_BROUILLON :
+						$contenu = "<img src='img/brouillon.svg' alt='brouillon' width='20px'>";
+						$class = "img";
+						break;
+					case STATUT_VALIDE :
+						$contenu = date('d/m/Y', strtotime($decree['majdate']));
+						$class = "green";
+						break;
+					case STATUT_EN_COURS :
+						$contenu = "<img src='img/enattente.svg' alt='signature en cours' width='20px'>";
+						$class = "img";
+						break;
+					case STATUT_ERREUR :
+						$contenu = "erreur";
+						$class = "red";
+						break;
+					default :
+						break;
+				}?>
+				<td class='<?php echo $class;?>'><?php echo $contenu; ?></td>
+				<td class="cellulesimple"><?php echo $decree['idesignature']; ?></td>
+			</tr>
+		<?php } ?>
+		</tbody>
 </table>
 <?php } ?>
 
 </div>
+<script>
+const getCellValue = (tr, idx) =>
+{
+    return tr.children[idx].innerText || tr.children[idx].textContent;
+}
+
+const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
+    v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+// do the work...
+document.getElementById('tableau_documents').querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+    const table = th.closest('table');
+    const tbody = table.querySelector('tbody');
+    Array.from(tbody.querySelectorAll('tr'))
+        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+        .forEach(tr => tbody.appendChild(tr) );
+    theader = table.querySelector('theader');
+
+    //alert(Array.from(th.parentNode.querySelectorAll('th')));
+
+    for (var thindex = 0 ; thindex < document.getElementById('tableau_documents').querySelectorAll('th').length; thindex++)
+    {
+        if (th.parentNode.children[thindex]!==null)
+        {
+            if (th.parentNode.children[thindex].querySelector('font')!==null)
+            {
+                th.parentNode.children[thindex].querySelector('font').innerText = ' ';
+            }
+        }
+    }
+
+    if (this.asc)
+    {
+        th.querySelector('font').innerHTML = '&darr;'; // fleche qui descend
+    }
+    else
+    {
+        th.querySelector('font').innerHTML = '&uarr;'; // fleche qui monte
+    }
+
+})));
+
+document.getElementById('tableau_documents').querySelectorAll('th')[1].click(); // On simule le clic sur la 2e colonne pour faire afficher la fleche et initialiser le asc
+
+</script>
 </body>
 </html>
 
