@@ -178,4 +178,23 @@ class model {
 		return $numeroid;		
 	}
 	
+	function getInfofield($idmodel_field)
+	{
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? AND mfi.idmodel_field = ?";
+		$params = array($this->_idmodel, $idmodel_field);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$infos = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$infos = $res;
+			}
+		}
+		else
+		{
+			elog("erreur select fields from model. ".mysqli_error($this->_dbcon));
+		}
+		return $infos;
+	}
 }

@@ -100,7 +100,7 @@ form label {
 }
 
 
-#numero_div label { width:  0px; padding-left: 5px; border:none; } 
+#aff_numero_div label { width:  0px; padding-left: 5px; border:none; }
 
 select {
     background: #f3f6f9;
@@ -165,9 +165,9 @@ select#selectarrete {
 }
 
 
-#numero_div { color: #00326e; font-size: 25px; margin-bottom: 22px;   text-align:left; }
+#aff_numero_div { color: #00326e; font-size: 25px; margin-bottom: 22px;   text-align:left; }
 
-#numero_div img{ padding-left: 75px; --width: 35px; }
+#aff_numero_div img{ padding-left: 75px; --width: 35px; }
 
 
  

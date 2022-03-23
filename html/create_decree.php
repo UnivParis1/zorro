@@ -144,11 +144,11 @@
 								//'targetUrls' => array()
 						);
 						elog("mail du créateur : ".$ref->getUserMail());
-						$responsables = '';
+						$responsables_email = '';
 						foreach ($responsables as $responsable)
 						{
 							elog("mail du responsable : ".$responsable['mail']);
-							$responsables .= "1*".$responsable['mail'].",";
+							$responsables_email .= "1*".$responsable['mail'].",";
 						}
 						$params['recipientEmails'] = "1*elodie.briere@univ-paris1.fr,2*elodie.briere@univ-paris1.fr,";//,"1*canica.sar@univ-paris1.fr","2*canica.sar@univ-paris1.fr");
 						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
@@ -186,7 +186,7 @@
 						if (is_int($id))
 						{
 							$mod_decree->setIdEsignature($id);
-							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables</p>";
+							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables_email</p>";
 							$mod_status = $mod_decree->getStatus();
 						}
 						else 
@@ -258,253 +258,296 @@
     			}
     		}
     		$idmodel_field_numero = $modelselected->getNumeroId();
-    		$decreefields[] = array('idmodel_field' => $idmodel_field_numero, 'value' => $numero_dispo);
-    		foreach ($modelfields as $modelfield)
+			$erreurnumero = false;
+			if ($idmodel_field_numero != 0)
     		{
-    			if ($modelfield['auto'] == 'N')
-    			{
-    				if ($modelfield['number'] == '+')
-    				{
-    					//print_r2($_POST);
-    					$valeurs = isset($_POST[$modelfield['name']]) ? $_POST[$modelfield['name']] : array();
-    					foreach($valeurs as $valeur)
-    					{
-    						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($valeur));
-    					}
-    					if (isset($_POST[$modelfield['name']."1"]) && $_POST[$modelfield['name']."1"] != '')
-    						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
-    				}
-    				else
-    				{
-    					for($i = 1; $i <= $modelfield['number']; $i++)
-    					{
-    						//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
-    						if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
-    						{
-    							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name'].$i]));
-    						}
-    					}
-    				}
-    			}
-				elseif ($modelfield['auto_value'] !== NULL)
+				$infos_field_numero = $modelselected->getInfofield($idmodel_field_numero);
+				if (array_key_exists('auto', $infos_field_numero) && $infos_field_numero['auto'] == 'O')
 				{
-					if ($modelfield['auto_value'] == '')
-					{
-						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
-					}
-					else
-					{
-						$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $modelfield['auto_value']);
-					}
-				}
-			}
-    		$idmodel = $post_selectarrete;
-    		$decree = new decree($dbcon, $year, $numero_dispo);
-    		$structure = htmlspecialchars($_POST['structure1']);
-    		$decree->save($user->getid(), $idmodel, $structure);
-    		$decree->setFields($decreefields);
-    		$modelselected = new model($dbcon, $idmodel);
-    		
-    		$modelfile = new ZipArchive();
-    		if (file_exists("./models/".$modelselected->getfile()))
-    		{
-    			$fieldstoinsert = $decree->getFields();
-    			// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
-    			$modelfields = $modelselected->getModelFields();
-    			//echo "<br>modelfields <br><br>"; print_r2($modelfields);
-    			$modelfieldsarrange = array_column($modelfields, 'idmodel_field', 'name');
-    			$modelfieldstype = array_column($modelfields, 'datatype', 'idmodel_field');
-    			//echo "<br>modelfieldsarrange <br><br>"; print_r2($modelfieldsarrange);
-    			//echo "<br>modelfieldstype <br><br>"; print_r2($modelfieldstype);
-    			// copie du modele pour l'arrêté
-    			$odtfilename = $decree->getFileName("odt");
-    			copy("./models/".$modelselected->getfile(), PDF_PATH.$odtfilename);
-    			// ouverture du modele pour l'arrêté
-    			$modelfile->open(PDF_PATH.$odtfilename);
-    			// extraction du content.xml dans le dossier temporaire pour l'arrêté
-    			$modelfile->extractTo(PDF_PATH.$year.'_'.$numero_dispo."/", array('content.xml'));
-    			// ouverture du content.xml extrait
-    			$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content.xml", 'r+');
-    			// lecture du content.xml extrait
-    			$contenu = fread($content, filesize(PDF_PATH.$year.'_'.$numero_dispo."/content.xml"));
-    			$doc = new DOMDocument('1.0', 'utf-8');
-    			$doc->preserveWhiteSpace = false;
-    			$doc->formatOutput = true;
-    			$doc->loadXML($contenu);
-    			$x = $doc->documentElement;
-    			$body = $x->getElementsByTagName('body')->item(0);
-    			// echo "BODY 1 : <br>"; print_r2($body);
-    			foreach ($fieldstoinsert as $idmodel_field => $field)
-    			{
-    				// dupliquer les champs multiples
-    				$nbChamps = sizeof($field);
-    				$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
-    				if ($nbChamps > 1)
-    				{
-    					// echo "Champs à multiplier : ";print_r2($field);
-    					// trouver le champs dans le xml
-    					$noeudcourant = $body; // le dernier noeud contenant le champ
-    					$noeudpere = $body; // le noeud où raccrocher le clone du champ
-    					$noeudadupliquer = $body; // le noeud à cloner
-    					$positiondunoeudadupliquer = 0; // la position où raccrocher le clone du champ sous le noeud père
-    					while (strpos($noeudcourant->textContent, '$$$'.$champ.'$$$') !== false)
-    					{
-    						if ($noeudcourant->hasChildNodes())
-    						{
-    							if ($noeudcourant->nextSibling != null || $noeudcourant->previousSibling != null)
-    							{
-    								$noeudadupliquer = $noeudcourant;
-    							}
-    							if ($noeudcourant->childNodes->count() > 1)
-    							{
-    								$noeudpere = $noeudcourant;
-    								$positiondunoeudadupliquer = 0;
-    							}
-    							foreach($noeudcourant->childNodes as $node)
-    							{
-    								if (strpos($node->textContent, '$$$'.$champ.'$$$') !== false)
-    								{
-    									$noeudcourant = $node;
-    									// echo "Noeud contenant le champ : <br>"; print_r2($node);
-    									break;
-    								}
-    								if ($noeudpere == $noeudcourant)
-    								{
-    									$positiondunoeudadupliquer++;
-    								}
-    							}
-    						}
-    						else
-    						{
-    							// echo "Dernier noeud contenant le champ : <br>"; print_r2($node);
-    							break;
-    						}
-    					}
-    					// echo "Noeud à dupliquer  : <br>"; print_r2($noeudadupliquer);
-    					// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
-    					// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
-    					// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
-    					for ($i = 1; $i <= $nbChamps; $i++)
-    					{
-    						// dupliquer le noeud
-    						$clone = $noeudadupliquer->cloneNode(true);
-    						// insérer le noeud
-    						$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
-    						// echo "Noeud père après $i ème insert : <br>"; print_r2($noeudpere);
-    					}
-    				}
+					$decreefields[] = array('idmodel_field' => $idmodel_field_numero, 'value' => $numero_dispo);
     			}
-    			// print_r2($body);
-    			// enregistrement du xml modifié
-    			$doc->save(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml");
-    			fclose($content);
-    			$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'r+');
-    			// lecture du content2.xml extrait
-    			$contenu = fread($content, filesize(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml"));
-    			// copie du contenu extrait
-    			$contenu2 = $contenu;
-    			//echo "<br>contenu <br><br>"; print_r2($contenu);echo "<br><br>";
-    			$position1 = strpos($contenu, '$$$'); // position de la balise de début d'un champ paramétrable
-    			$position2 = strpos($contenu, '$$$', $position1+1); // position de la balise de fin d'un champ paramétrable
-    			//print_r2(strlen($contenu));
-    			$nb_field = array();
-    			$champsamodif = array();
-    			while ($position1 < strlen($contenu) && substr($contenu, $position1 + 3, $position2 - $position1 - 3) && $position1 !== false && $position2 !== false)
-    			{
-    				$field = substr($contenu, $position1 + 3, $position2 - $position1 - 3); // le nom du champ est entre les balises
-    				if (!key_exists($field, $nb_field))
-    				{
-    					$nb_field[$field] = 0;
-    				}
-    				if (key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists($nb_field[$field], $fieldstoinsert[$modelfieldsarrange[$field]]))
-    				{
-    					// echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']."<br>";
-    					if ($modelfieldstype[$modelfieldsarrange[$field]] == 'user')
-    					{
-    						$champsamodif[] = array("valeur" => "- ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
-    					}
-						elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+				else
+				{
+					// Les numéros pour ce modèle sont gérés à la main
+					if (isset($_POST["numero1"]))
+					{
+						if ($ref->DecreeNumExists($_POST["numero1"], $year) && isset($post_duplique))
 						{
-							$champsamodif[] = array("valeur" => "[x]", "position" => $position1, "longueur" => (strlen($field)+6));
-						}
-    					else
-    					{
-    						$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
-    					}
-    				}
-    				else
-    				{
-						if (array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
-						{
-							$champsamodif[] = array("valeur" => '[ ]', "position" => $position1, "longueur" => (strlen($field)+6));
+							$erreurnumero = true;
 						}
 						else
 						{
-							//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : vide <br>";
-							$champsamodif[] = array("valeur" => '', "position" => $position1, "longueur" => (strlen($field)+6));
+							$numero_dispo = $_POST["numero1"];
 						}
 					}
-    				$nb_field[$field] += 1;
-    				$position1 = strpos($contenu, '$$$', $position2 + 4);
-    				$position2 = strpos($contenu, '$$$', $position1 + 1);
-    			}
-    			fclose($content);
-    			$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'w');
-    			$champsamodiffromlast = array_reverse($champsamodif);
-    			// remplacement des champs à partir de la fin du fichier
-    			foreach ($champsamodiffromlast as $champ)
-    			{
-    				$contenu2 = substr_replace($contenu2, $champ['valeur'], $champ['position'], $champ['longueur']);
-    			}
-    			// écriture du contenu modifié dans le fichier
-    			fwrite($content, $contenu2);
-    			// Ajout du fichier dans le document
-    			$modelfile->addFile(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'content.xml');
-    			//print_r2($fieldstoinsert);
-    			$modelfile->close();
-    			
-    			// CONVERSION EN PDF
-    			$descriptorspec = array(
-    					0 => array("pipe", "r"),  // stdin
-    					1 => array("pipe", "w"),  // stdout
-    					2 => array("pipe", "w"),  // stderr
-    			);
-    			$process = proc_open("unoconv --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
-    			$stdout = stream_get_contents($pipes[1]);
-    			fclose($pipes[1]);
-    			
-    			$stderr = stream_get_contents($pipes[2]);
-    			fclose($pipes[2]);
-    			if ($stdout != "")
-    			{
-    				elog( "stdout : \n");
-    				elog($stdout);
-    				elog( "La création du document PDF a échoué. <br>");
-					$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
-    			} 
-    			elseif ($stderr != "")
-    			{
-    				elog( "stderr :\n");
-    				elog($stderr);
-    				elog( "La création du document PDF a échoué. <br>");
-					$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
-    			}
-    			else 
-    			{
-					$message = "<p class='alerte alerte-success'>Document enregistré.</p>";
-    			}
-    			?>
-		<?php }
-		if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique))
+					else
+					{
+						// Le numéro n'est pas saisi : on met un numéro automatique
+					}
+				}
+			}
+			else
 			{
-				$mod_num = $numero_dispo;
-				$mod_year = $year;
-				$mod_decree_id = $decree->getId();
-				$mod_status = STATUT_BROUILLON;
-				$mode = 'modif';
+				// Le numéro n'est pas paramétrable sur le modèle : on met un numéro automatique
+			}
+			if (!$erreurnumero)
+			{
+				foreach ($modelfields as $modelfield)
+				{
+					if ($modelfield['auto'] == 'N')
+					{
+						if ($modelfield['number'] == '+')
+						{
+							//print_r2($_POST);
+							$valeurs = isset($_POST[$modelfield['name']]) ? $_POST[$modelfield['name']] : array();
+							foreach($valeurs as $valeur)
+							{
+								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($valeur));
+							}
+							if (isset($_POST[$modelfield['name']."1"]) && $_POST[$modelfield['name']."1"] != '')
+							{
+								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+							}
+						}
+						else
+						{
+							for($i = 1; $i <= $modelfield['number']; $i++)
+							{
+								//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
+								if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+								{
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name'].$i]));
+								}
+							}
+						}
+					}
+					elseif ($modelfield['auto_value'] !== NULL)
+					{
+						if ($modelfield['auto_value'] == '')
+						{
+							if (isset($_POST[$modelfield['name']."1"]))
+							{
+								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+							}
+						}
+						else
+						{
+							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $modelfield['auto_value']);
+						}
+					}
+				}
+				$idmodel = $post_selectarrete;
+				$decree = new decree($dbcon, $year, $numero_dispo);
+				$structure = htmlspecialchars($_POST['structure1']);
+				$decree->save($user->getid(), $idmodel, $structure);
+				$decree->setFields($decreefields);
+				$modelselected = new model($dbcon, $idmodel);
+				$modelfile = new ZipArchive();
+				if (file_exists("./models/".$modelselected->getfile()))
+				{
+					$fieldstoinsert = $decree->getFields();
+					// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
+					$modelfields = $modelselected->getModelFields();
+					//echo "<br>modelfields <br><br>"; print_r2($modelfields);
+					$modelfieldsarrange = array_column($modelfields, 'idmodel_field', 'name');
+					$modelfieldstype = array_column($modelfields, 'datatype', 'idmodel_field');
+					//echo "<br>modelfieldsarrange <br><br>"; print_r2($modelfieldsarrange);
+					//echo "<br>modelfieldstype <br><br>"; print_r2($modelfieldstype);
+					// copie du modele pour l'arrêté
+					$odtfilename = $decree->getFileName("odt");
+					copy("./models/".$modelselected->getfile(), PDF_PATH.$odtfilename);
+					// ouverture du modele pour l'arrêté
+					$modelfile->open(PDF_PATH.$odtfilename);
+					// extraction du content.xml dans le dossier temporaire pour l'arrêté
+					// TODO : nommer le document selon TAGS
+					$modelfile->extractTo(PDF_PATH.$year.'_'.$numero_dispo."/", array('content.xml'));
+					// ouverture du content.xml extrait
+					$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content.xml", 'r+');
+					// lecture du content.xml extrait
+					$contenu = fread($content, filesize(PDF_PATH.$year.'_'.$numero_dispo."/content.xml"));
+					$doc = new DOMDocument('1.0', 'utf-8');
+					$doc->preserveWhiteSpace = false;
+					$doc->formatOutput = true;
+					$doc->loadXML($contenu);
+					$x = $doc->documentElement;
+					$body = $x->getElementsByTagName('body')->item(0);
+					// echo "BODY 1 : <br>"; print_r2($body);
+					foreach ($fieldstoinsert as $idmodel_field => $field)
+					{
+						// dupliquer les champs multiples
+						$nbChamps = sizeof($field);
+						$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
+						if ($nbChamps > 1)
+						{
+							// echo "Champs à multiplier : ";print_r2($field);
+							// trouver le champs dans le xml
+							$noeudcourant = $body; // le dernier noeud contenant le champ
+							$noeudpere = $body; // le noeud où raccrocher le clone du champ
+							$noeudadupliquer = $body; // le noeud à cloner
+							$positiondunoeudadupliquer = 0; // la position où raccrocher le clone du champ sous le noeud père
+							while (strpos($noeudcourant->textContent, '$$$'.$champ.'$$$') !== false)
+							{
+								if ($noeudcourant->hasChildNodes())
+								{
+									if ($noeudcourant->nextSibling != null || $noeudcourant->previousSibling != null)
+									{
+										$noeudadupliquer = $noeudcourant;
+									}
+									if ($noeudcourant->childNodes->count() > 1)
+									{
+										$noeudpere = $noeudcourant;
+										$positiondunoeudadupliquer = 0;
+									}
+									foreach($noeudcourant->childNodes as $node)
+									{
+										if (strpos($node->textContent, '$$$'.$champ.'$$$') !== false)
+										{
+											$noeudcourant = $node;
+											// echo "Noeud contenant le champ : <br>"; print_r2($node);
+											break;
+										}
+										if ($noeudpere == $noeudcourant)
+										{
+											$positiondunoeudadupliquer++;
+										}
+									}
+								}
+								else
+								{
+									// echo "Dernier noeud contenant le champ : <br>"; print_r2($node);
+									break;
+								}
+							}
+							// echo "Noeud à dupliquer  : <br>"; print_r2($noeudadupliquer);
+							// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
+							// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
+							// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
+							for ($i = 1; $i <= $nbChamps; $i++)
+							{
+								// dupliquer le noeud
+								$clone = $noeudadupliquer->cloneNode(true);
+								// insérer le noeud
+								$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
+								// echo "Noeud père après $i ème insert : <br>"; print_r2($noeudpere);
+							}
+						}
+					}
+					// print_r2($body);
+					// enregistrement du xml modifié
+					$doc->save(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml");
+					fclose($content);
+					$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'r+');
+					// lecture du content2.xml extrait
+					$contenu = fread($content, filesize(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml"));
+					// copie du contenu extrait
+					$contenu2 = $contenu;
+					//echo "<br>contenu <br><br>"; print_r2($contenu);echo "<br><br>";
+					$position1 = strpos($contenu, '$$$'); // position de la balise de début d'un champ paramétrable
+					$position2 = strpos($contenu, '$$$', $position1+1); // position de la balise de fin d'un champ paramétrable
+					//print_r2(strlen($contenu));
+					$nb_field = array();
+					$champsamodif = array();
+					while ($position1 < strlen($contenu) && substr($contenu, $position1 + 3, $position2 - $position1 - 3) && $position1 !== false && $position2 !== false)
+					{
+						$field = substr($contenu, $position1 + 3, $position2 - $position1 - 3); // le nom du champ est entre les balises
+						if (!key_exists($field, $nb_field))
+						{
+							$nb_field[$field] = 0;
+						}
+						if (key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists($nb_field[$field], $fieldstoinsert[$modelfieldsarrange[$field]]))
+						{
+							// echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']."<br>";
+							if ($modelfieldstype[$modelfieldsarrange[$field]] == 'user')
+							{
+								$champsamodif[] = array("valeur" => "- ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+							{
+								$champsamodif[] = array("valeur" => "[x]", "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+							else
+							{
+								$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+						}
+						else
+						{
+							if (array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+							{
+								$champsamodif[] = array("valeur" => '[ ]', "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+							else
+							{
+								//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : vide <br>";
+								$champsamodif[] = array("valeur" => '', "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+						}
+						$nb_field[$field] += 1;
+						$position1 = strpos($contenu, '$$$', $position2 + 4);
+						$position2 = strpos($contenu, '$$$', $position1 + 1);
+					}
+					fclose($content);
+					$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'w');
+					$champsamodiffromlast = array_reverse($champsamodif);
+					// remplacement des champs à partir de la fin du fichier
+					foreach ($champsamodiffromlast as $champ)
+					{
+						$contenu2 = substr_replace($contenu2, $champ['valeur'], $champ['position'], $champ['longueur']);
+					}
+					// écriture du contenu modifié dans le fichier
+					fwrite($content, $contenu2);
+					// Ajout du fichier dans le document
+					$modelfile->addFile(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'content.xml');
+					//print_r2($fieldstoinsert);
+					$modelfile->close();
+
+					// CONVERSION EN PDF
+					$descriptorspec = array(
+							0 => array("pipe", "r"),  // stdin
+							1 => array("pipe", "w"),  // stdout
+							2 => array("pipe", "w"),  // stderr
+					);
+					$process = proc_open("unoconv --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
+					$stdout = stream_get_contents($pipes[1]);
+					fclose($pipes[1]);
+
+					$stderr = stream_get_contents($pipes[2]);
+					fclose($pipes[2]);
+					if ($stdout != "")
+					{
+						elog( "stdout : \n");
+						elog($stdout);
+						elog( "La création du document PDF a échoué. <br>");
+						$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
+					}
+					elseif ($stderr != "")
+					{
+						elog( "stderr :\n");
+						elog($stderr);
+						elog( "La création du document PDF a échoué. <br>");
+						$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
+					}
+					else
+					{
+						$message = "<p class='alerte alerte-success'>Document enregistré.</p>";
+					}
+					?>
+			<?php }
+			if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique))
+				{
+					$mod_num = $numero_dispo;
+					$mod_year = $year;
+					$mod_decree_id = $decree->getId();
+					$mod_status = STATUT_BROUILLON;
+					$mode = 'modif';
+				}
+			}
+			else
+			{
+				$message = "<p class='alerte alerte-danger'>Le numéro existe déjà pour cette année.</p>";
 			}
 		}
-	}
+    }
 	else
 	{
 	}
@@ -641,10 +684,10 @@ else
 			//if ($modelfield['auto'] != 'O')
 			//	echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];?>
 			<div id='<?php echo $modelfield['name'].'_div';?>'>
-			<?php if ($modelfield['auto'] != 'O')
+			<?php if ($modelfield['auto'] != 'O' && $modelfield['number'] != 0)
 			{?>
 				<label><?php echo $modelfield['web_name'];?></label>
-			<?php } elseif ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] != '') { ?>
+			<?php } elseif ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] != '' && $modelfield['number'] != 0) { ?>
 				<label><?php echo $modelfield['web_name'];?></label> <?php echo $modelfield['auto_value'];?>
 				<input type="hidden" id='<?php echo $modelfield['name'].'1';?>' name='<?php echo $modelfield['name'].'1';?>' value="<?php echo $modelfield['auto_value'];?>">
 			<?php } ?>
@@ -660,7 +703,7 @@ else
 						;?>
 						
 					<?php break;
-				}
+			}
 			for ($i=1; $i <= $nb_field; $i++)
 			{
 				if ($modelfield['auto'] == 'O')
@@ -790,6 +833,11 @@ else
 							?>
 							<input type="checkbox" id="<?php echo $modelfield['name'].$i;?>" name="<?php echo $modelfield['name'].$i;?>" value="yes" <?php echo $selected;?>>
 							<?php break;
+						case 'numero':
+							$value = (isset($_POST[$modelfield['name'].$i])) ? "value='".$_POST[$modelfield['name'].$i]."'" : '';
+							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
+							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' <?php echo $value;?>>
+							<?php break;
 						default:
 							$value = (isset($_POST[$modelfield['name'].$i])) ? "value='".$_POST[$modelfield['name'].$i]."'" : '';
 							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
@@ -828,7 +876,7 @@ else
 			<?php // Contrôler l'état de la demande dans esignature 
 			if (isset($mod_decree))
 			{ ?>
-				<div id="numero_div"><?php echo $mod_year.' / '.$mod_num;?>
+				<div id="aff_numero_div"><?php echo $mod_year.' / '.$mod_num;?>
 				<?php switch ($mod_status) {
 							case STATUT_BROUILLON : ?>
 								<img src="img/file-signature-solid.svg" alt="brouillon" width="40px">

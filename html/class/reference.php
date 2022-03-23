@@ -242,4 +242,18 @@ class reference {
 		return $lstGroupesRoles;
 	}
 
+	function DecreeNumExists($numero, $annee)
+	{
+		$select = 'SELECT iddecree FROM decree WHERE number = ? AND year = ?';
+		$params = array($numero, $annee);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if (mysqli_num_rows($result) > 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }
