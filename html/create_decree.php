@@ -879,7 +879,7 @@ else
 				<div id="aff_numero_div"><?php echo $mod_year.' / '.$mod_num;?>
 				<?php switch ($mod_status) {
 							case STATUT_BROUILLON : ?>
-								<img src="img/file-signature-solid.svg" alt="brouillon" width="40px">
+								<img src="img/file-signature-solid.svg" alt="brouillon" title="brouillon" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>	
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
@@ -887,7 +887,7 @@ else
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
 								<?php break;
 							case STATUT_EN_COURS : ?>
-								<img src="img/clock-solid.svg" alt="signature en cours" width="40px">
+								<img src="img/clock-solid.svg" alt="signature en cours" title="signature en cours" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
@@ -895,7 +895,7 @@ else
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
 							case STATUT_VALIDE : ?>
-								<img src="img/valide_OK.svg" alt="signé" width="40px">
+								<img src="img/valide_OK.svg" alt="signé" title="signé" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' disabled>
@@ -903,7 +903,7 @@ else
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
 							case STATUT_REFUSE : ?>
-								<img src="img/non_refuse.svg" alt="refusé" width="40px">
+								<img src="img/non_refuse.svg" alt="refusé" title="refusé" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
@@ -911,7 +911,7 @@ else
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
 							case STATUT_ANNULE : ?>
-								<img src="img/trash-alt-solid.svg" alt="supprimé" width="40px">
+								<img src="img/trash-alt-solid.svg" alt="supprimé" title="supprimé" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' disabled>

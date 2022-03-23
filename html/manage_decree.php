@@ -117,33 +117,39 @@ if (sizeof($alldecrees) > 0) { ?>
 				<td class="cellulesimple"><?php echo $decree['createdate']; ?></td>
 				<?php switch ($decree['status']) {
 					case STATUT_ANNULE :
-						$contenu = "<img src='img/supprimer.svg' alt='brouillon' width='20px'>";
+						$contenu = "<img src='img/supprimer.svg' alt='annulé' width='20px'>";
+						$title = 'annulé';
 						$class = "img";
 						break;
 					case STATUT_REFUSE :
 						$contenu = date('d/m/Y', strtotime($decree['majdate']));
+						$title = 'refusé';
 						$class = "red";
 						break;
 					case STATUT_BROUILLON :
 						$contenu = "<img src='img/brouillon.svg' alt='brouillon' width='20px'>";
+						$title = 'brouillon';
 						$class = "img";
 						break;
 					case STATUT_VALIDE :
 						$contenu = date('d/m/Y', strtotime($decree['majdate']));
+						$title = 'signé';
 						$class = "green";
 						break;
 					case STATUT_EN_COURS :
 						$contenu = "<img src='img/enattente.svg' alt='signature en cours' width='20px'>";
+						$title = 'signature en cours';
 						$class = "img";
 						break;
 					case STATUT_ERREUR :
 						$contenu = "erreur";
+						$title = 'erreur';
 						$class = "red";
 						break;
 					default :
 						break;
 				}?>
-				<td class='<?php echo $class;?>'><?php echo $contenu; ?></td>
+				<td class='<?php echo $class;?>' title='<?php echo $title;?>'><?php echo $contenu; ?></td>
 				<td class="cellulesimple"><?php echo $decree['idesignature']; ?></td>
 			</tr>
 		<?php } ?>
