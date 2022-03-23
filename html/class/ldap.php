@@ -376,7 +376,6 @@ class ldap {
 		}
 		//print_r2($json);
 		$tab = json_decode($json, true);
-		elog(var_export($tab, true));
 		//print_r2($tab);
 		if (is_array($tab))
 		{
@@ -409,7 +408,6 @@ class ldap {
 		}
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
-		elog(var_export($entries, true));
 		if (sizeof($entries) > 0)
 		{
 			if (array_key_exists('supannetuid', $entries[0]))
