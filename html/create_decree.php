@@ -236,7 +236,7 @@
     	if (isset($post_valide)||isset($post_duplique))
     	{
     		// Si le document est en mode modif et qu'il n'est pas validé dans esignature on supprime le numero d'arrêté et on crée un nouveau
-    		if (isset($mod_year) && isset($mod_num) && isset($post_valide) && $post_valide == "Remplacer")
+			if (isset($mod_year) && isset($mod_num) && isset($post_valide) && ($post_valide == "Remplacer" || ($post_valide == "Enregistrer" && isset($mod_status) && $mod_status == STATUT_BROUILLON)))
     		{
     			$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
     			$mod_decree_infos = $mod_decree->getDecree();
@@ -533,7 +533,7 @@
 					}
 					?>
 			<?php }
-			if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique))
+			if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique) || (isset($post_valide) && $post_valide == "Enregistrer" && isset($mod_status) && $mod_status == STATUT_BROUILLON))
 				{
 					$mod_num = $numero_dispo;
 					$mod_year = $year;
@@ -883,7 +883,7 @@ else
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>	
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
-							<input type='submit' name='valide' value='Remplacer'>
+							<input type='submit' name='valide' value='Enregistrer'>
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
 								<?php break;
 							case STATUT_EN_COURS : ?>
