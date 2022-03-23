@@ -377,7 +377,7 @@ class ldap {
 		//print_r2($json);
 		$tab = json_decode($json, true);
 		//print_r2($tab);
-		if (is_array($tab))
+		if (is_array($tab) && sizeof($tab) > 0)
 		{
 			//print_r2($tab);
 			if (array_key_exists('supannEntiteAffectationPrincipale-all',$tab[0]) && array_key_exists('description',$tab[0]['supannEntiteAffectationPrincipale-all']))
