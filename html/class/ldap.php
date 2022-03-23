@@ -134,7 +134,7 @@ class ldap {
 		};
 		array_walk( $params, $walk );
 		$params_string = implode( '&', $output );
-		$curl_opt_url = WSGROUPS_URL_GROUP.$params_string;
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_URL_GROUP.'?'.$params_string;
 		//echo "<br>Output = " . $params_string . '<br><br>';
 		
 		$opts = array(
@@ -190,7 +190,7 @@ class ldap {
 		};
 		array_walk( $params, $walk );
 		$params_string = implode( '&', $output );
-		$curl_opt_url = "https://wsgroups-test.univ-paris1.fr/getSubAndSuperGroups?".$params_string;
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SUBSUPER_GROUPS."?".$params_string;
 		//echo "<br>Output = " . $params_string . '<br><br>';
 
 		$opts = array(
@@ -255,7 +255,7 @@ class ldap {
 	{
 		$retour = array();
 		$curl = curl_init();
-		$curl_opt_url = "https://wsgroups.univ-paris1.fr/searchUser?filter_uid=".$uid;
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SEARCH_USER."?filter_uid=".$uid;
 
 		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
@@ -358,7 +358,7 @@ class ldap {
 	{
 		$retour = array();
 		$curl = curl_init();
-		$curl_opt_url = "https://wsgroups.univ-paris1.fr/searchUser?filter_uid=".$uid;
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SEARCH_USER."?filter_uid=".$uid;
 		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
 				CURLOPT_POST => true,
@@ -376,6 +376,7 @@ class ldap {
 		}
 		//print_r2($json);
 		$tab = json_decode($json, true);
+		elog(var_export($tab, true));
 		//print_r2($tab);
 		if (is_array($tab))
 		{
@@ -402,6 +403,10 @@ class ldap {
 		$r = ldap_bind($this->_con_ldap, LDAP_BIND_LOGIN, LDAP_BIND_PASS);
 		$filtre = "(uid=$uid)";
 		$attributs = array('uid', 'supannEtuId');
+		if (sizeof($tab) == 0)
+		{
+			$attributs = array('uid', 'supannEtuId','supannEntiteAffectationPrincipale', 'supannEtuEtape', 'sn', 'givenName', 'displayName');
+		}
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
 		elog(var_export($entries, true));
@@ -410,6 +415,15 @@ class ldap {
 			if (array_key_exists('supannetuid', $entries[0]))
 			{
 				$retour['numetu'] = $entries[0]['supannetuid'][0];
+			}
+			if (sizeof($tab) == 0)
+			{
+				$retour['nometu'] = array_key_exists('sn', $entries[0]) ? $entries[0]['sn'][0] : '';
+				$retour['prenometu'] = array_key_exists('givenname', $entries[0]) ? $entries[0]['givenname'][0] : '';
+				$retour['displayname'] = array_key_exists('displayname', $entries[0]) ? $entries[0]['displayname'][0] : '';
+				// TODO : Liste Rouge...
+				$retour['infoetu'] = array_key_exists('supannentiteaffectationprincipale', $entries[0]) ? $entries[0]['supannentiteaffectationprincipale'][0] : '';
+				$retour['infoetu'] = array_key_exists('supannetuetape', $entries[0]) ? $entries[0]['supannetuetape'][0].' - '.$retour['infoetu'] : $retour['infoetu'];
 			}
 		}
 		//print_r2($retour);

@@ -11,7 +11,7 @@ function findPerson($name, $id = '')
 	echo "<script>";
 	//var input_elt = $( ".token-autocomplete input" );
 	echo "$( '#".$name.$id."' ).autocompleteUser(
-			'https://wsgroups.univ-paris1.fr/searchUserCAS', { select: completionAgent, wantedAttr: 'displayName',
+			'".WSGROUPS_URL.WSGROUPS_SEARCH_USERCAS."', { select: completionAgent, wantedAttr: 'displayName',
 			wsParams: { allowInvalidAccounts: 0, showExtendedInfo: 1, filter_eduPersonAffiliation: 'employee|staff' } });
 	";
 	echo "</script>";
@@ -24,7 +24,7 @@ function findGroup($name, $id = '')
 	echo "<input type='hidden' id='".$name.$id."' name='".$name.$id."' class='".$name.$id."_ref' onchange='majComposante(this)'/>";
 	echo "<script>";
 	echo "$( '#".$name.$id."_ref' ).autocompleteGroup(
-			'https://wsgroups.univ-paris1.fr/searchGroup', { select: completionStructure, wantedAttr: 'key',
+			'".WSGROUPS_URL.WSGROUPS_SEARCH_GROUP."', { select: completionStructure, wantedAttr: 'key',
 			wsParams: { filter_category: 'structures' } });
 	";
 	echo "</script>";
@@ -37,7 +37,7 @@ function findStudent($name, $id = '')
 	echo "<script>";
 	//var input_elt = $( ".token-autocomplete input" );
 	echo "$( '#".$name.$id."_ref' ).autocompleteUser(
-			'https://wsgroups.univ-paris1.fr/searchUser', { select: completionStudent, wantedAttr: 'uid',
+			'".WSGROUPS_URL.WSGROUPS_SEARCH_USERCAS."', { select: completionStudent, wantedAttr: 'uid',
 			wsParams: { allowInvalidAccounts: 0, showExtendedInfo: 1, filter_eduPersonAffiliation: 'student' } });
 	";
 	echo "</script>";

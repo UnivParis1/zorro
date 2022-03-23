@@ -6,13 +6,13 @@
 
 
 <link rel="stylesheet"
-	href="https://wsgroups.univ-paris1.fr/web-widget/jquery-ui.css"
+	href="<?php echo WSGROUPS_URL;?>web-widget/jquery-ui.css"
 	type="text/css" media="all"></link>
 <link rel="stylesheet"
-	href="https://wsgroups.univ-paris1.fr/web-widget/ui.theme.css"
+	href="<?php echo WSGROUPS_URL;?>web-widget/ui.theme.css"
 	type="text/css" media="all"></link>
 <link rel="stylesheet"
-	href="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser.css"
+	href="<?php echo WSGROUPS_URL;?>web-widget/autocompleteUser.css"
 	type="text/css" media="all"></link>
 <script type="text/javascript">
 <?php
@@ -94,8 +94,8 @@
 <script
 	src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
-<script src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser.js"></script>
-<script src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
+<script src="<?php echo WSGROUPS_URL;?>web-widget/autocompleteUser.js"></script>
+<script src="<?php echo WSGROUPS_URL;?>web-widget/autocompleteUser-resources.html.js"></script>
 
 <script>
     var completionAgent = function (event, ui)
