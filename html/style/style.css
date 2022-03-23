@@ -60,10 +60,13 @@ h3 {
      margin-top: 19px; margin-bottom: 24px;
 }
 
-form {   line-height: 25px; font-weight: 700; color: #555;  font-size: 13px; ;
+form {   line-height: 16px; font-weight: 700; font-weight: 500; color: #555;  font-size: 13px; ;
      -text-transform: capitalize ;
 }
 
+form div {
+    margin-bottom: 5px;
+}
 
 form select,form input { font-size: 13px; color: #20558a; color: #00326e; border: 1px solid #00326e5c;
                         margin-bottom: 3px; }
@@ -73,17 +76,25 @@ form #structure_div input {
 }
 
 .gauche select#annee1 { width: 14.5em !important;}
-.gauche input { line-height: 22px; width: 14.5em; }
+.gauche input { line-height: 21px; width: 14.5em; padding-left: 5px; }
+.gauche input[type="checkbox"] {
+    width: 1em;
+}
+.gauche button { width: 44px; font-size : 17px; padding: 0px; border:1px solid #bbb;
+        height :24px; background: #f3f6f9;  }
 
-.gauche button { width: 44px; font-size : 17px; padding: 0px;border:1px solid #bbb; height :25px; background: #f3f6f9;  } 
 .gauche button:hover {  border:1px solid #2055AA; color: #2055aa;  font-weight : 700; }
 
-label {
+form label {
     display: inline-block;
-    width: 140px;
-    border-bottom: 1px dotted #888; 
-	margin-bottom: 4px; margin-top: 3px;
+    /*width: 140px;  min-width: 125px;*/
+    border-top: 1px dotted #888;
+	margin-bottom: 6px;
+    margin-top: 3px;
+    padding-right: 14px;
+    padding-top: 6px;
 }
+
 #table_membre {
     margin-left: 140px;
 }
@@ -162,18 +173,35 @@ select#selectarrete {
  
 /* table-grouper.html */ 
 
-.tableausimple { border:1px #ccc solid; border-collapse: collapse; }
+.tableausimple { border:1px #ccc solid; border-collapse: collapse; font-size: 0.85em;}
 
 .tableausimple  th.titresimple  {
-    background : #fddfbe; background: #f2e9e4; background: #ced9e8; background: #d4def1;
-	border:1px #aaa solid;
-    line-height: 30px; padding :4px; 
+     background: #d4def1;
+     border:1px #aaa solid;
+    line-height: 24px;
+    padding :4px;
 }
 
 .tableausimple TR:nth-child(even) {  background: #f3f6f9; }
 .tableausimple TR:hover { background: #f5c95c5e; color:black; }
 
-.tableausimple  td.cellulesimple { font-size: 13px;  padding: 9px 6px; border:1px #999 dotted; }
+.tableausimple  td.cellulesimple, .tableausimple  td
+ {  padding: 2px 6px; height: 28px; border:1px #444 dotted; }
+
+
+ td.img {
+    text-align: center;
+}
+
+td.red {
+    background: #CF4A02; color: white;
+}
+
+td.green {
+     background: #19830A; color: white;
+}
+
+
 
 
 
@@ -215,7 +243,8 @@ select#selectarrete {
    border-radius: 2px;
    -webkit-box-shadow: 7px 7px 5px -6px rgba(153,153,153,1);
    -moz-box-shadow: 7px 7px 5px -6px rgba(153,153,153,1);
-   box-shadow: 7px 7px 5px -6px rgb(153, 153, 153);
+  box-shadow: 3px 7px 3px -6px rgb(153, 153, 153);
+
 }
 
 
