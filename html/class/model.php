@@ -245,4 +245,24 @@ class model {
 		}
 		return $id;
 	}
+
+	function getFieldsForFileName()
+	{
+		$select = "SELECT idmodel_field, filename_position FROM model_field WHERE idmodel = ? AND filename_position IS NOT NULL AND filename_position > 0 ORDER BY filename_position";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$fields = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$fields[] = $res;
+			}
+		}
+		else
+		{
+			elog("erreur select fields from model. ".mysqli_error($this->_dbcon));
+		}
+		return $fields;
+	}
 }

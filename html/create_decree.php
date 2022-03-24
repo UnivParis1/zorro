@@ -366,7 +366,7 @@
 					//echo "<br>modelfieldsarrange <br><br>"; print_r2($modelfieldsarrange);
 					//echo "<br>modelfieldstype <br><br>"; print_r2($modelfieldstype);
 					// copie du modele pour l'arrêté
-					$odtfilename = $decree->getFileName("odt");
+					$odtfilename = $decree->getFileName("odt", true);
 					copy("./models/".$modelselected->getfile(), PDF_PATH.$odtfilename);
 					// ouverture du modele pour l'arrêté
 					$modelfile->open(PDF_PATH.$odtfilename);

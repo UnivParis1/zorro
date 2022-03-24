@@ -190,8 +190,8 @@ class decree {
 	
 	function setIdEsignature($id)
 	{
-		$update = "UPDATE decree SET idesignature = ?, status = 'p' WHERE iddecree = ?";
-		$params = array($id, $this->getId());
+		$update = "UPDATE decree SET idesignature = ?, status = ? WHERE iddecree = ?";
+		$params = array($id, STATUT_EN_COURS, $this->getId());
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -205,8 +205,8 @@ class decree {
 	
 	function unsetIdEsignature($userid)
 	{
-		$update = "UPDATE decree SET idesignature = NULL, status = 'a', idmajuser = ?, majdate = NOW() WHERE iddecree = ?";
-		$params = array($userid, $this->getId());
+		$update = "UPDATE decree SET idesignature = NULL, status = ?, idmajuser = ?, majdate = NOW() WHERE iddecree = ?";
+		$params = array(STATUT_ANNULE, $userid, $this->getId());
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -253,7 +253,21 @@ class decree {
 		}
 	}
 	
-	
+	function setFilename($filename)
+	{
+		$update = "UPDATE decree SET filename = ? WHERE iddecree = ?";
+		$params = array($filename, $this->getId());
+		$result = prepared_query($this->_dbcon, $update, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("filename : ".$filename." pour le decree id : ".$this->getId());
+		}
+		else
+		{
+			elog("Erreur update filename : ".$filename." pour le decree id : ".$this->getId()." ".mysqli_error($this->_dbcon));
+		}
+	}
+
 	function getStatus()
 	{
 		$select = "SELECT status FROM decree WHERE iddecree = ?";
@@ -278,12 +292,12 @@ class decree {
 		return 0;
 	}
 	
-	function save($iduser, $idmodel, $structure, $idesignature=null, $status = 'b')
+	function save($iduser, $idmodel, $structure, $idesignature=null, $status = STATUT_BROUILLON)
 	{
 		if ($idesignature != null)
 		{
-			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `idesignature`, `status`, `structure`) VALUES (?, ?, NOW(), ?, ?, ?, 'p', ?)";
-			$params = array($this->_year, $this->_number, $iduser, $idmodel, $idesignature, $structure);
+			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `idesignature`, `status`, `structure`) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)";
+			$params = array($this->_year, $this->_number, $iduser, $idmodel, $idesignature, STATUT_EN_COURS, $structure);
 		}
 		else 
 		{
@@ -299,8 +313,9 @@ class decree {
 		{
 			elog("Erreur insert Decree : ".$this->_number." / ".$this->_year." ".mysqli_error($this->_dbcon));
 		}
+		$this->getFileName();
 	}
-	
+
 	function setFields($fields)
 	{
 		foreach ($fields as $field)
@@ -340,8 +355,8 @@ class decree {
 	
 	function unsetNumber($iduser)
 	{
-		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW(), status = 'a' WHERE iddecree = ?";
-		$params = array($iduser, $this->getid());
+		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW(), status = ?, filename = NULL WHERE iddecree = ?";
+		$params = array($iduser, STATUT_ANNULE, $this->getid());
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -363,12 +378,49 @@ class decree {
 		return $model;
 	}
 	
-	function getFileName($extension='pdf')
+	function getFileName($extension='pdf', $new=false)
 	{
 		//print_r2("getFileName");
-		$filename = "";
+		// Si $new = true on écrase le nom de fichier actuel sinon on garde l'ancien ou on créé un nouveau s'il n'est pas renseigné
+		if (!$new)
+		{
+			$select = "SELECT filename FROM decree WHERE iddecree = ? AND filename IS NOT NULL";
+			$param = array($this->getid());
+			$result = prepared_select($this->_dbcon, $select, $param);
+			if ( !mysqli_error($this->_dbcon))
+			{
+				if (mysqli_num_rows($result) > 0)
+				{
+					if ($row = mysqli_fetch_assoc($result))
+					{
+						return $row['filename'].'.'.$extension;
+					}
+				}
+			}
+			else
+			{
+				elog("Erreur select filename : ".$this->getid()." ".mysqli_error($this->_dbcon));
+			}
+		}
 		$model = $this->getModel();
-		$filename .= substr($model->getfile(), 0, -4).$this->getYear().'_'.$this->getNumber().".".$extension;
+		//$filename .= substr($model->getfile(), 0, -4).$this->getYear().'_'.$this->getNumber();
+		$infosModel = $model->getModelInfo();
+		$filename = $infosModel['name'].'-'.$this->getYear().'-'.$this->getid();
+		$modelfields = $model->getFieldsForFileName();
+		if (sizeof($modelfields) == 0)
+		{
+			$filename .= '_'.$this->getId();
+		}
+		$fields = $this->getFields();
+		foreach($modelfields as $modelfield)
+		{
+			if (array_key_exists($modelfield['idmodel_field'],$fields) && $fields[$modelfield['idmodel_field']][0]['value'] != '')
+			{
+				$filename .= "_".str_replace(array("'", ".", " "), "_", $fields[$modelfield['idmodel_field']][0]['value']);
+			}
+		}
+		$this->setFilename($filename);
+		$filename .= ".".$extension;
 		return $filename;
 	}
 	
@@ -428,14 +480,14 @@ class decree {
 						case 'pending' :
 						case 'signed' :
 						case 'checked' :
-							$new_status = 'p'; // pending
+							$new_status = STATUT_EN_COURS; // pending
 							$date = date("Y-m-d H:i:s");
 							break;
 						case 'completed' :
 						case 'exported' :
 						case 'archived' :
 						case 'cleaned' :
-							$new_status = 'v'; // validated
+							$new_status = STATUT_VALIDE; // validated
 							$date = date("Y-m-d H:i:s");
 							if (isset($response['parentSignBook']['endDate']))
 							{
@@ -444,7 +496,7 @@ class decree {
 							}
 							break;
 						case 'refused':
-							$new_status = 'r'; // refused
+							$new_status = STATUT_REFUSE; // refused
 							$date = date("Y-m-d H:i:s");
 							if (isset($response['parentSignBook']['endDate']))
 							{
@@ -455,11 +507,11 @@ class decree {
 						case 'deleted' : // TODO : Attention le document est dans la corbeille
 						case 'canceled' :
 						case '' :
-							$new_status = 'a'; // aborted
+							$new_status = STATUT_ANNULE; // aborted
 							$date = date("Y-m-d H:i:s");
 							break;
 						default :
-							$new_status = 'e'; // error
+							$new_status = STATUT_ERREUR; // error
 							$date = date("Y-m-d H:i:s");
 					}
 					elog ("Nouveau statut le $date de la demande : ".$new_status);

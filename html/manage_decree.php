@@ -103,7 +103,8 @@ if (sizeof($alldecrees) > 0) { ?>
 			</tr>
 		</thead>
 		<tbody>
-	<?php 	foreach ($alldecrees as $decree) { ?>
+	<?php 	foreach ($alldecrees as $decree) {
+				$objdecree = new decree($dbcon, null, null, $decree['iddecree']);?>
 			<tr>
 				<?php if ($decree['status'] == STATUT_ANNULE) {?>
 					<td></td>
@@ -111,7 +112,7 @@ if (sizeof($alldecrees) > 0) { ?>
 					<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
 				<?php } ?>
 				<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
-				<td class="cellulesimple"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>
+				<td class="cellulesimple"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo substr($objdecree->getFileName(), 0, -4); ?></a></td>
 				<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
 				<td class="cellulesimple"><?php echo $decree['structure']; ?></td>
 				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
