@@ -575,4 +575,10 @@ class decree {
 		$model = $this->getModel();
 		return $model->getExportPath();
 	}
+
+	function getWorkflow()
+	{
+		$model = $this->getModel();
+		return $model->getWorkflow();
+	}
 }

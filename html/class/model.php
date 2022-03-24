@@ -221,4 +221,28 @@ class model {
 		}
 		return $export_path;
 	}
+
+	function getWorkflow()
+	{
+		$select = 'SELECT idworkflow_esign FROM model_workflow WHERE idmodel = ?';
+		$param = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $param);
+		$id = NULL;
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$id = $res['idworkflow_esign'];
+			}
+			else
+			{
+				elog('Workflow eSignature non renseigné.');
+			}
+		}
+		else
+		{
+			elog("Erreur select idworkflow_esign from model_workflow. ".mysqli_error($this->_dbcon));
+		}
+		return $id;
+	}
 }

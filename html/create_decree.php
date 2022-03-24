@@ -161,42 +161,49 @@
 							$params['targetUrls'] = TARGET_URL.$export_path;
 						}
 						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
-						$opts = array(
-								CURLOPT_URL => ESIGNATURE_CURLOPT_URL."286037".ESIGNATURE_CURLOPT_URL2,
-								CURLOPT_CUSTOMREQUEST => "POST",
-								CURLOPT_VERBOSE => true,
-								CURLOPT_POST => true,
-								CURLOPT_POSTFIELDS => $params,
-								CURLOPT_RETURNTRANSFER => true,
-								CURLOPT_SSL_VERIFYPEER => false
-						);
-						curl_setopt_array($curl, $opts);
-						//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-						$json = curl_exec($curl);
-						//print_r2($json);
-						$info = curl_getinfo($curl);
-						//echo "code: ${info['http_code']}";
-						
-						//print_r2($info);
-						$error = curl_error ($curl);
-						curl_close($curl);
-						if ($error != "")
+						$idworkflow = $mod_decree->getWorkflow();
+						if ($idworkflow == NULL)
 						{
-							elog( "Erreur Curl = " . $error . "<br><br>");
+							$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature. Le circuit n'est pas renseigné.</p>";
 						}
-						//echo "<br>" . print_r($json,true) . "<br>";
-						$id = json_decode($json, true);
-						elog(var_export($opts, true));
-						elog(" -- RETOUR ESIGNATURE CREATION ARRETE -- " . var_export($id, true));
-						if (is_int($id))
+						else
 						{
-							$mod_decree->setIdEsignature($id);
-							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables_email</p>";
-							$mod_status = $mod_decree->getStatus();
-						}
-						else 
-						{
-							$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature.</p>";
+							$opts = array(
+									CURLOPT_URL => ESIGNATURE_CURLOPT_URL.$idworkflow.ESIGNATURE_CURLOPT_URL2,
+									CURLOPT_CUSTOMREQUEST => "POST",
+									CURLOPT_VERBOSE => true,
+									CURLOPT_POST => true,
+									CURLOPT_POSTFIELDS => $params,
+									CURLOPT_RETURNTRANSFER => true,
+									CURLOPT_SSL_VERIFYPEER => false
+							);
+							curl_setopt_array($curl, $opts);
+							//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+							$json = curl_exec($curl);
+							//print_r2($json);
+							$info = curl_getinfo($curl);
+							//echo "code: ${info['http_code']}";
+							//print_r2($info);
+							$error = curl_error ($curl);
+							curl_close($curl);
+							if ($error != "")
+							{
+								elog( "Erreur Curl = " . $error . "<br><br>");
+							}
+							//echo "<br>" . print_r($json,true) . "<br>";
+							$id = json_decode($json, true);
+							elog(var_export($opts, true));
+							elog(" -- RETOUR ESIGNATURE CREATION ARRETE -- " . var_export($id, true));
+							if (is_int($id))
+							{
+								$mod_decree->setIdEsignature($id);
+								$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables_email</p>";
+								$mod_status = $mod_decree->getStatus();
+							}
+							else
+							{
+								$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature.</p>";
+							}
 						}
 					}
 					else
