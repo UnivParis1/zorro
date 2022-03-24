@@ -60,12 +60,13 @@ h3 {
      margin-top: 19px; margin-bottom: 24px;
 }
 
-form {   line-height: 16px; font-weight: 700; font-weight: 500; color: #555;  font-size: 13px; ;
-     -text-transform: capitalize ;
-}
+form {
+     line-height: 16px; font-weight: 700; font-weight: 500; color: #555;  font-size: 13px; ;
+     }
 
-form div {
-    margin-bottom: 5px;
+ form div {
+    margin-bottom: 1px; margin-top: 3px;
+
 }
 
 form select,form input { font-size: 13px; color: #20558a; color: #00326e; border: 1px solid #00326e5c;
@@ -76,10 +77,20 @@ form #structure_div input {
 }
 
 .gauche select#annee1 { width: 14.5em !important;}
+
 .gauche input { line-height: 21px; width: 14.5em; padding-left: 5px; }
-.gauche input[type="checkbox"] {
-    width: 1em;
+.gauche input[type="checkbox"] { width: 1em;}
+.gauche input:focus-within {-background: lightyellow; }
+
+.gauche input:-moz-read-only, .gauche input:-moz-read-only:focus ,
+.gauche input:read-only, .gauche input:read-only:focus  {
+    border:none ;
+    outline:none;
+    background:none;
 }
+
+
+
 .gauche button { width: 44px; font-size : 17px; padding: 0px; border:1px solid #bbb;
         height :24px; background: #f3f6f9;  }
 
@@ -87,12 +98,12 @@ form #structure_div input {
 
 form label {
     display: inline-block;
-    /*width: 140px;  min-width: 125px;*/
+    /*width: 140px; */ min-width: 135px;
     border-top: 1px dotted #888;
-	margin-bottom: 6px;
-    margin-top: 3px;
+    margin-bottom: 1px;
+	margin-top: 1px;
     padding-right: 14px;
-    padding-top: 6px;
+    padding-top: 9px; padding-bottom:5px;
 }
 
 #table_membre {
