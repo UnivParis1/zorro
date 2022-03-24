@@ -154,7 +154,12 @@
 						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
 						elog($params['recipientEmails']);
 						$params['targetEmails'] = "elodie.briere@univ-paris1.fr";
-						$params['targetUrls'] = TARGET_URL."arreteMaitrise";
+						$export_path = $mod_decree->getExportPath();
+						$params['targetUrls'] = '';
+						if ($export_path != NULL)
+						{
+							$params['targetUrls'] = TARGET_URL.$export_path;
+						}
 						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
 						$opts = array(
 								CURLOPT_URL => ESIGNATURE_CURLOPT_URL."286037".ESIGNATURE_CURLOPT_URL2,

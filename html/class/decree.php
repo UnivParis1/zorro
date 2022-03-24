@@ -485,4 +485,10 @@ class decree {
 			elog("Demande de signature supprimée pour le decree  ".$this->getId()." par l'utilisateur ".$userid);
 		}
 	}
+
+	function getExportPath()
+	{
+		$model = $this->getModel();
+		return $model->getExportPath();
+	}
 }
