@@ -248,7 +248,7 @@
     	if (isset($post_valide)||isset($post_duplique))
     	{
     		// Si le document est en mode modif et qu'il n'est pas validé dans esignature on supprime le numero d'arrêté et on crée un nouveau
-			if (isset($mod_year) && isset($mod_num) && isset($post_valide) && ($post_valide == "Remplacer" || ($post_valide == "Enregistrer" && isset($mod_status) && $mod_status == STATUT_BROUILLON)))
+			if (isset($mod_year) && isset($mod_num) && isset($post_valide) && $post_valide == "Remplacer")
     		{
     			$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
     			$mod_decree_infos = $mod_decree->getDecree();
@@ -349,10 +349,21 @@
 					}
 				}
 				$idmodel = $post_selectarrete;
-				$decree = new decree($dbcon, $year, $numero_dispo);
 				$structure = htmlspecialchars($_POST['structure1']);
-				$decree->save($user->getid(), $idmodel, $structure);
-				$decree->setFields($decreefields);
+				if (isset($post_valide) && $post_valide == "Enregistrer" && isset($mod_status) && $mod_status == STATUT_BROUILLON)
+				{
+					// update le decree
+					$decree = new decree($dbcon, null, null, $mod_decree_id);
+					$numero_dispo = $decree->getNumber();
+					$decree->save($user->getid(), $idmodel, $structure, true);
+					$decree->setFields($decreefields, true);
+				}
+				else
+				{
+					$decree = new decree($dbcon, $year, $numero_dispo);
+					$decree->save($user->getid(), $idmodel, $structure);
+					$decree->setFields($decreefields);
+				}
 				$modelselected = new model($dbcon, $idmodel);
 				$modelfile = new ZipArchive();
 				if (file_exists("./models/".$modelselected->getfile()))

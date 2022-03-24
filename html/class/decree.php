@@ -292,17 +292,17 @@ class decree {
 		return 0;
 	}
 	
-	function save($iduser, $idmodel, $structure, $idesignature=null, $status = STATUT_BROUILLON)
+	function save($iduser, $idmodel, $structure, $update=false)
 	{
-		if ($idesignature != null)
+		if ($update)
 		{
-			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `idesignature`, `status`, `structure`) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)";
-			$params = array($this->_year, $this->_number, $iduser, $idmodel, $idesignature, STATUT_EN_COURS, $structure);
+			$insert = "UPDATE decree SET year = ?, number = ?, createdate = NOW(), iduser = ?, idmodel = ?, status = ?, structure = ? WHERE iddecree = ?";
+			$params = array($this->getYear(), $this->getNumber(), $iduser, $idmodel, STATUT_BROUILLON, $structure, $this->getid());
 		}
 		else 
 		{
 			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `status`, `structure`) VALUES (?, ?, NOW(), ?, ?, ?, ?)";
-			$params = array($this->_year, $this->_number, $iduser, $idmodel, $status, $structure);
+			$params = array($this->_year, $this->_number, $iduser, $idmodel, STATUT_BROUILLON, $structure);
 		}
 		$result = prepared_query($this->_dbcon, $insert, $params);
 		if ( !mysqli_error($this->_dbcon))
@@ -316,8 +316,22 @@ class decree {
 		$this->getFileName();
 	}
 
-	function setFields($fields)
+	function setFields($fields, $update=false)
 	{
+		if ($update)
+		{
+			$delete = "DELETE FROM decree_field WHERE iddecree = ?";
+			$param = array($this->getid());
+			$result = prepared_query($this->_dbcon, $delete, $param);
+			if ( !mysqli_error($this->_dbcon))
+			{
+				elog("Fields supprimés pour le decree ".$this->getNumber());
+			}
+			else
+			{
+				elog("Erreur delete Fields : ".$this->getNumber()." ".mysqli_error($this->_dbcon));
+			}
+		}
 		foreach ($fields as $field)
 		{
 			$insert = "INSERT INTO decree_field (`iddecree`, `idmodel_field`, `value`) VALUES (?, ?, ?)";
