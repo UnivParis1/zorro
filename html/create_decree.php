@@ -684,10 +684,10 @@ else
 			//if ($modelfield['auto'] != 'O')
 			//	echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];?>
 			<div id='<?php echo $modelfield['name'].'_div';?>'>
-			<?php if ($modelfield['auto'] != 'O' && $modelfield['number'] != 0)
+			<?php if ($modelfield['auto'] != 'O' && $modelfield['number'] != '0')
 			{?>
 				<label><?php echo $modelfield['web_name'];?></label>
-			<?php } elseif ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] != '' && $modelfield['number'] != 0) { ?>
+			<?php } elseif ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] != '' && $modelfield['number'] != '0') { ?>
 				<label><?php echo $modelfield['web_name'];?></label> <?php echo $modelfield['auto_value'];?>
 				<input type="hidden" id='<?php echo $modelfield['name'].'1';?>' name='<?php echo $modelfield['name'].'1';?>' value="<?php echo $modelfield['auto_value'];?>">
 			<?php } ?>
