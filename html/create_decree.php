@@ -907,8 +907,8 @@ else
 							<input type='submit' name='valide' value='Remplacer' disabled>
 							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php break;
-							case STATUT_REFUSE : ?>
-								<img src="img/non_refuse.svg" alt="refusé" title="refusé" width="40px">
+							case STATUT_REFUSE : $motif = $mod_decree->getRefuseComment();?>
+								<img src="img/non_refuse.svg" alt="refusé" title="refusé : <?php echo $motif;?>" width="40px">
 							</div>
 							<input type='submit' name='duplique' value='Dupliquer'>
 							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">

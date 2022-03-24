@@ -5,6 +5,7 @@
 	require_once ('./include/dbconnection.php');
 	require_once ('./class/user.php');
 	require_once ('./class/model.php');
+	require_once ('./class/decree.php');
 	require_once ('./class/reference.php');
 
 	$ref = new reference($dbcon, $rdbApo);
@@ -115,15 +116,26 @@ if (sizeof($alldecrees) > 0) { ?>
 				<td class="cellulesimple"><?php echo $decree['structure']; ?></td>
 				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
 				<td class="cellulesimple"><?php echo $decree['createdate']; ?></td>
-				<?php switch ($decree['status']) {
+				<?php
+				$status = $decree['status'];
+				$majdate = $decree['majdate'];
+				if ($status == STATUT_EN_COURS)
+				{
+					$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
+					$status = $mod_decree->getStatus();
+					$majdate = $mod_decree->getMajDate();
+				}
+				switch ($status) {
 					case STATUT_ANNULE :
 						$contenu = "<img src='img/supprimer.svg' alt='annulé' width='20px'>";
 						$title = 'annulé';
 						$class = "img";
 						break;
 					case STATUT_REFUSE :
-						$contenu = date('d/m/Y', strtotime($decree['majdate']));
-						$title = 'refusé';
+						$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
+						$comment = $mod_decree->getRefuseComment();
+						$contenu = date('d/m/Y', strtotime($majdate));
+						$title = 'refusé : '.$comment;
 						$class = "red";
 						break;
 					case STATUT_BROUILLON :
@@ -132,7 +144,7 @@ if (sizeof($alldecrees) > 0) { ?>
 						$class = "img";
 						break;
 					case STATUT_VALIDE :
-						$contenu = date('d/m/Y', strtotime($decree['majdate']));
+						$contenu = date('d/m/Y', strtotime($majdate));
 						$title = 'signé';
 						$class = "green";
 						break;

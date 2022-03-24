@@ -116,6 +116,29 @@ class decree {
 		return 0;
 	}
 	
+	function getMajDate()
+	{
+		$select = "SELECT majdate FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				return $res['majdate'];
+			}
+			else
+			{
+				elog("decree $this->_id absent de la table.");
+			}
+		}
+		else
+		{
+			elog("erreur select majdate from decree.".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
+
 	function getModelId()
 	{
 		//print_r2("getModelId");
@@ -215,10 +238,10 @@ class decree {
 		return 0;
 	}
 	
-	function setStatus($status)
+	function setStatus($status, $date)
 	{
-		$update = "UPDATE decree SET status = ? WHERE iddecree = ?";
-		$params = array($status, $this->getId());
+		$update = "UPDATE decree SET status = ?, majdate = ? WHERE iddecree = ?";
+		$params = array($status, $date, $this->getId());
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -241,7 +264,7 @@ class decree {
 			if ($res = mysqli_fetch_assoc($result))
 			{
 				$status = $res['status'];
-				if ($status == 'p')
+				if ($status == STATUT_EN_COURS)
 				{
 					return $this->synchroEsignatureStatus($status);
 				}
@@ -406,28 +429,43 @@ class decree {
 						case 'signed' :
 						case 'checked' :
 							$new_status = 'p'; // pending
+							$date = date("Y-m-d H:i:s");
 							break;
 						case 'completed' :
 						case 'exported' :
 						case 'archived' :
 						case 'cleaned' :
 							$new_status = 'v'; // validated
+							$date = date("Y-m-d H:i:s");
+							if (isset($response['parentSignBook']['endDate']))
+							{
+								$date = new DateTime($response['parentSignBook']['endDate']);
+								$date = $date->format("Y-m-d H:i:s");
+							}
 							break;
 						case 'refused':
 							$new_status = 'r'; // refused
+							$date = date("Y-m-d H:i:s");
+							if (isset($response['parentSignBook']['endDate']))
+							{
+								$date = new DateTime($response['parentSignBook']['endDate']);
+								$date = $date->format("Y-m-d H:i:s");
+							}
 							break;
 						case 'deleted' : // TODO : Attention le document est dans la corbeille
 						case 'canceled' :
 						case '' :
 							$new_status = 'a'; // aborted
+							$date = date("Y-m-d H:i:s");
 							break;
 						default :
 							$new_status = 'e'; // error
+							$date = date("Y-m-d H:i:s");
 					}
-					elog ("Nouveau statut de la demande : ".$new_status);
+					elog ("Nouveau statut le $date de la demande : ".$new_status);
 					if ($status != $new_status)
 					{
-						$this->setStatus($new_status);
+						$this->setStatus($new_status, $date);
 					}
 					return $new_status;
 				}
@@ -444,6 +482,52 @@ class decree {
 		return null;
 	}
 	
+	function getRefuseComment()
+	{
+		$idesignature = $this->getIdEsignature();
+		if ($idesignature == 0)
+		{
+			elog("Le document ".$this->getId()." n'a pas d'identifiant eSignature.");
+		}
+		else
+		{
+			elog("Récupération du commentaire de refus... ".ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+			$curl = curl_init();
+			$opts = array(
+					CURLOPT_URL => ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_SSL_VERIFYPEER => false,
+					CURLOPT_PROXY => ''
+			);
+			curl_setopt_array($curl, $opts);
+			$json = curl_exec($curl);
+			$error = curl_error ($curl);
+			curl_close($curl);
+			if ($error != "")
+			{
+				elog(" Erreur Curl =>  " . $error);
+			}
+			$response = json_decode($json, true);
+			if (stristr(substr($json,0,20),'HTML') === false)
+			{
+				if (! isset($response['error']))
+				{
+					elog ("Succès. getRefuseComment...");
+					if (isset($response['comments'][0]['text']))
+					{
+						elog ("Commentaire : ".$response['comments'][0]['text']);
+						return $response['comments'][0]['text'];
+					}
+					else
+					{
+						elog ("Erreur pas de commentaire...");
+					}
+				}
+			}
+		}
+		return 'erreur eSignature';
+	}
+
 	function deleteSignRequest($userid)
 	{
 		/*$eSignature_url = $fonctions->liredbconstante("ESIGNATUREURL"); //"https://esignature-test.univ-paris1.fr";
