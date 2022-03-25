@@ -265,4 +265,23 @@ class model {
 		}
 		return $fields;
 	}
+
+	function isActive()
+	{
+		$select = "SELECT active FROM model WHERE idmodel = ? AND active = 'O'";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if (mysqli_num_rows($result) > 0)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			elog("erreur select active from model. ".mysqli_error($this->_dbcon));
+		}
+		return false;
+	}
 }

@@ -69,9 +69,11 @@
     //}
     // Récupération des modeles auxquels à accès l'utilisateur
     $user = new user($dbcon, $userid);
+    $superadmin = false;
     if ($user->isSuperAdmin())
     {
-    	// donner accès à tous les modèles
+		// donner accès à tous les modèles
+		$superadmin = true;
     	$models = $ref->getListModel();
     	foreach ($models as $idmodel => $infos)
     	{
@@ -81,7 +83,7 @@
     }
     else 
     {
-    	$roles = $user->getGroupeRoles($_SESSION['groupes']); // roles actifs de l'utilisateur
+		$roles = $user->getGroupeRoles($_SESSION['groupes'], null, true); // roles actifs de l'utilisateur
     	//print_r2($_SESSION['groupes']);
 	    $listModels = array();
 	    foreach ($roles as $role)
@@ -105,10 +107,11 @@
 		{
 			$mod_select_decree = $mod_decree->getDecree();
 			$mod_decree_fields = $mod_decree->getFields();
+			$mod_decree_active = $mod_decree->modelActive() || $superadmin;
 		}
 	}
 	
-	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPRIME)
+	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPRIME && $mod_decree_active)
 	{
 		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
 		{
@@ -121,7 +124,7 @@
 		$mod_status = STATUT_ANNULE;
 		$message = "<p class='alerte alerte-success'>Le document a été supprimé.</p>";
 	}
-	elseif (isset($_POST['sign']) && isset($mod_decree) && $mod_status == STATUT_BROUILLON) 
+	elseif (isset($_POST['sign']) && isset($mod_decree) && $mod_status == STATUT_BROUILLON && $mod_decree_active) 
 	{
 		$ldap = new ldap();
 		elog('on est dans la signature...');
@@ -228,7 +231,7 @@
 			elog("pas de code composante.");
 		}
 	}
-    elseif (isset($post_selectarrete) && $post_selectarrete != '' || isset($mod_select_decree))
+	elseif (isset($post_selectarrete) && $post_selectarrete != '' || (isset($mod_select_decree) && $mod_decree_active))
     {
     	$selectarrete = isset($mod_select_decree) ? $mod_select_decree['idmodel'] : $post_selectarrete;
     	$modelselected = new model($dbcon, $selectarrete);
@@ -579,6 +582,10 @@
     }
 	else
 	{
+		if(!$mod_decree_active)
+		{
+			$message = "<p class='alerte alerte-danger'>Le modèle de document est désactivé.</p>";
+		}
 	}
 ?>
 	
@@ -920,43 +927,48 @@ else
 							case STATUT_BROUILLON : ?>
 								<img src="img/file-signature-solid.svg" alt="brouillon" title="brouillon" width="40px">
 							</div>
-							<input type='submit' name='duplique' value='Dupliquer'>	
-							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
-							<input type='submit' name='valide' value='Enregistrer'>
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
-								<?php break;
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>	
+								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
+								<input type='submit' name='valide' value='Enregistrer'>
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
+								<?php } break;
 							case STATUT_EN_COURS : ?>
 								<img src="img/clock-solid.svg" alt="signature en cours" title="signature en cours" width="40px">
 							</div>
-							<input type='submit' name='duplique' value='Dupliquer'>
-							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
-							<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php break;
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+								<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php } break;
 							case STATUT_VALIDE : ?>
 								<img src="img/valide_OK.svg" alt="signé" title="signé" width="40px">
 							</div>
-							<input type='submit' name='duplique' value='Dupliquer'>
-							<input type='submit' name='supprime' value='Supprimer' disabled>
-							<input type='submit' name='valide' value='Remplacer' disabled>
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php break;
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='supprime' value='Supprimer' disabled>
+								<input type='submit' name='valide' value='Remplacer' disabled>
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php } break;
 							case STATUT_REFUSE : $motif = $mod_decree->getRefuseComment();?>
 								<img src="img/non_refuse.svg" alt="refusé" title="refusé : <?php echo $motif;?>" width="40px">
 							</div>
-							<input type='submit' name='duplique' value='Dupliquer'>
-							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
-							<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php break;
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+								<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php } break;
 							case STATUT_ANNULE : ?>
 								<img src="img/trash-alt-solid.svg" alt="supprimé" title="supprimé" width="40px">
 							</div>
-							<input type='submit' name='duplique' value='Dupliquer'>
-							<input type='submit' name='supprime' value='Supprimer' disabled>
-							<input type='submit' name='valide' value='Remplacer' disabled>
-							<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php break;
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='supprime' value='Supprimer' disabled>
+								<input type='submit' name='valide' value='Remplacer' disabled>
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php } break;
 							default : break;
 				}
 				if (isset($message)) {

@@ -647,4 +647,10 @@ class decree {
 		$model = $this->getModel();
 		return $model->getWorkflow();
 	}
+
+	function modelActive()
+	{
+		$model = $this->getModel();
+		return $model->isActive();
+	}
 }

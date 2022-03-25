@@ -33,14 +33,22 @@ class reference {
 		return $list;
 	}
 	
-	function getListModel($iddecree_type = null)
+	function getListModel($iddecree_type = null, $activeonly=false)
 	{
 		$select = "SELECT * FROM model ";
 		$params = array();
 		if ($iddecree_type != null)
 		{
-			$select .= " WHERE iddecree_type = ?";
+			$select .= " WHERE iddecree_type = ? ";
+			if ($activeonly)
+			{
+				$select .= " AND active = 'O'";
+			}
 			$params = array($iddecree_type);
+		}
+		elseif ($activeonly)
+		{
+			$select .= " WHERE active = 'O' ";
 		}
 		$select .= " ORDER BY iddecree_type, name";
 		if (sizeof($params) > 0)

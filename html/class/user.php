@@ -376,7 +376,7 @@ class user {
 		return $listGroupes;
 	}
 	
-	function getGroupeRoles($listGroupes, $scope = NULL)
+	function getGroupeRoles($listGroupes, $scope = NULL, $activemodelonly=false)
 	{
 		$roles = array();
 		$nbgroupes = sizeof($listGroupes);
@@ -394,6 +394,10 @@ class user {
 			{
 				$select .= " AND role.scope = ?";
 				$params[] = $scope;
+			}
+			if($activemodelonly)
+			{
+				$select .= " AND model.active = 'O'";
 			}
 			$select .= " ORDER BY model.iddecree_type, grr.idmodel";
 			$result = prepared_select($this->_dbcon, $select, $params);
