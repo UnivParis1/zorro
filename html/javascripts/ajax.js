@@ -112,6 +112,7 @@ function readInfosEtu(data)
 			{
 				var oInput, oDiv;
 				oDiv = document.getElementById(infos[i].getAttribute("id")+"_div");
+				oDiv.setAttribute("style", "display:block;");
 				//alert(infos[i].getAttribute("id")+"_div");
 				if (oDiv != null)
 				{

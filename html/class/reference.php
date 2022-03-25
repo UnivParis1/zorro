@@ -250,7 +250,7 @@ class reference {
 		return $lstGroupesRoles;
 	}
 
-	function DecreeNumExists($numero, $annee)
+	function decreeNumExists($numero, $annee)
 	{
 		$select = 'SELECT iddecree FROM decree WHERE number = ? AND year = ?';
 		$params = array($numero, $annee);
@@ -263,5 +263,20 @@ class reference {
 			}
 		}
 		return false;
+	}
+
+	function getModelFieldName($idmodel_field)
+	{
+		$select = 'SELECT fty.name FROM field_type fty INNER JOIN model_field mfi ON fty.idfield_type = mfi.idfield_type WHERE mfi.idmodel_field = ?';
+		$params = array($idmodel_field);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				return $row['name'];
+			}
+		}
+		return NULL;
 	}
 }

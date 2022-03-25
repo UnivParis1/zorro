@@ -287,7 +287,7 @@
 					// Les numéros pour ce modèle sont gérés à la main
 					if (isset($_POST["numero1"]))
 					{
-						if ($ref->DecreeNumExists($_POST["numero1"], $year) && isset($post_duplique))
+						if ($ref->decreeNumExists($_POST["numero1"], $year) && isset($post_duplique))
 						{
 							$erreurnumero = true;
 						}
@@ -310,45 +310,58 @@
 			{
 				foreach ($modelfields as $modelfield)
 				{
-					if ($modelfield['auto'] == 'N')
+					$linked = $modelfield['linkedto'];
+					$linked_ok = true;
+					if ($linked != NULL)
 					{
-						if ($modelfield['number'] == '+')
+						$linked_field_name = $ref->getModelFieldName($modelfield['linkedto']);
+						if (!isset($_POST[$linked_field_name]) && !(isset($_POST[$linked_field_name."1"]) && $_POST[$linked_field_name."1"] != ''))
 						{
-							//print_r2($_POST);
-							$valeurs = isset($_POST[$modelfield['name']]) ? $_POST[$modelfield['name']] : array();
-							foreach($valeurs as $valeur)
-							{
-								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($valeur));
-							}
-							if (isset($_POST[$modelfield['name']."1"]) && $_POST[$modelfield['name']."1"] != '')
-							{
-								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
-							}
+							$linked_ok = false;
 						}
-						else
+					}
+					if ($linked_ok)
+					{
+						if ($modelfield['auto'] == 'N')
 						{
-							for($i = 1; $i <= $modelfield['number']; $i++)
+							if ($modelfield['number'] == '+')
 							{
-								//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
-								if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+								//print_r2($_POST);
+								$valeurs = isset($_POST[$modelfield['name']]) ? $_POST[$modelfield['name']] : array();
+								foreach($valeurs as $valeur)
 								{
-									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name'].$i]));
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($valeur));
+								}
+								if (isset($_POST[$modelfield['name']."1"]) && $_POST[$modelfield['name']."1"] != '')
+								{
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+								}
+							}
+							else
+							{
+								for($i = 1; $i <= $modelfield['number']; $i++)
+								{
+									//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
+									if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+									{
+										$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name'].$i]));
+									}
 								}
 							}
 						}
-					}
-					elseif ($modelfield['auto_value'] !== NULL)
-					{
-						if ($modelfield['auto_value'] == '')
+						elseif ($modelfield['auto_value'] !== NULL)
 						{
-							if (isset($_POST[$modelfield['name']."1"]))
+							if ($modelfield['auto_value'] == '')
 							{
-								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+								if (isset($_POST[$modelfield['name']."1"]))
+								{
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+								}
 							}
-						}
-						else
-						{
-							$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $modelfield['auto_value']);
+							else
+							{
+								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $modelfield['auto_value']);
+							}
 						}
 					}
 				}
@@ -632,6 +645,24 @@ function supprimerValeur(cellid)
 	table.deleteRow(rowindex);
 	return false;
 }
+
+function activeLinked(divname){
+	//alert(divname);
+	var divs = document.getElementsByName('linked_'+divname);
+	for (var i=0, c=divs.length; i<c; i++)
+	{
+		//alert(divs[i].id);
+		var display = divs[i].getAttribute("style");
+		if (display == 'display:none;')
+		{
+			divs[i].setAttribute("style", "display:block;");
+		}
+		else
+		{
+			divs[i].setAttribute("style", 'display:none;');
+		}
+	}
+}
 </script>
 <div id="contenu1">
 <?php 
@@ -719,8 +750,16 @@ else
 		<?php foreach ($modelfields as $modelfield)
 		{ 
 			//if ($modelfield['auto'] != 'O')
-			//	echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];?>
-			<div id='<?php echo $modelfield['name'].'_div';?>'>
+			//	echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];
+			$hidden = '';
+			if ($modelfield['linkedto'] != NULL)
+			{
+				if (!(isset($mod_decree_fields) && key_exists($modelfield['linkedto'], $mod_decree_fields)))
+				{
+					$hidden = "name= 'linked_".$ref->getModelFieldName($modelfield['linkedto'])."' style='display:none;'";
+				}
+			}?>
+			<div id='<?php echo $modelfield['name'].'_div';?>' <?php echo $hidden;?>>
 			<?php if ($modelfield['auto'] != 'O' && $modelfield['number'] != '0')
 			{?>
 				<label><?php echo $modelfield['web_name'];?></label>
@@ -792,7 +831,7 @@ else
 								break;
 						case 'year':
 							$defaultyear = (isset($mod_year)) ? date('Y', mktime(0,0,0,1,1,$mod_year)): date('Y'); ?>
-							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 								<option value="<?php echo $defaultyear - 1;?>"><?php echo $defaultyear - 1;?></option>
 								<option value="<?php echo $defaultyear;?>" selected="selected"><?php echo $defaultyear;?></option>
 								<option value="<?php echo $defaultyear + 1;?>"><?php echo $defaultyear + 1;?></option>
@@ -812,7 +851,7 @@ else
 											'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$value['code']."'"))[0];
 								}
 								$structuser = $ref->getUserStructureCodeAPO();?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 								<?php
 								foreach ($comps as $num => $comp)
 								{
@@ -827,7 +866,7 @@ else
 							<?php } else {
 							// liste déroulante
 							?>
-							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 							<?php foreach($result as $value)
 							{ 
 								if (isset($mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
@@ -844,7 +883,7 @@ else
 							$listFields = $modelselected->getListField($modelfield['idfield_type']);
 							if (sizeof($listFields) > 0)
 							{ ?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 									<option value="">&nbsp;</option>
 								<?php foreach($listFields as $value)
 								{
@@ -868,27 +907,27 @@ else
 								$selected = '';
 							}
 							?>
-							<input type="checkbox" id="<?php echo $modelfield['name'].$i;?>" name="<?php echo $modelfield['name'].$i;?>" value="yes" <?php echo $selected;?>>
+							<input type="checkbox" id="<?php echo $modelfield['name'].$i;?>" name="<?php echo $modelfield['name'].$i;?>" value="yes" <?php echo $selected;?> onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 							<?php break;
 						case 'numero':
 							$value = (isset($_POST[$modelfield['name'].$i])) ? "value='".$_POST[$modelfield['name'].$i]."'" : '';
 							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
-							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' <?php echo $value;?>>
+							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' <?php echo $value;?> onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 							<?php break;
 						case 'date':
 							if(isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 							{ ?>
-								<input class="calendrier" type="date" name='<?php echo $modelfield['name'].$i;?>' id='<?php echo $modelfield['name'].$i;?>' size=10 value="<?php echo $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'];?>">
+								<input class="calendrier" type="date" name='<?php echo $modelfield['name'].$i;?>' id='<?php echo $modelfield['name'].$i;?>' size=10 value="<?php echo $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'];?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 							<?php }
 							else
 							{ ?>
-								<input class="calendrier" type="date" name='<?php echo $modelfield['name'].$i;?>' id='<?php echo $modelfield['name'].$i;?>' size=10 value="<?php echo date('Y-m-d');?>">
+								<input class="calendrier" type="date" name='<?php echo $modelfield['name'].$i;?>' id='<?php echo $modelfield['name'].$i;?>' size=10 value="<?php echo date('Y-m-d');?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 							<?php }
 							break;
 						default:
 							$value = (isset($_POST[$modelfield['name'].$i])) ? "value='".$_POST[$modelfield['name'].$i]."'" : '';
 							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
-							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' <?php echo $value;?>>
+							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' <?php echo $value;?> onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 						<?php break;
 					}
 				}
