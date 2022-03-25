@@ -488,6 +488,12 @@
 							{
 								$champsamodif[] = array("valeur" => "[x]", "position" => $position1, "longueur" => (strlen($field)+6));
 							}
+							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'date')
+							{
+								$date = new DateTime($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
+								$date = $date->format("d/m/Y");
+								$champsamodif[] = array("valeur" => $date, "position" => $position1, "longueur" => (strlen($field)+6));
+							}
 							else
 							{
 								$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], "position" => $position1, "longueur" => (strlen($field)+6));
@@ -861,6 +867,16 @@ else
 							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
 							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' <?php echo $value;?>>
 							<?php break;
+						case 'date':
+							if(isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+							{ ?>
+								<input class="calendrier" type="date" name='<?php echo $modelfield['name'].$i;?>' id='<?php echo $modelfield['name'].$i;?>' size=10 value="<?php echo $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'];?>">
+							<?php }
+							else
+							{ ?>
+								<input class="calendrier" type="date" name='<?php echo $modelfield['name'].$i;?>' id='<?php echo $modelfield['name'].$i;?>' size=10 value="<?php echo date('Y-m-d');?>">
+							<?php }
+							break;
 						default:
 							$value = (isset($_POST[$modelfield['name'].$i])) ? "value='".$_POST[$modelfield['name'].$i]."'" : '';
 							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? "value='".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'" : '';?>
