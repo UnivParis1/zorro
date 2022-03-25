@@ -36,6 +36,7 @@
     else 
     {
     	$mode = 'create';
+		$mod_decree_active = true;
     }
     if (isset($_POST['arrete'])) 
     {
