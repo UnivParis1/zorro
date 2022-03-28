@@ -869,7 +869,7 @@ else
 							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 							<?php foreach($result as $value)
 							{ 
-								if (isset($mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
+								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
 								{?>
 									<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
 								<?php } else { ?>
