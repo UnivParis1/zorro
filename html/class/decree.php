@@ -520,9 +520,10 @@ class decree {
 							break;
 						case 'deleted' : // TODO : Attention le document est dans la corbeille
 						case 'canceled' :
-						case '' :
-							$new_status = STATUT_ANNULE; // aborted
+							$new_status = STATUT_ANNULE; // aborted TODO : Libérer le numéro ??
 							$date = date("Y-m-d H:i:s");
+							break;
+						case '' : elog('Erreur Statut vide esignature... Ne rien faire');
 							break;
 						default :
 							$new_status = STATUT_ERREUR; // error
