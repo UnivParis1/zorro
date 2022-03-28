@@ -112,10 +112,10 @@ function readInfosEtu(data)
 			{
 				var oInput, oDiv;
 				oDiv = document.getElementById(infos[i].getAttribute("id")+"_div");
-				oDiv.setAttribute("style", "display:block;");
 				//alert(infos[i].getAttribute("id")+"_div");
 				if (oDiv != null)
 				{
+					oDiv.setAttribute("style", "display:block;");
 					oInput = document.createElement("input");
 					//oInner  = document.createTextNode(text);
 					oInput.setAttribute("id", infos[i].getAttribute("id")+"1");
