@@ -17,9 +17,22 @@
 		exit();
 	}
 
+	$params = array();
+
     if (isset($_POST['selectarrete']))
     {
     	$post_selectarrete = $_POST['selectarrete'];
+		$params['idmodel'] = $post_selectarrete;
+    }
+    if (isset($_POST['selectstatut']))
+    {
+		$post_selectstatut = $_POST['selectstatut'];
+		$params['status'] = $post_selectstatut;
+    }
+    if (isset($_POST['contenu']) && $_POST['contenu'] != '')
+    {
+		$post_contenu = $_POST['contenu'];
+		$params['contenu'] = $post_contenu;
     }
      
     // Récupération des modeles auxquels à accès l'utilisateur
@@ -53,41 +66,53 @@
 	//print_r2($listModels);
 	// echo "<br>";
 ?>
-<?php if (sizeof($listModels) == 0 ) { ?>
-Vous n'avez accès à aucun modèle d'arrêté. <br>
-<?php } else { ?>
-<label>Sélection du modèle</label> 
-<form name="formselectdecree" action="manage_decree.php" method="post">
-<input type="hidden" name='userid' value='<?php echo $userid;?>'>
-<select style="width:26em" name="selectarrete" id="selectarrete" onchange="this.form.submit()">			             		
-        <?php 
-        if (!isset($_POST['selectarrete'])) { ?>
-        <option value="" selected="selected">&nbsp;</option>
-        <?php } else { ?>
-            <option value="">&nbsp;</option>
-        <?php } 
-        $type = 0;
-        foreach ($listModels as $model) { 
-        	if ($model['iddecree_type'] != $type) { 
-        		if ($type != 0) { ?>
-        			</optgroup> 
-        		<?php } $type = $model['iddecree_type']; ?>
-	        	<optgroup label="<?php echo $model['namedecree_type'];?>">
-        	<?php } if (isset($post_selectarrete) && $post_selectarrete == $model['idmodel']) { ?>
-	            	<option value="<?php echo $model['idmodel'];?>" selected="selected"><?php echo $model['name'];?></option>
-	            	<?php } else { ?>
-	            	<option value="<?php echo $model['idmodel'];?>"><?php echo $model['name'];?></option>
-		<?php } } ?>
-		</optgroup> 
-</select>
-</form>
-<?php } ?>
-
-
-<p>Affichage des arrêtés pour le modèle et l'utilisateur</p>
+<div class="recherche">
+	<form name="formselectdecree" action="manage_decree.php" method="post">
+		<input type="hidden" name='userid' value='<?php echo $userid;?>'>
+		<input type="text" name="contenu" id="contenu" value='<?php echo (isset($post_contenu)) ? $post_contenu : '';?>' placeholder="Contenu, numéro..."/>
+		<select style="width:26em" name="selectarrete" id="selectarrete">
+			<?php
+			if (!isset($_POST['selectarrete'])) { ?>
+				<option value="" selected="selected">&nbsp;</option>
+			<?php } else { ?>
+				<option value="">&nbsp;</option>
+			<?php }
+			$type = 0;
+			foreach ($listModels as $model) {
+				if ($model['iddecree_type'] != $type) {
+					if ($type != 0) { ?>
+						</optgroup>
+					<?php } $type = $model['iddecree_type']; ?>
+					<optgroup label="<?php echo $model['namedecree_type'];?>">
+				<?php } if (isset($post_selectarrete) && $post_selectarrete == $model['idmodel']) { ?>
+					<option value="<?php echo $model['idmodel'];?>" selected="selected"><?php echo $model['name'];?></option>
+				<?php } else { ?>
+					<option value="<?php echo $model['idmodel'];?>"><?php echo $model['name'];?></option>
+				<?php }
+			} ?>
+			</optgroup>
+		</select>
+		<select style="width:26em" name="selectstatut" id="selectstatut">
+			<?php
+			if (!isset($_POST['selectstatut'])) { ?>
+				<option value="" selected="selected">&nbsp;</option>
+			<?php } else { ?>
+				<option value="">&nbsp;</option>
+			<?php }
+			foreach ($ref->getStatuts() as $name => $value) {
+				if (isset($post_selectstatut) && $post_selectstatut == $name) { ?>
+					<option value="<?php echo $name;?>" selected="selected"><?php echo $value;?></option>
+				<?php } else { ?>
+					<option value="<?php echo $name;?>"><?php echo $value;?></option>
+			<?php } } ?>
+		</select>
+		<input type='submit' name='rechercher' value='Rechercher'>
+	</form>
+</div>
 
 <?php 
-$alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees(); 
+//$alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees();
+$alldecrees = $user->getDecreesBy($params);
 if (sizeof($alldecrees) > 0) { ?>
 	<table id="tableau_documents" class="tableausimple">
 		<thead>

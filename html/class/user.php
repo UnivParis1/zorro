@@ -467,5 +467,91 @@ class user {
 	function getDecreesBy($criteres)
 	{
 		// TODO
+		$listdecrees = array();
+		$iduser = $this->getid();
+		$params = array();
+		$select = " SELECT DISTINCT
+						d.iddecree,
+						d.number,
+						d.year,
+						d.createdate,
+						d.majdate,
+						d.idesignature,
+						m.name as modelname,
+						dt.name as decreetypename,
+						user.uid as uid,
+						d.structure,
+						d.status
+					FROM
+						decree d
+						INNER JOIN model m
+							ON m.idmodel = d.idmodel
+						INNER JOIN decree_type dt
+							ON dt.iddecree_type = m.iddecree_type
+						LEFT JOIN user
+							ON user.iduser = d.iduser";
+		if ($this->isSuperAdmin())
+		{
+			$select .= " WHERE d.iduser LIKE '%' ";
+		}
+		elseif ($this->isAdmin())
+		{
+			$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
+			$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
+			//print_r2($listStructuresFilles);
+			$select .= " WHERE d.structure IN (?";
+			$params[] = $listStructuresFilles[0];
+			for($i = 1; $i < sizeof($listStructuresFilles); $i++)
+			{
+				$select .= ', ?';
+				$params[] = $listStructuresFilles[$i];
+			}
+			$select .= ')';
+		}
+		else // user lambda
+		{
+			$select .= " WHERE d.iduser = ?";
+			$params[] = $iduser;
+		}
+		if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
+		{
+			$select .= " AND d.idmodel = ?";
+			$params[] = $criteres['idmodel'];
+		}
+		if (array_key_exists('status', $criteres) && $criteres['status'] != null)
+		{
+			$select .= " AND d.status = ?";
+			$params[] = $criteres['status'];
+		}
+		if (array_key_exists('contenu', $criteres) && $criteres['contenu'] != '')
+		{
+			$list_mots = explode(" ", $criteres['contenu']);
+			if (sizeof($list_mots) > 0)
+			{
+				$select .= " AND exists (SELECT dfi.value FROM decree_field dfi WHERE dfi.iddecree = d.iddecree AND (LOWER(dfi.value) LIKE ? ";
+				$params[] = '%'.mb_strtolower($list_mots[0],'UTF-8').'%';
+				for ($i = 1; $i < sizeof($list_mots); $i++)
+				{
+					$select .= " OR LOWER(dfi.value) LIKE ? ";
+					$params[] = '%'.mb_strtolower($list_mots[$i],'UTF-8').'%';
+				}
+				$select .= "))";
+			}
+		}
+		if (sizeof($params) == 0)
+		{
+			$result = mysqli_query($this->_dbcon, $select);
+		}
+		else {
+			$result = prepared_select($this->_dbcon, $select, $params);
+		}
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$listdecrees[] = $row;
+			}
+		}
+		return $listdecrees;
 	}
 }
