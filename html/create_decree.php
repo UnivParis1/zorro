@@ -38,10 +38,10 @@
     	$mode = 'create';
 		$mod_decree_active = true;
     }
-    if (isset($_POST['arrete'])) 
+   /* if (isset($_POST['arrete'])) 
     {
     	$post_arrete = $_POST['arrete'];
-    }
+    }*/
     if (isset($_POST['selectarrete']))
     {
     	$post_selectarrete = $_POST['selectarrete'];
@@ -269,6 +269,7 @@
     				if ($oldyear == $year)
     				{
     					$numero_dispo = $ref->getNumDispo($year);
+    					elog("numero dispo remplacé par l'ancien");
     				}
     				// TODO : Supprimer le PDF qui avait été créé
     			}
@@ -294,6 +295,7 @@
 						else
 						{
 							$numero_dispo = $_POST["numero1"];
+							elog("numero dispo remplacé par post :".$_POST["numero1"]);
 						}
 					}
 					else
@@ -372,12 +374,14 @@
 					// update le decree
 					$decree = new decree($dbcon, null, null, $mod_decree_id);
 					$numero_dispo = $decree->getNumber();
+					elog("numero dispo remplace par numero du decree en modif : ".$numero_dispo);
 					$decree->save($user->getid(), $idmodel, $structure, true);
 					$decree->setFields($decreefields, true);
 				}
 				else
 				{
 					$decree = new decree($dbcon, $year, $numero_dispo);
+					elog('decree cree avec numero : '.$numero_dispo);
 					$decree->save($user->getid(), $idmodel, $structure);
 					$decree->setFields($decreefields);
 				}
@@ -416,9 +420,9 @@
 					{
 						// dupliquer les champs multiples
 						$nbChamps = sizeof($field);
-						$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
 						if ($nbChamps > 1)
 						{
+							$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
 							// echo "Champs à multiplier : ";print_r2($field);
 							// trouver le champs dans le xml
 							$noeudcourant = $body; // le dernier noeud contenant le champ
@@ -714,7 +718,7 @@ else
 	<input type="hidden" name='userid' value='<?php echo $userid;?>'>
 	<select style="width:26em" name="selectarrete" id="selectarrete" onchange="this.form.submit()">			             		
 	        <?php 
-	        if (!isset($post_arrete)) { ?>
+	        if (!isset($post_selectarrete)) { ?>
 	        <option value="" selected="selected">&nbsp;</option>
 	        <?php } else { ?>
 	            <option value="">&nbsp;</option>

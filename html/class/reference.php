@@ -176,6 +176,7 @@ class reference {
 			if ($res = mysqli_fetch_assoc($result))
 			{
 				$numero_dispo = $res['numero_dispo'];
+				elog('le numero disponible est : '.$numero_dispo);
 			}
 		}
 		return $numero_dispo;
