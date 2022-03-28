@@ -358,7 +358,7 @@ class ldap {
 	{
 		$retour = array();
 		$curl = curl_init();
-		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SEARCH_USER."?filter_uid=".$uid;
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SEARCH_USERTRUSTED."?filter_uid=".$uid;
 		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
 				CURLOPT_POST => true,
@@ -402,19 +402,20 @@ class ldap {
 		$r = ldap_bind($this->_con_ldap, LDAP_BIND_LOGIN, LDAP_BIND_PASS);
 		$filtre = "(uid=$uid)";
 		$attributs = array('uid', 'supannEtuId');
-		if (sizeof($tab) == 0)
+		if (!is_array($tab) || sizeof($tab) == 0)
 		{
 			$attributs = array('uid', 'supannEtuId','supannEntiteAffectationPrincipale', 'supannEtuEtape', 'sn', 'givenName', 'displayName');
 		}
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
+		//elog(var_export($entries, true));
 		if (sizeof($entries) > 0)
 		{
 			if (array_key_exists('supannetuid', $entries[0]))
 			{
 				$retour['numetu'] = $entries[0]['supannetuid'][0];
 			}
-			if (sizeof($tab) == 0)
+			if (!is_array($tab) || sizeof($tab) == 0)
 			{
 				$retour['nometu'] = array_key_exists('sn', $entries[0]) ? $entries[0]['sn'][0] : '';
 				$retour['prenometu'] = array_key_exists('givenname', $entries[0]) ? $entries[0]['givenname'][0] : '';
@@ -424,6 +425,7 @@ class ldap {
 				$retour['infoetu'] = array_key_exists('supannetuetape', $entries[0]) ? $entries[0]['supannetuetape'][0].' - '.$retour['infoetu'] : $retour['infoetu'];
 			}
 		}
+		//elog(var_export($retour, true));
 		//print_r2($retour);
 		return $retour;
 	}
