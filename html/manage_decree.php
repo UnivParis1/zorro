@@ -7,7 +7,9 @@
 	require_once ('./class/model.php');
 	require_once ('./class/decree.php');
 	require_once ('./class/reference.php');
+	require_once ('./class/ldap.php');
 
+	$ldap = new ldap();
 	$ref = new reference($dbcon, $rdbApo);
 	$userid = $ref->getUserUid();
 	if (is_null($userid) or ($userid == ""))
@@ -120,7 +122,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				<th class="titresimple" style='cursor: pointer;'>Numéro <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Document <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Type <font></font></th>
-				<th class="titresimple" style='cursor: pointer;'>UFR <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>Service/UFR<font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Créateur <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Création <font></font></th>
 				<th class="titresimple" >Statut</th>
@@ -138,7 +140,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
 				<td class="cellulesimple"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo substr($objdecree->getFileName(), 0, -4); ?></a></td>
 				<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
-				<td class="cellulesimple"><?php echo $decree['structure']; ?></td>
+				<td class="cellulesimple"><?php echo $ldap->getStructureInfos($decree['structure'])['superGroups'][$decree['structure']]['name']; ?></td>
 				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
 				<td class="cellulesimple"><?php echo $decree['createdate']; ?></td>
 				<?php
