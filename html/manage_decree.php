@@ -124,7 +124,6 @@ if (sizeof($alldecrees) > 0) { ?>
 				<th class="titresimple" style='cursor: pointer;'>Créateur <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Création <font></font></th>
 				<th class="titresimple" >Statut</th>
-				<th class="titresimple" style='cursor: pointer;'>eSignature <font></font></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -153,29 +152,29 @@ if (sizeof($alldecrees) > 0) { ?>
 				}
 				switch ($status) {
 					case STATUT_ANNULE :
-						$contenu = "<img src='img/supprimer.svg' alt='annulé' width='20px'>";
+						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
 						$title = 'annulé';
 						$class = "img";
 						break;
 					case STATUT_REFUSE :
 						$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
 						$comment = $mod_decree->getRefuseComment();
-						$contenu = date('d/m/Y', strtotime($majdate));
+						$contenu = "<a href='".ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
 						$title = 'refusé : '.$comment;
 						$class = "red";
 						break;
 					case STATUT_BROUILLON :
-						$contenu = "<img src='img/brouillon.svg' alt='brouillon' width='20px'>";
+						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/brouillon.svg' alt='brouillon' width='20px'></a>";
 						$title = 'brouillon';
 						$class = "img";
 						break;
 					case STATUT_VALIDE :
-						$contenu = date('d/m/Y', strtotime($majdate));
+						$contenu = "<a href='".ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
 						$title = 'signé';
 						$class = "green";
 						break;
 					case STATUT_EN_COURS :
-						$contenu = "<img src='img/enattente.svg' alt='signature en cours' width='20px'>";
+						$contenu = "<a href='".ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/enattente.svg' alt='signature en cours' width='20px'></a>";
 						$title = 'signature en cours';
 						$class = "img";
 						break;
@@ -188,7 +187,6 @@ if (sizeof($alldecrees) > 0) { ?>
 						break;
 				}?>
 				<td class='<?php echo $class;?>' title="<?php echo $title;?>"><?php echo $contenu; ?></td>
-				<td class="cellulesimple"><?php echo $decree['idesignature']; ?></td>
 			</tr>
 		<?php } ?>
 		</tbody>
