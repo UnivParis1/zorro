@@ -187,7 +187,7 @@ if (sizeof($alldecrees) > 0) { ?>
 					default :
 						break;
 				}?>
-				<td class='<?php echo $class;?>' title='<?php echo $title;?>'><?php echo $contenu; ?></td>
+				<td class='<?php echo $class;?>' title="<?php echo $title;?>"><?php echo $contenu; ?></td>
 				<td class="cellulesimple"><?php echo $decree['idesignature']; ?></td>
 			</tr>
 		<?php } ?>
