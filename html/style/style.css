@@ -122,7 +122,53 @@ select {
 
 select#selectarrete {
     background-color: #fdf5e2;  background-color: #f5c95c5e;
-    font-size : 14px;
+    //font-size : 14px;
+}
+
+
+.recherche   {
+    margin-bottom: 25px;
+    max-width: 620px;
+    margin-left:auto; margin-right: auto;
+}
+
+.recherche form input {
+    background: #fff;
+    border: 1px solid #00326e5c;
+    padding: 4px 3px 4px 5px;
+    font-family: arial;
+    width: 12.5em;
+}
+
+ .recherche select, .recherche select#selectarrete  {
+     background: #f3f6f9;
+}
+
+ .recherche select#selectarrete  {
+      width: 15em !important;
+}
+
+ .recherche select#selectstatut{
+      width: 8em !important;
+}
+
+
+.recherche input[type="submit"] {
+    text-align: center;
+    font-family: inherit;
+    color: #00326e;
+    background-color: #dee4f0;
+    border: 1px solid #00326e54;
+    width: 9.5em;
+    border-bottom-color: #00236e9e;
+    border-right-color: #00326e9e;
+    border-radius: 2px;
+	margin-left: 12px;
+}
+
+.recherche input[type="submit"]:hover {
+    background-color: #f5c95c;
+    font-weight : 600;
 }
 
 
@@ -188,12 +234,13 @@ select#selectarrete {
 
 .tableausimple  th.titresimple  {
      background: #d4def1;
+     background: #eeeff0;
      border:1px #aaa solid;
     line-height: 24px;
     padding :4px;
 }
 
-.tableausimple TR:nth-child(even) {  background: #f3f6f9; }
+.tableausimple TR:nth-child(even) {  background: #f3f6f9; background: #f6f7f8; }
 .tableausimple TR:hover { background: #f5c95c5e; color:black; }
 
 .tableausimple  td.cellulesimple, .tableausimple  td
@@ -208,7 +255,7 @@ td.red {
     background: #CF4A02; color: white;
 }
 
-td.green {
+td.green, td.green a {
      background: #19830A; color: white;
 }
 
@@ -278,4 +325,14 @@ td.green {
    background: #CF4A02;
    border: 2px #fcb8b8 dashed;
    color: white;
+}
+
+
+.tableausimple {
+    border: 1px #ccc solid;
+    border-collapse: collapse;
+    font-size: 0.85em;
+    min-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
