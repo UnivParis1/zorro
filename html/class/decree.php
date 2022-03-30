@@ -419,7 +419,7 @@ class decree {
 		$model = $this->getModel();
 		//$filename .= substr($model->getfile(), 0, -4).$this->getYear().'_'.$this->getNumber();
 		$infosModel = $model->getModelInfo();
-		$filename = str_replace(array(" "), "_",$infosModel['name']).'-'.$this->getYear().'-'.$this->getid();
+		$filename = $this->getYear().'_'.str_replace(array(" "), "_",$infosModel['name']);
 		$modelfields = $model->getFieldsForFileName();
 		if (sizeof($modelfields) == 0)
 		{
@@ -433,6 +433,7 @@ class decree {
 				$filename .= "_".str_replace(array("'", ".", " "), "_", $fields[$modelfield['idmodel_field']][0]['value']);
 			}
 		}
+		$filename .= '_'.$this->getid();
 		$this->setFilename($filename);
 		$filename .= ".".$extension;
 		return $filename;
