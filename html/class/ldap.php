@@ -429,4 +429,40 @@ class ldap {
 		//print_r2($retour);
 		return $retour;
 	}
+
+	function getStructureName($supannCodeEntite)
+	{
+		if (substr($supannCodeEntite, 0, 11) != 'structures-')
+		{
+			$supannCodeEntite = 'structures-'.$supannCodeEntite;
+		}
+		$retour = '';
+		$curl = curl_init();
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_URL_GROUP.'?key='.$supannCodeEntite;
+		$opts = array(
+				CURLOPT_URL => $curl_opt_url,
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_PROXY => ''
+		);
+		curl_setopt_array($curl, $opts);
+		$json = curl_exec($curl);
+		$error = curl_error ($curl);
+		curl_close($curl);
+		if ($error != "")
+		{
+			elog( "Erreur Curl = " . $error );
+		}
+		//print_r2($json);
+		$tab = json_decode($json, true);
+		//print_r2($tab);
+		if (is_array($tab))
+		{
+			//print_r2($tab);
+			$retour = $tab['name'];
+		}
+		//print_r2($retour);
+		return $retour;
+	}
 }

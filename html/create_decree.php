@@ -768,7 +768,7 @@ else
 			{?>
 				<label><?php echo $modelfield['web_name'];?></label>
 			<?php } elseif ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] != '' && $modelfield['number'] != '0') { ?>
-				<label><?php echo $modelfield['web_name'];?></label> <?php echo $modelfield['auto_value'];?>
+				<label><?php echo $modelfield['web_name'];?></label> <?php echo ($modelfield['datatype'] == 'group') ? $ldap->getStructureName($modelfield['auto_value']) : $modelfield['auto_value'];?>
 				<input type="hidden" id='<?php echo $modelfield['name'].'1';?>' name='<?php echo $modelfield['name'].'1';?>' value="<?php echo $modelfield['auto_value'];?>">
 			<?php } ?>
 			<input type="hidden" id='<?php echo $modelfield['name'].'_number';?>' value=1>
