@@ -228,9 +228,20 @@ select#selectarrete {
 
 
  
-/* table-grouper.html */ 
+/****** table-grouper.html ******/
 
-.tableausimple { border:1px #ccc solid; border-collapse: collapse; font-size: 0.85em;}
+
+.tableausimple {
+    border: 1px #ccc solid;
+    border-collapse: collapse;
+    font-size: 0.85em;
+    min-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+
 
 .tableausimple  th.titresimple  {
      background: #d4def1;
@@ -239,6 +250,7 @@ select#selectarrete {
     line-height: 24px;
     padding :4px;
 }
+
 
 .tableausimple TR:nth-child(even) {  background: #f3f6f9; background: #f6f7f8; }
 .tableausimple TR:hover { background: #f5c95c5e; color:black; }
@@ -251,14 +263,34 @@ select#selectarrete {
     text-align: center;
 }
 
-td.red {
-    background: #CF4A02; color: white;
+td.red, td.red a {
+    background: #CF4A02; color: white; text-align: left;
 }
 
-td.green, td.green a {
-     background: #19830A; color: white;
+td.green , td.green a {
+     background: #19830A; color: white; text-align: left;
 }
 
+
+td.img[title="signature en cours"], td.green, td.red {
+
+   background-image: url("../img/vers-esign.svg");
+   background-size: 10px;
+   background-repeat: no-repeat;
+   background-position: top 3px right 3px;
+   width: 79px;
+}
+
+td.green:hover, td.red:hover { filter: brightness(150%);}
+
+td.img:hover { filter: brightness(30%);}
+
+td.img[title="signature en cours"]:hover {
+
+ -webkit-filter: saturate(180%);
+  filter: saturate(180%);
+
+}
 
 
 
@@ -327,12 +359,3 @@ td.green, td.green a {
    color: white;
 }
 
-
-.tableausimple {
-    border: 1px #ccc solid;
-    border-collapse: collapse;
-    font-size: 0.85em;
-    min-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
