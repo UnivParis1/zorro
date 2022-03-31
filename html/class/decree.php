@@ -426,7 +426,7 @@ class decree {
 		{
 			if (array_key_exists($modelfield['idmodel_field'],$fields) && $fields[$modelfield['idmodel_field']][0]['value'] != '')
 			{
-				$filename .= "_".str_replace(array( "(", ")"), "", str_replace(array("'", ".", " "), "_", $fields[$modelfield['idmodel_field']][0]['value']));
+				$filename .= "_".str_replace(array( "(", ")", ","), "", str_replace(array("'", ".", " "), "_", $fields[$modelfield['idmodel_field']][0]['value']));
 			}
 		}
 		$filename .= '_'.$this->getid();
