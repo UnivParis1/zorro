@@ -421,10 +421,6 @@ class decree {
 		$infosModel = $model->getModelInfo();
 		$filename = $this->getYear().'_'.str_replace(array(" "), "_",$infosModel['name']);
 		$modelfields = $model->getFieldsForFileName();
-		if (sizeof($modelfields) == 0)
-		{
-			$filename .= '_'.$this->getId();
-		}
 		$fields = $this->getFields();
 		foreach($modelfields as $modelfield)
 		{
