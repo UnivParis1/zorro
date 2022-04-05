@@ -699,7 +699,7 @@ if ($mode == 'modif')
 	} 
 	else 
 	{
-		elog ("Erreur de paramètres : annee $mod_year et numero $mod_num.");
+		elog ("Erreur de paramètres : id $mod_decree_id.");
 		$access = false;
 		unset($mod_decree);
 		$mode = 'create';
@@ -836,9 +836,9 @@ else
 						case 'year':
 							$defaultyear = (isset($mod_year)) ? date('Y', mktime(0,0,0,1,1,$mod_year)): date('Y'); ?>
 							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-								<option value="<?php echo $defaultyear - 1;?>"><?php echo $defaultyear - 1;?></option>
+								<!-- <option value="<?php echo $defaultyear - 1;?>"><?php echo $defaultyear - 1;?></option> -->
 								<option value="<?php echo $defaultyear;?>" selected="selected"><?php echo $defaultyear;?></option>
-								<option value="<?php echo $defaultyear + 1;?>"><?php echo $defaultyear + 1;?></option>
+								<!-- <option value="<?php echo $defaultyear + 1;?>"><?php echo $defaultyear + 1;?></option> -->
 							</select>
 							<?php break;
 						case 'query':
