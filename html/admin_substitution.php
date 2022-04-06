@@ -1,7 +1,9 @@
 <?php
     require_once ('CAS.php');
     include './include/casconnection.php';
-	include './class/ldap.php';
+    include './class/ldap.php';
+    require_once('./class/reference.php');
+    require_once('./class/user.php');
 	
 	// Initialisation de l'utilisateur
 	if (isset($_POST["userid"])) {
@@ -16,12 +18,12 @@
 	 }
 	 if (isset($_POST['newuser']) && $_POST['newuser'] != null)
 	 {
+		elog($userid." a usurpe l identite de ".$_POST['newuser']);
 	 	$ldap = new ldap();
 	 	$ldap->setUser($_POST['newuser']);
 	 	$ldap->getInfos($_POST['newuser']);
+		$ldap->getUserAndStructureInfos($_POST['newuser']);
 	 	$userid = $_POST['newuser'];
-	 	require_once('./class/user.php');
-	 	require_once('./class/reference.php');
 	 	$ref = new reference($dbcon, $rdbApo);
 	 	$user = new user($dbcon, $userid);
 	 	$allgroups = $ref->getAllGroupes();
@@ -31,6 +33,11 @@
 	 $menuItem = 'menu_admin';
 	require ("include/menu.php");
 
+	if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
+	{
+		$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
+		if ($userCAS->isSuperAdmin(false))
+		{
 ?>
 <div id="contenu1">
 	<h2>Changer d'utilisateur</h2>
@@ -40,6 +47,15 @@
 		<input type='submit' value='Se faire passer pour...'>
 	</form>
 </div>
+<?php } else { ?>
+<div id="contenu1">
+	<h2> Accès interdit </h2>
+</div>
+<?php } } else { ?>
+<div id="contenu1">
+	<h2> Accès interdit </h2>
+</div>
+<?php } ?>
 </body>
 </html>
 

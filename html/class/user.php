@@ -163,28 +163,51 @@ class user {
 		}
 	}
 	
-	function isSuperAdmin()
+	function isSuperAdmin($setSession = true)
 	{
-		if (!isset($_SESSION['issuperadmin']))
+		if ($setSession)
+		{
+			if (!isset($_SESSION['issuperadmin']))
+			{
+				$select = "SELECT iduser_role FROM user_role WHERE iduser = ? AND active = 'O' AND idrole = 3";
+				$params = array($this->getid());
+				$result = prepared_select($this->_dbcon, $select, $params);
+				$_SESSION['issuperadmin'] = FALSE;
+				if ( !mysqli_error($this->_dbcon))
+				{
+					if (mysqli_num_rows($result) > 0)
+					{
+						elog("L'utilisateur est super admin <br>".$this->_uid);
+						$_SESSION['issuperadmin'] = TRUE;
+					}
+				}
+				else
+				{
+					elog( "L'utilisateur n'est pas super admin <br>");
+				}
+			}
+			return $_SESSION['issuperadmin'];
+		}
+		else
 		{
 			$select = "SELECT iduser_role FROM user_role WHERE iduser = ? AND active = 'O' AND idrole = 3";
 			$params = array($this->getid());
 			$result = prepared_select($this->_dbcon, $select, $params);
-			$_SESSION['issuperadmin'] = FALSE;
+			$issuperadmin = FALSE;
 			if ( !mysqli_error($this->_dbcon))
 			{
 				if (mysqli_num_rows($result) > 0)
 				{
-					elog("L'utilisateur est super admin <br>".$this->_uid);
-					$_SESSION['issuperadmin'] = TRUE;
+					elog("L'utilisateur est super admin : ".$this->_uid);
+					$issuperadmin = TRUE;
 				}
 			}
 			else
 			{
-				elog( "L'utilisateur n'est pas super admin <br>");
+				elog( "L'utilisateur n'est pas super admin : ".$this->_uid);
 			}
+			return $issuperadmin;
 		}
-		return $_SESSION['issuperadmin'];
 	}
 	
 	function isAdmin()

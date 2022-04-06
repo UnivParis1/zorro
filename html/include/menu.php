@@ -25,6 +25,10 @@
     	require_once "./include/dbconnection.php";
     	$user = new user($dbcon, $userid);
     }
+    if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
+    {
+		$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
+    }
     require_once('./class/ldap.php');
     $ldap = new ldap();
 
@@ -176,12 +180,14 @@
 						<a href="javascript:document.managemodel.submit();">Modèles</a>
 					</li>
 					<?php } ?>	
+					<?php if (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
 					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> onclick='document.usurpe.submit();' <?php //echo $hidemenu; ?> >
 						<form name='usurpe' method='post' action="admin_substitution.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
 						</form>
 						<a href="javascript:document.ursurpe.submit();">Changer d'utilisateur</a>
 					</li>	
+					<?php } ?>
 				</ul>
 			</nav>
 		</header>

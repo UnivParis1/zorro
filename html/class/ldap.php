@@ -77,6 +77,9 @@ class ldap {
 			else
 			{
 				elog("L'utilisateur $uid n'a pas d'affectation.");
+				$infos_ldap['ou'] = NULL;
+				$infos_ldap['description'] = NULL;
+				$infos_ldap['supannrefid'] = NULL;
 			}
 			if ($temUserApp)
 			{
@@ -99,6 +102,9 @@ class ldap {
 		$_SESSION['uid'] = $uid;
 		unset($_SESSION['issuperadmin']);
 		unset($_SESSION['groupes']);
+		unset($_SESSION['affectation']);
+		unset($_SESSION['roles']);
+		unset($_SESSION['subsuper']);
 	}
 	
 	function getSupannCodeEntiteFromAPO($codApogee)
