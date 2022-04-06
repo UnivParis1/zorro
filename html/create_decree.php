@@ -143,9 +143,8 @@
 						$curl = curl_init();
 						$params = array
 						(
-								'createByEppn' => "system",
+								'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
 								//'targetEmails' => $ref->getUserMail()
-								//'targetUrls' => array()
 						);
 						elog("mail du créateur : ".$ref->getUserMail());
 						$responsables_email = '';
@@ -154,10 +153,11 @@
 							elog("mail du responsable : ".$responsable['mail']);
 							$responsables_email .= "1*".$responsable['mail'].",";
 						}
-						$params['recipientEmails'] = "1*elodie.briere@univ-paris1.fr,2*elodie.briere@univ-paris1.fr,";//,"1*canica.sar@univ-paris1.fr","2*canica.sar@univ-paris1.fr");
+
+						$params['recipientEmails'] = "1*".$ref->getUserMail().", 1*elodie.briere@univ-paris1.fr,2*".$ref->getUserMail().",2*elodie.briere@univ-paris1.fr";
 						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
 						elog($params['recipientEmails']);
-						$params['targetEmails'] = "elodie.briere@univ-paris1.fr";
+						$params['targetEmails'] = $ref->getUserMail();
 						$export_path = $mod_decree->getExportPath();
 						$params['targetUrls'] = '';
 						if ($export_path != NULL)
