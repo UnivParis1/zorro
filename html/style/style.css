@@ -87,6 +87,7 @@ form #structure_div input {
     border:none ;
     outline:none;
     background:none;
+   width: calc(100% - 160px);
 }
 
 
@@ -255,8 +256,14 @@ select#selectarrete {
 .tableausimple TR:nth-child(even) {  background: #f3f6f9; background: #f6f7f8; }
 .tableausimple TR:hover { background: #f5c95c5e; color:black; }
 
-.tableausimple  td.cellulesimple, .tableausimple  td
- {  padding: 2px 6px; height: 28px; border:1px #444 dotted; }
+.tableausimple  td.cellulesimple, .tableausimple  td {
+    padding: 2px 6px;
+    height: 28px;
+    border:1px #444 dotted;
+    max-width: 400px;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+}
 
 
  td.img {
