@@ -221,14 +221,15 @@ class user {
 			//print_r2($infostruct);
 			if (array_key_exists('superGroups', $infostruct) && array_key_exists($structure, $infostruct['superGroups']) 
 					&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($_SESSION['uid']) && array_key_exists($_SESSION['uid'], $infostruct['superGroups'][$structure]['roles'])
-					&& ($infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable administratif' || $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable'))
+					&& ($infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable administratif' || $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable'
+							|| $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Directrice' || $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Directeur' ))
 			{
-				elog("L'utilisateur ".$_SESSION['uid']." est responsable administratif de sa structure ".$_SESSION['supannentiteaffectation']);
+				elog("L'utilisateur ".$_SESSION['uid']." est ".$infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role']." de sa structure ".$_SESSION['supannentiteaffectation']);
 				return TRUE;
 			}
 			else 
 			{
-				elog("L'utilisateur ".$_SESSION['uid']." n'est pas responsable administratif de sa structure");
+				elog("L'utilisateur ".$_SESSION['uid']." n'a pas de responsabilité sur sa structure");
 				return FALSE;
 			}
 		}
