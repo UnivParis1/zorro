@@ -85,9 +85,9 @@
 </script>
 
 
-<script type="text/javascript">window.bandeau_ENT={current:'arrete'};</script>
+<script type="text/javascript">window.prolongation_ENT_args = { current:'arrete' };</script>
 <script type="text/javascript"
-	src="https://esup-data.univ-paris1.fr/esup/outils/postMessage-resize-iframe-in-parent.js"></script>
+	src="https://ent.univ-paris1.fr/ProlongationENT/loader.js"></script>
 <script src="javascripts/jquery-1.8.3.js"></script>
 <script src="javascripts/jquery-ui.js"></script>
 <script type="text/javascript" src="javascripts/ajax.js"></script>
