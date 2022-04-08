@@ -278,9 +278,10 @@ class decree {
 			if ($res = mysqli_fetch_assoc($result))
 			{
 				$status = $res['status'];
-				if ($status == STATUT_EN_COURS)
+				if ($status == STATUT_EN_COURS || $status == STATUT_ANNULE)
 				{
-					return $this->synchroEsignatureStatus($status);
+					$new_status = $this->synchroEsignatureStatus($status);
+					return ($new_status == NULL) ? ($status == STATUT_ANNULE ? STATUT_ANNULE : STATUT_ERREUR)  : $new_status;
 				}
 				return $status;
 			}
@@ -466,81 +467,91 @@ class decree {
 			$response = json_decode($json, true);
 			//print_r2($response);
 			
-			//elog("Le json est =>  " . var_export($json,true));
+			elog("Le json est =>  " . var_export($json,true));
 			
 			//elog("La réponse est =>  " . var_export($response,true));
-			
-			if (stristr(substr($json,0,20),'HTML') === false)
+			if ($json == '')
 			{
-				if (! isset($response['error']))
+				// le document a été supprimé d'esignature
+				elog("Le json est vide pour l'id ".$idesignature);
+				return 0;
+			}
+			else
+			{
+				if (stristr(substr($json,0,20),'HTML') === false)
 				{
-					elog ("Succès. setStatus...");
-					if (isset($response['parentSignBook']['status']))
+					if (! isset($response['error']))
 					{
-						$current_status = $response['parentSignBook']['status'];
+						elog ("Succès. setStatus...");
+						if (isset($response['parentSignBook']['status']))
+						{
+							elog("Statut de la demande sur eSignature : ".$response['parentSignBook']['status']);
+							$current_status = $response['parentSignBook']['status'];
+						}
+						else
+						{
+							$current_status = '';
+						}
+						elog("current status ".$current_status);
+						$new_status = $current_status;
+						switch (strtolower($current_status))
+						{
+							//draft, pending, canceled, checked, signed, refused, deleted, completed, exported, archived, cleaned
+							case 'draft' :
+							case 'pending' :
+							case 'signed' :
+							case 'checked' :
+								$new_status = STATUT_EN_COURS; // pending
+								$date = date("Y-m-d H:i:s");
+								break;
+							case 'completed' :
+							case 'exported' :
+							case 'archived' :
+							case 'cleaned' :
+								$new_status = STATUT_VALIDE; // validated
+								$date = date("Y-m-d H:i:s");
+								if (isset($response['parentSignBook']['endDate']))
+								{
+									$date = new DateTime($response['parentSignBook']['endDate']);
+									$date = $date->format("Y-m-d H:i:s");
+								}
+								break;
+							case 'refused':
+								$new_status = STATUT_REFUSE; // refused
+								$date = date("Y-m-d H:i:s");
+								if (isset($response['parentSignBook']['endDate']))
+								{
+									$date = new DateTime($response['parentSignBook']['endDate']);
+									$date = $date->format("Y-m-d H:i:s");
+								}
+								break;
+							case 'deleted' : // TODO : Attention le document est dans la corbeille
+							case 'canceled' :
+								$new_status = STATUT_ANNULE; // aborted TODO : Libérer le numéro ??
+								$date = date("Y-m-d H:i:s");
+								break;
+							case '' : elog('Erreur Statut vide esignature... Ne rien faire');
+								break;
+							default :
+								$new_status = STATUT_ERREUR; // error
+								$date = date("Y-m-d H:i:s");
+						}
+						elog ("Nouveau statut le $date de la demande : ".$new_status);
+						if ($status != $new_status)
+						{
+							$this->setStatus($new_status, $date);
+						}
+						return $new_status;
 					}
 					else
 					{
-						$current_status = '';
+						elog("La réponse est en erreur.");
 					}
-					elog("current status ".$current_status);
-					switch (strtolower($current_status))
-					{
-						//draft, pending, canceled, checked, signed, refused, deleted, completed, exported, archived, cleaned
-						case 'draft' :
-						case 'pending' :
-						case 'signed' :
-						case 'checked' :
-							$new_status = STATUT_EN_COURS; // pending
-							$date = date("Y-m-d H:i:s");
-							break;
-						case 'completed' :
-						case 'exported' :
-						case 'archived' :
-						case 'cleaned' :
-							$new_status = STATUT_VALIDE; // validated
-							$date = date("Y-m-d H:i:s");
-							if (isset($response['parentSignBook']['endDate']))
-							{
-								$date = new DateTime($response['parentSignBook']['endDate']);
-								$date = $date->format("Y-m-d H:i:s");
-							}
-							break;
-						case 'refused':
-							$new_status = STATUT_REFUSE; // refused
-							$date = date("Y-m-d H:i:s");
-							if (isset($response['parentSignBook']['endDate']))
-							{
-								$date = new DateTime($response['parentSignBook']['endDate']);
-								$date = $date->format("Y-m-d H:i:s");
-							}
-							break;
-						case 'deleted' : // TODO : Attention le document est dans la corbeille
-						case 'canceled' :
-							$new_status = STATUT_ANNULE; // aborted TODO : Libérer le numéro ??
-							$date = date("Y-m-d H:i:s");
-							break;
-						case '' : elog('Erreur Statut vide esignature... Ne rien faire');
-							break;
-						default :
-							$new_status = STATUT_ERREUR; // error
-							$date = date("Y-m-d H:i:s");
-					}
-					elog ("Nouveau statut le $date de la demande : ".$new_status);
-					if ($status != $new_status)
-					{
-						$this->setStatus($new_status, $date);
-					}
-					return $new_status;
 				}
-				else 
+				else
 				{
-					elog("La réponse est en erreur.");
+					elog("Le json est du HTML.");
 				}
-			}
-			else 
-			{
-				elog("Le json est du HTML.");
 			}
 		}
 		return null;

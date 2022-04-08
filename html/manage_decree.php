@@ -146,7 +146,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				<?php
 				$status = $decree['status'];
 				$majdate = $decree['majdate'];
-				if ($status == STATUT_EN_COURS)
+				if ($status == STATUT_EN_COURS || $status == STATUT_ANNULE)
 				{
 					$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
 					$status = $mod_decree->getStatus();
@@ -186,6 +186,9 @@ if (sizeof($alldecrees) > 0) { ?>
 						$class = "red";
 						break;
 					default :
+						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
+						$title = 'annulé';
+						$class = "img";
 						break;
 				}?>
 				<td class='<?php echo $class;?>' title="<?php echo $title;?>"><?php echo $contenu; ?></td>
