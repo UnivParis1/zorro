@@ -1027,6 +1027,15 @@ else
 								<input type='submit' name='valide' value='Remplacer' disabled>
 								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php } break;
+							case STATUT_ERREUR : ?>
+								<img src="img/trash-alt-solid.svg" alt="supprimé" title="supprimé" width="40px">
+							</div>
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='supprime' value='Supprimer' disabled>
+								<input type='submit' name='valide' value='Remplacer' disabled>
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php } break;
 							default : break;
 				}
 				if (isset($message)) {
