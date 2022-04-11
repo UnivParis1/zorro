@@ -436,6 +436,31 @@ class decree {
 		return $filename;
 	}
 	
+	function getFileNameAff()
+	{
+		$filename = '';
+		$select = "SELECT filename FROM decree WHERE iddecree = ? AND filename IS NOT NULL";
+		$param = array($this->getid());
+		$result = prepared_select($this->_dbcon, $select, $param);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if (mysqli_num_rows($result) > 0)
+			{
+				if ($row = mysqli_fetch_assoc($result))
+				{
+					$filename = $row['filename'];
+					$nom_sans_annee_ni_numero = substr($filename, strpos($filename, '_')+1, strrpos($filename, '_') - strpos($filename, '_')-1);
+					return $nom_sans_annee_ni_numero;
+				}
+			}
+		}
+		else
+		{
+			elog("Erreur select filename : ".$this->getid()." ".mysqli_error($this->_dbcon));
+		}
+		return $filename;
+	}
+
 	function synchroEsignatureStatus($status)
 	{
 		$idesignature = $this->getIdEsignature();
