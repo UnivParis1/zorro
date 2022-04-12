@@ -54,8 +54,8 @@ class model {
 	
 	function getDecreeType()
 	{
-		$select = "SELECT dty.* FROM model mod INNER JOIN decree_type dty ON dtY.iddecree_type = mod.iddecree_type WHERE mod.idmodel = ?";
-		$params = array($this->_idmodel);
+		$select = "SELECT dty.* FROM model INNER JOIN decree_type dty ON dty.iddecree_type = model.iddecree_type WHERE model.idmodel = ?";
+		$params = array($this->getid());
 		$result = prepared_select($this->_dbcon, $select, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -204,7 +204,7 @@ class model {
 		{
 			return $this->_export_path;
 		}
-		$select = 'SELECT export_path FROM model WHERE idmodel = ?';
+		$select = 'SELECT model.export_path as model_export_path, decree_type.export_path as decree_type_export_path FROM model INNER JOIN decree_type ON decree_type.iddecree_type = model.iddecree_type WHERE idmodel = ?';
 		$param = array($this->_idmodel);
 		$result = prepared_select($this->_dbcon, $select, $param);
 		$export_path = NULL;
@@ -212,7 +212,7 @@ class model {
 		{
 			if ($res = mysqli_fetch_assoc($result))
 			{
-				$export_path = $res['export_path'];
+				$export_path = $res;
 			}
 		}
 		else

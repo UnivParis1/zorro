@@ -1040,7 +1040,8 @@ else
 				}
 				if (isset($message)) {
 					echo $message;
-				} ?>
+				}
+				//echo $mod_decree->getExportPath();?>
 				<br>
 			<?php } 
 		} else {?>

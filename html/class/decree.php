@@ -2,6 +2,8 @@
 require_once './include/const.php';
 require_once './include/fonctions.php';
 require_once './class/model.php';
+require_once './class/reference.php';
+require_once './class/ldap.php';
 
 class decree {
 	
@@ -673,7 +675,81 @@ class decree {
 	function getExportPath()
 	{
 		$model = $this->getModel();
-		return $model->getExportPath();
+		$model_export_path = $model->getExportPath();
+		$year = $this->getYear();
+		$decree_type = $model->getDecreeType();
+		$ref = new reference($this->_dbcon, '');
+		// Les modèles de la DEVE
+		if ($decree_type['iddecree_type'] == 3)
+		{
+			// TARGET_ULR.export_path_decree_type.composante_etu_export_path.export_path_model.year
+			$infoetu = explode(' - ', $this->getFieldForFieldType(23)); // champ formation composante
+			if (sizeof($infoetu) > 0)
+			{
+				$supannCodeEntite = end($infoetu);
+				$struct_export_path = $ref->getStructureExportPath($supannCodeEntite);
+				if ($struct_export_path == NULL)
+				{
+					$ldap = new ldap();
+					$nom_court = $ldap->getNomCourtStruct($supannCodeEntite);
+					if ($nom_court == NULL)
+					{
+						$struct_export_path = '';
+					}
+					else
+					{
+						$ref->setStructureExportPath('structures-'.$supannCodeEntite, $nom_court);
+						$struct_export_path = $nom_court.'/';
+					}
+				}
+				else
+				{
+					$struct_export_path .= '/';
+				}
+			}
+			return TARGET_URL.$model_export_path['decree_type_export_path'].'/'.$struct_export_path.$model_export_path['model_export_path'].'/'.$year;
+		}
+		else
+		{
+			// TARGET_ULR.export_path_decree_type.structure_export_path.year.export_path_model
+			$structure = $this->getStructure();
+			$struct_export_path = $ref->getStructureExportPath($structure);
+			if ($struct_export_path == NULL)
+			{
+				$ldap = new ldap();
+				$nom_court = $ldap->getNomCourtStruct($structure);
+				if ($nom_court == NULL)
+				{
+					$struct_export_path = '';
+				}
+				else
+				{
+					$ref->setStructureExportPath($structure, $nom_court);
+					$struct_export_path = $nom_court.'/';
+				}
+			}
+			else
+			{
+				$struct_export_path .= '/';
+			}
+			return TARGET_URL.$model_export_path['decree_type_export_path'].'/'.$struct_export_path.$year.'/'.$model_export_path['model_export_path'];
+		}
+	}
+
+	function getStructure()
+	{
+		$select = "SELECT structure FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$structure = NULL;
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$structure = $res['structure'];
+			}
+		}
+		return $structure;
 	}
 
 	function getWorkflow()
@@ -686,5 +762,21 @@ class decree {
 	{
 		$model = $this->getModel();
 		return $model->isActive();
+	}
+
+	function getFieldForFieldType($idfield_type)
+	{
+		$select = 'SELECT dfi.value FROM decree_field dfi INNER JOIN model_field mfi ON dfi.idmodel_field = mfi.idmodel_field WHERE dfi.iddecree = ? AND mfi.idfield_type = ?';
+		$params = array($this->getId(), $idfield_type);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$values = '';
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$values = $res['value'];
+			}
+		}
+		return $values;
 	}
 }

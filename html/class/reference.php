@@ -285,4 +285,38 @@ class reference {
 	{
 		return array(STATUT_BROUILLON => 'Brouillon', STATUT_EN_COURS => 'En cours', STATUT_VALIDE => 'Validé', STATUT_REFUSE => 'Refusé', STATUT_ANNULE => 'Annulé', STATUT_ERREUR => 'Erreur');
 	}
+
+	function getStructureExportPath($structure)
+	{
+		if (substr($structure, 0, 11) != 'structures-')
+		{
+			$structure = 'structures-'.$structure;
+		}
+		$select = "SELECT export_path FROM structure_export_path WHERE structure = ?";
+		$params = array($structure);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				return $row['export_path'];
+			}
+		}
+		return NULL;
+	}
+
+	function setStructureExportPath($structure, $export_path)
+	{
+		$insert = "INSERT INTO structure_export_path (`structure`, `export_path`) VALUES (?, ?)";
+		$params = array($structure, $export_path);
+		$result = prepared_query($this->_dbcon, $insert, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("Export_path cree pour la structure ".$structure." : ".$export_path);
+		}
+		else
+		{
+			elog("Erreur insert Export_path cree pour la structure ".$structure." : ".$export_path." ".mysqli_error($this->_dbcon));
+		}
+	}
 }
