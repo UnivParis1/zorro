@@ -676,7 +676,8 @@ class decree {
 	{
 		$model = $this->getModel();
 		$model_export_path = $model->getExportPath();
-		$year = $this->getYear();
+		$date = date('m');
+		$year = ($date < '9') ? date('Y')-1 : date('Y');
 		$decree_type = $model->getDecreeType();
 		$ref = new reference($this->_dbcon, '');
 		// Les modèles de la DEVE
