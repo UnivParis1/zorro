@@ -499,7 +499,7 @@ class user {
 						d.number,
 						d.year,
 						d.createdate,
-						d.majdate,
+						IFNULL(d.majdate, d.createdate) AS majdate,
 						d.idesignature,
 						m.name as modelname,
 						dt.name as decreetypename,
@@ -562,6 +562,7 @@ class user {
 				$select .= "))";
 			}
 		}
+		$select .= " ORDER BY majdate DESC";
 		if (sizeof($params) == 0)
 		{
 			$result = mysqli_query($this->_dbcon, $select);
