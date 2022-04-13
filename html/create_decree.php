@@ -873,7 +873,10 @@ else
 								<?php
 								foreach ($comps as $num => $comp)
 								{
-									if (/*(!isset($mod_select_decree) && $structuser == $num) ||*/ (isset($mod_select_decree) && $mod_select_decree['structure'] == $num))
+									if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $num)
+									{?>
+										<option value="<?php echo $num;?>" selected="selected"><?php echo $comp['value'];?></option>
+									<?php } elseif (/*(!isset($mod_select_decree) && $structuser == $num) ||*/ (isset($mod_select_decree) && $mod_select_decree['structure'] == $num))
 									{ ?>
 										<option value="<?php echo $num;?>" selected="selected"><?php echo $comp['value'];?></option>
 									<?php } else { ?>
