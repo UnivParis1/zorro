@@ -162,7 +162,7 @@
 						$params['targetUrls'] = '';
 						if ($export_path != NULL)
 						{
-							$params['targetUrls'] = TARGET_URL.$export_path;
+							$params['targetUrls'] = $export_path;
 						}
 						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
 						$idworkflow = $mod_decree->getWorkflow();

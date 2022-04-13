@@ -482,7 +482,7 @@ class ldap {
 		$supannCodeEntite = $structure;
 		if (substr($supannCodeEntite, 0, 11) == 'structures-')
 		{
-			$supannCodeEntite = substr($supannCodeEntite, 12);
+			$supannCodeEntite = substr($supannCodeEntite, 11);
 		}
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$supannCodeEntite.")", array('ou'));
 		$entries = ldap_get_entries($this->_con_ldap, $result);
