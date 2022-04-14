@@ -124,11 +124,11 @@ function majDomaine(select,valeur='')
 		if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0))
 		{
 			readListDomaines(xhr.responseXML);
+			majMention('', valeur);
 		}
 	}
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	xhr.send(params);
-	majMention('', valeur);
 }
 
 
