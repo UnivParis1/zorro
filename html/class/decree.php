@@ -509,7 +509,7 @@ class decree {
 				{
 					if (! isset($response['error']))
 					{
-						elog ("Succès. setStatus...");
+						elog ("Success. setStatus...");
 						if (isset($response['parentSignBook']['status']))
 						{
 							elog("Statut de la demande sur eSignature : ".$response['parentSignBook']['status']);

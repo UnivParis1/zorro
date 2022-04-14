@@ -157,7 +157,7 @@
 						$params['recipientEmails'] = "1*".$ref->getUserMail().", 1*elodie.briere@univ-paris1.fr,2*".$ref->getUserMail().",2*elodie.briere@univ-paris1.fr";
 						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
 						elog($params['recipientEmails']);
-						$params['targetEmails'] = $ref->getUserMail();
+						//$params['targetEmails'] = $ref->getUserMail();
 						$export_path = $mod_decree->getExportPath();
 						$params['targetUrls'] = '';
 						if ($export_path != NULL)
@@ -165,6 +165,7 @@
 							$params['targetUrls'] = $export_path;
 						}
 						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
+						$params['title'] = $filename;
 						$idworkflow = $mod_decree->getWorkflow();
 						if ($idworkflow == NULL)
 						{
@@ -859,46 +860,42 @@ else
 							// récupérer et exécuter la requête 
 							$query = $modelselected->getQueryField($modelfield['idfield_type']);
 							$result = $ref->executeQuery($query);
-							if ($modelfield['idfield_type'] == 10)
-							{ // C'est le choix de la composante
-								// TODO : calculer la composante au submit à partir de la structure référente
-								$comps = array();
-								foreach ($result as $value)
-								{
-									$comps[$value['code']] = $ref->executeQuery(array('schema'=>'APOGEE',
-											'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$value['code']."'"))[0];
-								}
-								$structuser = $ref->getUserStructureCodeAPO();?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-								<?php
-								foreach ($comps as $num => $comp)
-								{
-									if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $num)
-									{?>
-										<option value="<?php echo $num;?>" selected="selected"><?php echo $comp['value'];?></option>
-									<?php } elseif (/*(!isset($mod_select_decree) && $structuser == $num) ||*/ (isset($mod_select_decree) && $mod_select_decree['structure'] == $num))
-									{ ?>
-										<option value="<?php echo $num;?>" selected="selected"><?php echo $comp['value'];?></option>
-									<?php } else { ?>
-										<option value="<?php echo $num;?>"><?php echo $comp['value'];?></option>
-									<?php } 
-								}?>
-								</select>
-							<?php } else {
 							// liste déroulante
-							?>
-							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-							<?php foreach($result as $value)
-							{ 
-								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
-								{?>
-									<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
-								<?php } else { ?>
-									<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
-								<?php } 
-							} ?>
-							</select>
+							if ($modelfield['idfield_type'] == 3) { ?>
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+								</select>
+								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+								{ ?>
+									<script>majMention(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
+								<?php } ?>
 							<?php }
+							elseif ($modelfield['idfield_type'] == 2)
+							{ ?>
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majMention(this);">
+								</select>
+								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+								{ ?>
+									<script>majDomaine(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
+								<?php } ?>
+							<?php
+							}
+							else
+							{ ?>
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+								<?php foreach($result as $value)
+									{
+										if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
+										{?>
+											<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
+										<?php }
+										else
+										{ ?>
+											<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
+										<?php }
+									} ?>
+								</select>
+							<?php
+							}
 							break;
 						case 'list':
 							$listFields = $modelselected->getListField($modelfield['idfield_type']);
@@ -946,10 +943,26 @@ else
 							<?php }
 							break;
 						default:
-							$value = (isset($_POST[$modelfield['name'].$i])) ? $_POST[$modelfield['name'].$i] : '';
-							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] : '';?>
+							if ($modelfield['idfield_type'] == 10) {
+								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) {
+									$composante = $ref->executeQuery(array('schema'=>'APOGEE',
+											'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'"))[0];
+									$value = $composante['value']; ?>
+									<input type='hidden' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' value="<?php echo $composante['code'];?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+									<input type='text' id='affichecomposante' value="<?php echo $value;?>" readonly>
+							<?php }
+								else
+								{ ?>
+									<input type='hidden' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+									<input type='text' id='affichecomposante' value="" readonly>
+								<?php }
+							}
+							else
+							{
+								$value = (isset($_POST[$modelfield['name'].$i])) ? $_POST[$modelfield['name'].$i] : '';
+								$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] : '';?>
 							<input type='text' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' value="<?php echo $value;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-						<?php break;
+						<?php } break;
 					}
 				}
 			} 

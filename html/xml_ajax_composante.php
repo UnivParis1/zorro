@@ -15,24 +15,77 @@ if (isset($_POST['structure']))
 	require_once './class/reference.php'; 
 	$ref = new reference($dbcon, $rdbApo);
 	$ldap = new ldap();
-	$structureInfos = $ldap->getStructureInfos($_POST['structure']);
-	if (isset($structureInfos['codeapo']) && sizeof($structureInfos['codeapo']) > 0)
+	$codApo = $ldap->getInfoApo($_POST['structure']);
+	if ($codApo != '')
 	{
-		foreach($structureInfos['codeapo'] as $codApo)
-		{
-			$composanteName = $ref->executeQuery(array('schema'=>'APOGEE',
-					'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$codApo."'"))[0];
-			echo "<item id=\"".$codApo."\" libelle=\"".$composanteName['value']."\" />";
-		}
-
+		$composanteName = $ref->executeQuery(array('schema'=>'APOGEE',
+				'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$codApo."'"))[0];
+		echo "<item id=\"".$codApo."\" libelle=\"".$composanteName['value']."\" />";
 	}
 	else 
 	{
-		$query = "SELECT cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' ORDER BY cod_cmp";
+		/*$query = "SELECT cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' ORDER BY cod_cmp";
 		$result = $ref->executeQuery(array("schema" => 'APOGEE', "query" => $query, "query_clause" => NULL));
 		foreach ($result as $comp)
 		{
 			echo "<item id=\"".$comp['code']."\" libelle=\"".$comp['value']."\" />";
+		}*/
+		echo "<item id=\"Erreur\" libelle=\"Pas de composante associée\" />";
+	}
+}
+elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
+{
+	include './include/dbconnection.php';
+	include './class/model.php';
+	include './class/decree.php';
+	require_once './class/reference.php';
+	$ref = new reference($dbcon, $rdbApo);
+	$model = new model($dbcon, $_POST['idmodel']);
+	if (!isset($_POST['coddfd']))
+	{
+		$query = $model->getQueryField(2); //domaine
+		$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+		$result = $ref->executeQuery($query);
+		$valeur = '';
+		if (isset($_POST['iddecree']))
+		{
+			$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+			$valeur = $mod_decree->getFieldForFieldType(2);
+		}
+		foreach ($result as $dom)
+		{
+			if ($valeur == $dom['value'])
+			{
+				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"true\" />";
+			}
+			else
+			{
+				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"false\" />";
+			}
+		}
+	}
+	else
+	{
+		$query = $model->getQueryField(3); //mention
+		$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND dfd.lib_dfd = '".$_POST['coddfd']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND dfd.lib_dfd = '".$_POST['coddfd']."' ORDER BY 2";
+		//elog(var_export($query, true));
+		$result = $ref->executeQuery($query);
+		$valeur = '';
+		if (isset($_POST['iddecree']))
+		{
+			$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+			$valeur = $mod_decree->getFieldForFieldType(3);
+		}
+		foreach ($result as $dom)
+		{
+			if ($valeur == $dom['value'])
+			{
+				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"true\" />";
+			}
+			else
+			{
+				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"false\" />";
+			}
 		}
 	}
 }
