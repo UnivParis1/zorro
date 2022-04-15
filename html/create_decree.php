@@ -798,7 +798,7 @@ else
 				}
 			}?>
 			<div id='<?php echo $modelfield['name'].'_div';?>' <?php echo $hidden;?>>
-			<?php if ($modelfield['auto'] != 'O' && $modelfield['number'] != '0')
+			<?php if ($modelfield['auto'] != 'O' && $modelfield['number'] != '0' && $modelfield['idfield_type'] != 10)
 			{?>
 				<label><?php echo $modelfield['web_name'];?></label>
 			<?php } elseif ($modelfield['auto_value'] !== NULL && $modelfield['auto_value'] != '' && $modelfield['number'] != '0') { ?>
@@ -968,12 +968,12 @@ else
 											'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'"))[0];
 									$value = $composante['value']; ?>
 									<input type='hidden' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' value="<?php echo $composante['code'];?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-									<input type='text' id='affichecomposante' value="<?php echo $value;?>" readonly>
+									<input type='hidden' id='affichecomposante' value="<?php echo $value;?>" readonly>
 							<?php }
 								else
 								{ ?>
 									<input type='hidden' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-									<input type='text' id='affichecomposante' value="" readonly>
+									<input type='hidden' id='affichecomposante' value="" readonly>
 								<?php }
 							}
 							else
