@@ -781,8 +781,14 @@ else
 			//	echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];
 			$hidden = '';
 			if ($modelfield['lib_section'] != NULL)
-			{ ?>
-				<h2 class="section"><?php echo $modelfield['lib_section']; ?></h2>
+			{
+				if (isset($hasSection))
+				{ ?>
+					</div>
+				<?php }
+				$hasSection = true;?>
+				<div class="section">
+				<h3><?php echo $modelfield['lib_section']; ?></h3>
 			<?php }
 			if ($modelfield['linkedto'] != NULL)
 			{
@@ -997,7 +1003,11 @@ else
 			
 			?>
 			</div>
-		<?php } ?>
+		<?php }
+		if (isset($hasSection))
+		{ ?>
+			</div>
+		<?php }?>
 		</div>
 		<div class="droite">
 		<?php if (isset($mod_year) && isset($mod_num))
