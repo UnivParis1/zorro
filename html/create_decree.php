@@ -496,9 +496,14 @@
 					while ($position1 < strlen($contenu) && substr($contenu, $position1 + 3, $position2 - $position1 - 3) && $position1 !== false && $position2 !== false)
 					{
 						$field = substr($contenu, $position1 + 3, $position2 - $position1 - 3); // le nom du champ est entre les balises
+						$comp_before = '';
 						if (!key_exists($field, $nb_field))
 						{
 							$nb_field[$field] = 0;
+						}
+						else
+						{
+							$comp_before = ', ';
 						}
 						$comp_after = '';
 						if (array_key_exists($field, $modelfieldscomp) && $modelfieldscomp[$field] != null)
@@ -522,6 +527,10 @@
 								$date = new DateTime($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
 								$date = $date->format("d/m/Y");
 								$champsamodif[] = array("valeur" => $date.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'list')
+							{
+								$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 							else
 							{
