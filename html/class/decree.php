@@ -422,7 +422,14 @@ class decree {
 		$model = $this->getModel();
 		//$filename .= substr($model->getfile(), 0, -4).$this->getYear().'_'.$this->getNumber();
 		$infosModel = $model->getModelInfo();
-		$filename = $this->getYear().'_'.str_replace(array(" "), "_",$infosModel['name']);
+		if ($infosModel['iddecree_type'] == 1)
+		{
+			$filename = 'Jury';
+		}
+		else
+		{
+			$filename = str_replace(array(" "), "_",$infosModel['name']);
+		}
 		$modelfields = $model->getFieldsForFileName();
 		$fields = $this->getFields();
 		foreach($modelfields as $modelfield)
@@ -432,6 +439,15 @@ class decree {
 				$filename .= "_".str_replace(array( "(", ")", ","), "", str_replace(array("'", ".", " "), "_", $fields[$modelfield['idmodel_field']][0]['value']));
 			}
 		}
+		if (date('m') < 9)
+		{
+			$year = (date('Y')-1).'-'.date('Y');
+		}
+		else
+		{
+			$year = date('Y').'-'.(date('Y')+1);
+		}
+		$filename .= '_'.$year;
 		$filename .= '_'.$this->getid();
 		$this->setFilename($filename);
 		$filename .= ".".$extension;
@@ -451,8 +467,8 @@ class decree {
 				if ($row = mysqli_fetch_assoc($result))
 				{
 					$filename = $row['filename'];
-					$nom_sans_annee_ni_numero = substr($filename, strpos($filename, '_')+1, strrpos($filename, '_') - strpos($filename, '_')-1);
-					return $nom_sans_annee_ni_numero;
+					$nom_sans_numero = substr($filename, 0, strrpos($filename, '_'));
+					return $nom_sans_numero;
 				}
 			}
 		}
@@ -733,7 +749,7 @@ class decree {
 			{
 				$struct_export_path .= '/';
 			}
-			return TARGET_URL.$model_export_path['decree_type_export_path'].'/'.$struct_export_path.$year.'/'.$model_export_path['model_export_path'];
+			return TARGET_URL.$model_export_path['decree_type_export_path'].'/'.$struct_export_path.$year; //.'/'.$model_export_path['model_export_path'];
 		}
 	}
 
