@@ -780,6 +780,10 @@ else
 			//if ($modelfield['auto'] != 'O')
 			//	echo $modelfield['web_name']." : ";//." (".$modelfield['datatype'].") nombre d'occurrences : ".$modelfield['number'];
 			$hidden = '';
+			if ($modelfield['lib_section'] != NULL)
+			{ ?>
+				<h2 class="section"><?php echo $modelfield['lib_section']; ?></h2>
+			<?php }
 			if ($modelfield['linkedto'] != NULL)
 			{
 				if (!(isset($mod_decree_fields) && key_exists($modelfield['linkedto'], $mod_decree_fields)))
