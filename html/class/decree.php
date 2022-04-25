@@ -372,7 +372,7 @@ class decree {
 	
 	function unsetNumber($iduser)
 	{
-		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW(), status = ?, filename = NULL WHERE iddecree = ?";
+		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW(), status = ? WHERE iddecree = ?";
 		$params = array($iduser, STATUT_ANNULE, $this->getid());
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
