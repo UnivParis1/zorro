@@ -988,7 +988,7 @@ else
 			if ($modelfield['number'] == '+')
 			{ ?>
 				<button onclick="return ajouterValeur('<?php echo $modelfield['name'];?>');">+</button>
-				<table id='<?php echo "table_".$modelfield['name'];?>'></table>
+				<table id='<?php echo "table_".$modelfield['name'];?>' class="marge_table"></table>
 				<br>
 				<?php if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields) && sizeof($mod_decree_fields[$modelfield['idmodel_field']]) > 1)
 					{
@@ -1067,7 +1067,7 @@ else
 								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php } break;
 							case STATUT_ERREUR : ?>
-								<img src="img/trash-alt-solid.svg" alt="supprimé" title="supprimé" width="40px">
+								<img src="img/erreur1.svg" alt="erreur" title="erreur" width="40px">
 							</div>
 							<?php if ($mod_decree_active) { ?>
 								<input type='submit' name='duplique' value='Dupliquer'>

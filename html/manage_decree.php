@@ -182,9 +182,9 @@ if (sizeof($alldecrees) > 0) { ?>
 						$class = "img";
 						break;
 					case STATUT_ERREUR :
-						$contenu = "erreur";
+						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/erreur1.svg' alt='erreur' width='20px'></a>";
 						$title = 'erreur';
-						$class = "red";
+						$class = "img";
 						break;
 					default :
 						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
