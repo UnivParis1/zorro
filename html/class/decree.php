@@ -299,7 +299,7 @@ class decree {
 	{
 		if ($update)
 		{
-			$insert = "UPDATE decree SET year = ?, number = ?, createdate = NOW(), iduser = ?, idmodel = ?, status = ?, structure = ? WHERE iddecree = ?";
+			$insert = "UPDATE decree SET year = ?, number = ?, majdate = NOW(), idmajuser = ?, idmodel = ?, status = ?, structure = ? WHERE iddecree = ?";
 			$params = array($this->getYear(), $this->getNumber(), $iduser, $idmodel, STATUT_BROUILLON, $structure, $this->getid());
 		}
 		else 
