@@ -124,7 +124,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				<th class="titresimple" style='cursor: pointer;'>Type <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Service/UFR<font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Créateur <font></font></th>
-				<th class="titresimple" style='cursor: pointer;'>Création <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>Date <font></font></th>
 				<th class="titresimple" >Statut</th>
 			</tr>
 		</thead>
@@ -139,11 +139,11 @@ if (sizeof($alldecrees) > 0) { ?>
 					<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
 				<?php } ?>
 				<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
-				<td class="cellulesimple" title="<?php echo $nom_aff; ?>"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $nom_aff; ?></a></td>
+				<td class="cellulesimple" title="<?php echo $objdecree->getFileName(); ?>"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $nom_aff; ?></a></td>
 				<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
 				<td class="cellulesimple"><?php echo $ldap->getStructureName($decree['structure']); ?></td>
 				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
-				<td class="cellulesimple"><?php echo $decree['createdate']; ?></td>
+				<td class="cellulesimple"><?php echo $decree['majdate']; ?></td>
 				<?php
 				$status = $decree['status'];
 				$majdate = $decree['majdate'];
@@ -243,7 +243,8 @@ document.getElementById('tableau_documents').querySelectorAll('th').forEach(th =
 
 })));
 
-document.getElementById('tableau_documents').querySelectorAll('th')[1].click(); // On simule le clic sur la 2e colonne pour faire afficher la fleche et initialiser le asc
+document.getElementById('tableau_documents').querySelectorAll('th')[5].click(); // On simule le clic sur la 6e colonne pour faire afficher la fleche et initialiser le asc
+document.getElementById('tableau_documents').querySelectorAll('th')[5].click(); // On simule le clic sur la 6e colonne pour trier par ordre chronologique inverse
 
 </script>
 </body>
