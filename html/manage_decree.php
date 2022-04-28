@@ -39,7 +39,7 @@
      
     // Récupération des modeles auxquels à accès l'utilisateur
     $user = new user($dbcon, $userid);
-    if ($user->isSuperAdmin())
+    if ($user->isSuperAdmin() || $user->isDaji())
     {
     	$ref = new reference($dbcon, $rdbApo);
     	$allmodels = $ref->getListModel();

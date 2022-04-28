@@ -152,7 +152,7 @@
 		<header id="header-zorro">
 			<nav class="navigat" >
 				<ul >
-					<?php if ($user->isSuperAdmin() || (isset($_SESSION['groupes']) && sizeof($_SESSION['groupes']) > 0) || $user->isAdmin()) { ?>
+					<?php if ($user->isSuperAdmin() || (isset($_SESSION['groupes']) && sizeof($_SESSION['groupes']) > 0) || $user->isAdmin() || $user->isDaji()) { ?>
 					<li id='menu_create' <?php  echo ($menuItem == 'menu_create') ? "class='navcourant'" : '';?> onclick='document.createdecree.submit();' <?php //echo $hidemenu; ?> >
 						<form name='createdecree' method='post' action="create_decree.php">
 							<input type="hidden" name="userid" value="<?php echo $userid; ?>">

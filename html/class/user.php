@@ -210,6 +210,19 @@ class user {
 		}
 	}
 	
+	function isDaji()
+	{
+		if (isset($_SESSION['supannentiteaffectation']))
+		{
+			$structure = $_SESSION['supannentiteaffectation'];
+			if ($structure == 'DGC' || $structure == 'DGCB')
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	function isAdmin()
 	{
 		if (isset($_SESSION['supannentiteaffectation']))
@@ -318,7 +331,7 @@ class user {
 							ON dt.iddecree_type = m.iddecree_type
 						LEFT JOIN user 
 							ON user.iduser = d.iduser";
-		if ($this->isSuperAdmin())
+		if ($this->isSuperAdmin() || $this->isDaji())
 		{
 			$select .= " WHERE d.iduser LIKE '%' ";
 		}
@@ -366,7 +379,7 @@ class user {
 	function hasAccessDecree($decree)
 	{
 		// L'utilisateur a créé le document ou est super admin
-		if ($this->getId() == $decree['iduser'] || $this->isSuperAdmin())
+		if ($this->getId() == $decree['iduser'] || $this->isSuperAdmin() || $this->isDaji())
 		{
 			return true;
 		}
@@ -514,7 +527,7 @@ class user {
 							ON dt.iddecree_type = m.iddecree_type
 						LEFT JOIN user
 							ON user.iduser = d.iduser";
-		if ($this->isSuperAdmin())
+		if ($this->isSuperAdmin() || $this->isDaji())
 		{
 			$select .= " WHERE d.iduser LIKE '%' ";
 		}

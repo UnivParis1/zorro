@@ -71,7 +71,7 @@
     // Récupération des modeles auxquels à accès l'utilisateur
     $user = new user($dbcon, $userid);
     $superadmin = false;
-    if ($user->isSuperAdmin())
+    if ($user->isSuperAdmin() || $user->isDaji())
     {
 		// donner accès à tous les modèles
 		$superadmin = true;
