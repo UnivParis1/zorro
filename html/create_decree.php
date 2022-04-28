@@ -762,6 +762,7 @@ else
 			</optgroup> 
 	</select>
 	</form>
+	</div>
 	<?php } ?>
 	<?php if (isset($post_selectarrete) && $post_selectarrete != '' || (isset($mod_select_decree) && $access)) 
 		{ 
@@ -773,6 +774,7 @@ else
 		<?php $modelfields = $modelselected->getModelFields();
 		 ?>
 		<form name='find_person' method='post' action='create_decree.php'>
+		<div class="gauche">
 		<input type="hidden" name='userid' value='<?php echo $userid;?>'>
 		<input type="hidden" name='selectarrete' value='<?php echo isset($post_selectarrete) ? $post_selectarrete : $mod_select_decree['idmodel'];?>'>
 		<?php foreach ($modelfields as $modelfield)
@@ -1087,8 +1089,8 @@ else
 		<br><input type='submit' name='valide' value='Enregistrer'><br>
 		<?php } ?>
 		</div>
-		</form>
 		</div>
+		</form>
 		<div id="contenu2">
 		<?php 
 		if (isset($mod_decree))
