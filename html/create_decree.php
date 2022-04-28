@@ -1069,7 +1069,7 @@ else
 								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php } break;
 							case STATUT_ERREUR : ?>
-								<img src="img/erreur1.svg" alt="erreur" title="erreur" width="40px">
+								<img src="img/erreur1.svg" alt="Document non trouvé sur eSignature" title="Document non trouvé sur eSignature" width="40px">
 							</div>
 							<?php if ($mod_decree_active) { ?>
 								<input type='submit' name='duplique' value='Dupliquer'>

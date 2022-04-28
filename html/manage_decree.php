@@ -182,7 +182,7 @@ if (sizeof($alldecrees) > 0) { ?>
 						$class = "img";
 						break;
 					case STATUT_ERREUR :
-						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/erreur1.svg' alt='erreur' width='20px'></a>";
+						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/erreur1.svg' alt='Document non trouvé sur eSignature' width='20px'></a>";
 						$title = 'erreur';
 						$class = "img";
 						break;
