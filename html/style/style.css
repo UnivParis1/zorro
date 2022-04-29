@@ -79,10 +79,17 @@ form select,form input {
 }
 
 form #structure_div input {
-    ---width: 17em; width: 25.5em;
+    /*width: 17em; */
+    width: 25.5em;
 }
 
-.gauche select#annee1 { width: 14.5em !important;}
+.gauche select#annee1 {
+	width: 14.5em !important;
+	background: white;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	border: none;
+}
 
 .gauche input { line-height: 21px; width: 14.5em; padding-left: 5px; }
 .gauche input[type="checkbox"] { width: 1em;}
@@ -93,7 +100,7 @@ form #structure_div input {
     border:none ;
     outline:none;
     background:none;
-   ---width: calc(100% - 160px);
+   /*width: calc(100% - 160px);*/
 }
 
 #affichecomposante:read-only {

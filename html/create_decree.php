@@ -871,7 +871,7 @@ else
 								break;
 						case 'year':
 							$defaultyear = (isset($mod_year)) ? date('Y', mktime(0,0,0,1,1,$mod_year)): date('Y'); ?>
-							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+							<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" disabled>
 								<!-- <option value="<?php echo $defaultyear - 1;?>"><?php echo $defaultyear - 1;?></option> -->
 								<option value="<?php echo $defaultyear;?>" selected="selected"><?php echo $defaultyear;?></option>
 								<!-- <option value="<?php echo $defaultyear + 1;?>"><?php echo $defaultyear + 1;?></option> -->
