@@ -150,19 +150,19 @@
 						$responsables = "TEST NON ENVOYE : ".$responsables;
 						$params = array	(
 									'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
-									'targetEmails' => $mail_user,
+									//'targetEmails' => $mail_user,
 									'recipientEmails' => "1*".$mail_user.",2*".$mail_user
 								);
 						if ($export_path != NULL)
 						{
-							$params['targetUrls'] = TARGET_URL."TEST";
+							$params['targetUrls'] = $export_path."/TEST";
 						}
 					}
 					else
 					{
 						$params = array	(
 									'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
-									'targetEmails' => $mail_user,
+									//'targetEmails' => $mail_user,
 									'recipientEmails' => $responsables
 								);
 						if ($export_path != NULL)
