@@ -492,4 +492,57 @@ class ldap {
 		}
 		return $nom_court;
 	}
+
+	function getEmailsForGroupUsers($structure)
+	{
+		$emails = array();
+		if (substr($structure, 0, 11) != 'structures-')
+		{
+			$structure = 'structures-'.$structure;
+		}
+		$curl = curl_init();
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_URL_GROUP_USERS.'?key='.$structure;
+		$opts = array(
+				CURLOPT_URL => $curl_opt_url,
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_PROXY => ''
+		);
+		curl_setopt_array($curl, $opts);
+		$json = curl_exec($curl);
+		$error = curl_error ($curl);
+		curl_close($curl);
+		if ($error != "")
+		{
+			elog( "Erreur Curl = " . $error );
+		}
+		$tab = json_decode($json, true);
+		if (is_array($tab))
+		{
+			foreach($tab as $uid)
+			{
+				$mail = $this->getEmailUser($uid['uid']);
+				if ($mail != '')
+				{
+					$emails[] = $mail;
+				}
+			}
+		}
+		return $emails;
+	}
+
+	function getEmailUser($uid)
+	{
+		$r = ldap_bind($this->_con_ldap, LDAP_BIND_LOGIN, LDAP_BIND_PASS);
+		$filtre = "(uid=$uid)";
+		$attributs = array('uid','mail');
+		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
+		$entries = ldap_get_entries($this->_con_ldap, $result);
+		if (sizeof($entries) > 0 && key_exists('mail', $entries[0]))
+		{
+			return $entries[0]['mail'][0];
+		}
+		return '';
+	}
 }

@@ -796,4 +796,81 @@ class decree {
 		}
 		return $values;
 	}
+
+	function getRecipientMail()
+	{
+		$select = "SELECT mw.idetape, mw.recipient_type, mw.recipient_default_value FROM model_workflow mw INNER JOIN decree d ON d.idmodel = mw.idmodel WHERE d.iddecree = ? ORDER BY mw.idetape";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$values = '';
+		if ( !mysqli_error($this->_dbcon))
+		{
+			$ref = new reference('','');
+			$ldap = new ldap();
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				switch ($res['recipient_type']) {
+					case 'email':
+						$values .= $res['idetape'].'*'.$res['recipient_default_value'].',';
+						break;
+					case 'role':
+						// récupérer les personnes associées au role $res['recipient_default_value'] et pour chacun ajouter son email
+						$roles = $ldap->getStructureResp($this->getStructure());
+						switch ($res['recipient_default_value']) {
+							case 'RA':
+								foreach ($roles as $role)
+								{
+									if ($role['role'] == 'Responsable administratif')
+									{
+										$values .= $res['idetape'].'*'.$role['mail'].',';
+									}
+								}
+								break;
+							case 'RESP':
+								foreach ($roles as $role)
+								{
+									if ($role['role'] == 'Responsable')
+									{
+										$values .= $res['idetape'].'*'.$role['mail'].',';
+									}
+								}
+								break;
+							case 'DIR':
+								foreach ($roles as $role)
+								{
+									if ($role['role'] == 'Directeur' || $role['role'] == 'Directrice')
+									{
+										$values .= $res['idetape'].'*'.$role['mail'].',';
+									}
+								}
+								break;
+							case 'ALL':
+								foreach ($roles as $role)
+								{
+									$values .= $res['idetape'].'*'.$role['mail'].',';
+								}
+								break;
+							default:
+								break;
+						}
+						break;
+					case 'group':
+						// récupérer les membres de la structure $res['recipient_default_value'] et pour chacun ajouter son email
+						$emails = $ldap->getEmailsForGroupUsers($res['recipient_default_value']);
+						foreach ($emails as $email)
+						{
+							$values .= $res['idetape'].'*'.$email.',';
+						}
+						break;
+					case 'creator':
+						$values .= $res['idetape'].'*'.$ref->getUserMail().',';
+						break;
+					default:
+						break;
+				}
+			}
+			$values = substr($values, 0, -1);
+		}
+		return $values;
+	}
 }

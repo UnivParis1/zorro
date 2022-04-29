@@ -224,7 +224,7 @@ class model {
 
 	function getWorkflow()
 	{
-		$select = 'SELECT idworkflow_esign FROM model_workflow WHERE idmodel = ?';
+		$select = 'SELECT idworkflow_esign FROM model WHERE idmodel = ?';
 		$param = array($this->_idmodel);
 		$result = prepared_select($this->_dbcon, $select, $param);
 		$id = NULL;

@@ -129,108 +129,112 @@
 	{
 		$ldap = new ldap();
 		elog('on est dans la signature...');
-		if (isset($_POST["structure1"]))
+		if (isset($mod_decree))
 		{
-			$supannCodeEntite = $_POST["structure1"];
-			if ($supannCodeEntite != NULL)
+			$responsables = $mod_decree->getRecipientMail();
+			$filename = $mod_decree->getFileName();
+			if ($filename != "" && file_exists(PDF_PATH.$filename))
 			{
-				$responsables = $ldap->getStructureResp($supannCodeEntite);
-				$filename = $mod_decree->getFileName();
-				if ($filename != "" && file_exists(PDF_PATH.$filename))
+				if (strstr($responsables, "1*") !== false && strstr($responsables, "2*") !== false )
 				{
-					if (sizeof($responsables) > 0)
+					$curl = curl_init();
+					if ($user->isDaji())
 					{
-						$curl = curl_init();
-						$params = array
-						(
-								'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
-								//'targetEmails' => $ref->getUserMail()
-						);
-						elog("mail du créateur : ".$ref->getUserMail());
-						$responsables_email = '';
-						foreach ($responsables as $responsable)
-						{
-							elog("mail du responsable : ".$responsable['mail']);
-							$responsables_email .= "1*".$responsable['mail'].",";
-						}
-
-						$params['recipientEmails'] = "1*".$ref->getUserMail().", 1*elodie.briere@univ-paris1.fr,2*".$ref->getUserMail().",2*elodie.briere@univ-paris1.fr";
-						$params['recipientEmails'] = rtrim($params['recipientEmails'], ',');
-						elog($params['recipientEmails']);
-						//$params['targetEmails'] = $ref->getUserMail();
-						$export_path = $mod_decree->getExportPath();
-						$params['targetUrls'] = '';
+						$responsables .= ",1*".$ref->getUserMail();
+					}
+					$mail_user = $ref->getUserMail();
+					$export_path = $mod_decree->getExportPath();
+					//$params['targetUrls'] = '';
+					if (MODE_TEST == 'O')
+					{
+						$responsables = "TEST NON ENVOYE : ".$responsables;
+						$params = array	(
+									'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
+									'targetEmails' => $mail_user,
+									'recipientEmails' => "1*".$mail_user.",2*".$mail_user
+								);
 						if ($export_path != NULL)
 						{
-							$params['targetUrls'] = $export_path;
-						}
-						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
-						$params['title'] = $filename;
-						$idworkflow = $mod_decree->getWorkflow();
-						if ($idworkflow == NULL)
-						{
-							$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature. Le circuit n'est pas renseigné.</p>";
-						}
-						else
-						{
-							$opts = array(
-									CURLOPT_URL => ESIGNATURE_CURLOPT_URL.$idworkflow.ESIGNATURE_CURLOPT_URL2,
-									CURLOPT_CUSTOMREQUEST => "POST",
-									CURLOPT_VERBOSE => true,
-									CURLOPT_POST => true,
-									CURLOPT_POSTFIELDS => $params,
-									CURLOPT_RETURNTRANSFER => true,
-									CURLOPT_SSL_VERIFYPEER => false
-							);
-							curl_setopt_array($curl, $opts);
-							//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-							$json = curl_exec($curl);
-							//print_r2($json);
-							$info = curl_getinfo($curl);
-							//echo "code: ${info['http_code']}";
-							//print_r2($info);
-							$error = curl_error ($curl);
-							curl_close($curl);
-							if ($error != "")
-							{
-								elog( "Erreur Curl = " . $error . "<br><br>");
-							}
-							//echo "<br>" . print_r($json,true) . "<br>";
-							$id = json_decode($json, true);
-							elog(var_export($opts, true));
-							elog(" -- RETOUR ESIGNATURE CREATION ARRETE -- " . var_export($id, true));
-							if (is_int($id))
-							{
-								$mod_decree->setIdEsignature($id);
-								$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables_email</p>";
-								$mod_status = $mod_decree->getStatus();
-							}
-							else
-							{
-								$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature.</p>";
-							}
+							$params['targetUrls'] = TARGET_URL."TEST";
 						}
 					}
 					else
 					{
-						$message = "<p class='alerte alerte-danger'>Aucun responble n'est désigné sur la structure référente sélectionnée.</p>";
-						elog("pas de responsable de structure.");
+						$params = array	(
+									'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
+									'targetEmails' => $mail_user,
+									'recipientEmails' => $responsables
+								);
+						if ($export_path != NULL)
+						{
+							$params['targetUrls'] = $export_path;
+						}
+					}
+					//$params['signRequestParamsJsonString'] = "[{ \"xPos\": 100, \"yPos\": 100, \"signPageNumber\": 1 },{ \"xPos\": 388, \"yPos\": 636, \"signPageNumber\": 1 }]";
+					$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
+					//$params['attachementMultipartFiles'] = $params['multipartFiles']; //curl_file_create(realpath(APPLI_PATH.PDF_PATH.'Nomination_jury_validation_delivrance_DEUG2022_47.pdf'), "application/pdf", 'Nomination_jury_validation_delivrance_DEUG2022_47.pdf');
+					$params['title'] = $filename;
+					$idworkflow = $mod_decree->getWorkflow();
+					if ($idworkflow == NULL)
+					{
+						$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature. Le circuit n'est pas renseigné.</p>";
+					}
+					else
+					{
+						$opts = array(
+								CURLOPT_URL => ESIGNATURE_CURLOPT_URL.$idworkflow.ESIGNATURE_CURLOPT_URL2,
+								CURLOPT_CUSTOMREQUEST => "POST",
+								CURLOPT_VERBOSE => true,
+								CURLOPT_POST => true,
+								CURLOPT_POSTFIELDS => $params,
+								CURLOPT_RETURNTRANSFER => true,
+								CURLOPT_SSL_VERIFYPEER => false
+						);
+						curl_setopt_array($curl, $opts);
+						//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+						$json = curl_exec($curl);
+						//print_r2($json);
+						$info = curl_getinfo($curl);
+						//echo "code: ${info['http_code']}";
+						//print_r2($info);
+						$error = curl_error ($curl);
+						curl_close($curl);
+						if ($error != "")
+						{
+							elog( "Erreur Curl = " . $error . "<br><br>");
+						}
+						//echo "<br>" . print_r($json,true) . "<br>";
+						$id = json_decode($json, true);
+						elog(var_export($opts, true));
+						elog(" -- RETOUR ESIGNATURE CREATION ARRETE -- " . var_export($id, true));
+						if (is_int($id) && $id > 0)
+						{
+							$mod_decree->setIdEsignature($id);
+							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables</p>";
+							$mod_status = $mod_decree->getStatus();
+						}
+						else
+						{
+							$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature.</p>";
+						}
 					}
 				}
-				else 
-				{	$message = "<p class='alerte alerte-danger'>Erreur de chargement du document.</p>";
-					elog ("fichier pdf absent ".PDF_PATH.$filename);
+				else
+				{
+					$message = "<p class='alerte alerte-danger'>Liste des signataires incomplète.</p>";
+					elog("Liste des signataires incomplète pour le decree ".$mod_decree_id.' '.$responsables);
 				}
 			}
 			else
 			{
-				elog("supannCodeEntite NULL.");
+				$message = "<p class='alerte alerte-danger'>Erreur de chargement du document.</p>";
+				elog ("fichier pdf absent pour le decree ".$mod_decree_id." avant envoi à eSignature ".PDF_PATH.$filename);
 			}
 		}
 		else
 		{
 			$message = "<p class='alerte alerte-danger'>La structure référente n'est pas renseignée.</p>";
-			elog("pas de code composante.");
+			elog("pas de code composante pour le decree ".$mod_decree_id." avant envoi à eSignature.");
 		}
 	}
 	elseif (isset($post_selectarrete) && $post_selectarrete != '' || (isset($mod_select_decree) && $mod_decree_active))
