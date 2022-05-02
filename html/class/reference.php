@@ -283,7 +283,7 @@ class reference {
 
 	function getStatuts()
 	{
-		return array(STATUT_BROUILLON => 'Brouillon', STATUT_EN_COURS => 'En cours de signature', STATUT_VALIDE => 'Validé', STATUT_REFUSE => 'Refusé', STATUT_ANNULE => 'Annulé', STATUT_ERREUR => 'Document non trouvé sur eSignature');
+		return array(STATUT_BROUILLON => 'Brouillon', STATUT_EN_COURS => 'En cours de signature', STATUT_VALIDE => 'Validé', STATUT_REFUSE => 'Refusé', STATUT_ANNULE => 'Annulé', STATUT_ERREUR => 'Document non trouvé sur eSignature', STATUT_SUPPR_ESIGN => 'Document supprimé d\'eSignature');
 	}
 
 	function getStructureExportPath($structure)

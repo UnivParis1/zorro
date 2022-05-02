@@ -133,7 +133,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				$objdecree = new decree($dbcon, null, null, $decree['iddecree']);
 				$nom_aff = $objdecree->getFileNameAff();?>
 			<tr>
-				<?php if ($decree['status'] == STATUT_ANNULE) {?>
+				<?php if ($decree['number'] == 0) {?>
 					<td></td>
 				<?php } else {?>
 					<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
@@ -186,13 +186,18 @@ if (sizeof($alldecrees) > 0) { ?>
 						$title = 'erreur';
 						$class = "img";
 						break;
+					case STATUT_SUPPR_ESIGN :
+						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='Document supprimé d\'eSignature' width='20px'></a>";
+						$title = 'Document supprimé d\'eSignature';
+						$class = "img";
+						break;
 					default :
 						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
 						$title = 'annulé';
 						$class = "img";
 						break;
 				}?>
-				<td class='<?php echo $class;?>' title="<?php echo $title;?>"><?php echo $contenu; ?></td>
+				<td class="<?php echo $class;?>" title="<?php echo $title;?>"><?php echo $contenu; ?></td>
 			</tr>
 		<?php } ?>
 		</tbody>

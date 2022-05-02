@@ -112,7 +112,7 @@
 		}
 	}
 	
-	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPRIME && $mod_decree_active)
+	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPR_ESIGN && $mod_decree_active)
 	{
 		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
 		{
@@ -121,6 +121,7 @@
 		}
 		elog("Suppression du numero...");
 		$mod_decree->unsetNumber($user->getId());
+		$mod_decree->setStatus(STATUT_ANNULE,date("Y-m-d H:i:s"));
 		$mod_num = 0;
 		$mod_status = STATUT_ANNULE;
 		$message = "<p class='alerte alerte-success'>Le document a été supprimé.</p>";
@@ -1074,6 +1075,15 @@ else
 								<?php } break;
 							case STATUT_ERREUR : ?>
 								<img src="img/erreur1.svg" alt="Document non trouvé sur eSignature" title="Document non trouvé sur eSignature" width="40px">
+							</div>
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='supprime' value='Supprimer' disabled>
+								<input type='submit' name='valide' value='Remplacer' disabled>
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php } break;
+							case STATUT_SUPPR_ESIGN : ?>
+								<img src="img/trash-alt-solid.svg" alt="Document supprimé d'eSignature" title="Document supprimé d'eSignature" width="40px">
 							</div>
 							<?php if ($mod_decree_active) { ?>
 								<input type='submit' name='duplique' value='Dupliquer'>

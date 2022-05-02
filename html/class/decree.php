@@ -372,8 +372,8 @@ class decree {
 	
 	function unsetNumber($iduser)
 	{
-		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW(), status = ? WHERE iddecree = ?";
-		$params = array($iduser, STATUT_ANNULE, $this->getid());
+		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW() WHERE iddecree = ?";
+		$params = array($iduser, $this->getid());
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -515,8 +515,41 @@ class decree {
 			//elog("La réponse est =>  " . var_export($response,true));
 			if ($json == '')
 			{
-				// le document a été supprimé d'esignature
+				// on vérifie si le document a été supprimé d'esignature
 				elog("Le json est vide pour l'id ".$idesignature);
+				$curl = curl_init();
+				$opts = array(
+						CURLOPT_URL => ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_STATUS . $idesignature,
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_SSL_VERIFYPEER => false,
+						CURLOPT_PROXY => ''
+				);
+				curl_setopt_array($curl, $opts);
+				elog(var_export($opts, true));
+				curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+				$json = curl_exec($curl);
+				$error = curl_error ($curl);
+				curl_close($curl);
+				if ($error != "")
+				{
+					elog(" Erreur Curl =>  " . $error);
+				}
+				elog("Le json est =>  " . var_export($json,true));
+				if ($json == 'fully-deleted')
+				{
+					if ($status != STATUT_VALIDE)
+					{
+						// On conserve le statut si la demande est signée
+						$this->setStatus(STATUT_SUPPR_ESIGN, date("Y-m-d H:i:s"));
+						$this->unsetIdEsignature(0);
+						$this->unsetNumber(0);
+						return STATUT_SUPPR_ESIGN;
+					}
+					else
+					{
+						return STATUT_VALIDE;
+					}
+				}
 				return 0;
 			}
 			else
