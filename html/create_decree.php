@@ -191,7 +191,7 @@
 								CURLOPT_SSL_VERIFYPEER => false
 						);
 						curl_setopt_array($curl, $opts);
-						//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+						curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 						$json = curl_exec($curl);
 						//print_r2($json);
 						$info = curl_getinfo($curl);

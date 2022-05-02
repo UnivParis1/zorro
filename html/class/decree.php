@@ -497,7 +497,7 @@ class decree {
 					CURLOPT_PROXY => ''
 			);
 			curl_setopt_array($curl, $opts);
-			//curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			$json = curl_exec($curl);
 			
 			$error = curl_error ($curl);
@@ -618,6 +618,7 @@ class decree {
 					CURLOPT_PROXY => ''
 			);
 			curl_setopt_array($curl, $opts);
+			curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			$json = curl_exec($curl);
 			$error = curl_error ($curl);
 			curl_close($curl);
@@ -665,7 +666,7 @@ class decree {
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 		//curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		//curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		$json = curl_exec($ch);
 		$result = json_decode($json);
