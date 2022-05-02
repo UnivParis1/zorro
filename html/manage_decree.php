@@ -156,29 +156,29 @@ if (sizeof($alldecrees) > 0) { ?>
 				switch ($status) {
 					case STATUT_ANNULE :
 						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
-						$title = 'annulé';
+						$title = 'Annulé';
 						$class = "img";
 						break;
 					case STATUT_REFUSE :
 						$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
 						$comment = $mod_decree->getRefuseComment();
 						$contenu = "<a href='".ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
-						$title = 'refusé : '.$comment;
+						$title = 'Refusé : '.$comment;
 						$class = "red";
 						break;
 					case STATUT_BROUILLON :
 						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/brouillon.svg' alt='brouillon' width='20px'></a>";
-						$title = 'brouillon';
+						$title = 'Brouillon';
 						$class = "img";
 						break;
 					case STATUT_VALIDE :
 						$contenu = "<a href='".ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
-						$title = 'signé';
+						$title = 'Validé';
 						$class = "green";
 						break;
 					case STATUT_EN_COURS :
 						$contenu = "<a href='".ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/enattente.svg' alt='signature en cours' width='20px'></a>";
-						$title = 'signature en cours';
+						$title = 'En cours de signature';
 						$class = "img";
 						break;
 					case STATUT_ERREUR :
@@ -193,7 +193,7 @@ if (sizeof($alldecrees) > 0) { ?>
 						break;
 					default :
 						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
-						$title = 'annulé';
+						$title = 'Annulé';
 						$class = "img";
 						break;
 				}?>
