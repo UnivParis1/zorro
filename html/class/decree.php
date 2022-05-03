@@ -488,10 +488,10 @@ class decree {
 		}
 		else 
 		{
-			elog("Synchronisation... ".ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+			elog("Synchronisation... ".ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
 			$curl = curl_init();
 			$opts = array(
-					CURLOPT_URL => ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
+					CURLOPT_URL => ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
 					CURLOPT_RETURNTRANSFER => true,
 					CURLOPT_SSL_VERIFYPEER => false,
 					CURLOPT_PROXY => ''
@@ -642,10 +642,10 @@ class decree {
 		}
 		else
 		{
-			elog("Récupération du commentaire de refus... ".ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+			elog("Récupération du commentaire de refus... ".ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
 			$curl = curl_init();
 			$opts = array(
-					CURLOPT_URL => ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
+					CURLOPT_URL => ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
 					CURLOPT_RETURNTRANSFER => true,
 					CURLOPT_SSL_VERIFYPEER => false,
 					CURLOPT_PROXY => ''
@@ -682,20 +682,9 @@ class decree {
 
 	function deleteSignRequest($userid)
 	{
-		/*$eSignature_url = $fonctions->liredbconstante("ESIGNATUREURL"); //"https://esignature-test.univ-paris1.fr";
-		$url = $eSignature_url.'/ws/signrequests/'.$esignatureid_annule;
-		$params = array('id' => $esignatureid_annule);
-		$walk = function( $item, $key, $parent_key = '' ) use ( &$output, &$walk ) {
-			is_array( $item )
-			? array_walk( $item, $walk, $key )
-			: $output[] = http_build_query( array( $parent_key ?: $key => $item ) );
-			
-		};
-		array_walk( $params, $walk );
-		$json = implode( '&', $output );*/
 		$ch = curl_init();
 		$idesignature = $this->getIdEsignature();
-		curl_setopt($ch, CURLOPT_URL, ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+		curl_setopt($ch, CURLOPT_URL, ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 		//curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
