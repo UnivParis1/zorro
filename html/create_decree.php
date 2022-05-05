@@ -121,7 +121,7 @@
 		}
 		elog("Suppression du numero...");
 		$mod_decree->unsetNumber($user->getId());
-		$mod_decree->setStatus(STATUT_ANNULE,date("Y-m-d H:i:s"));
+		$mod_decree->setStatus(STATUT_ANNULE, date("Y-m-d H:i:s"), $user->getId());
 		$mod_num = 0;
 		$mod_status = STATUT_ANNULE;
 		$message = "<p class='alerte alerte-success'>Le document a été supprimé.</p>";

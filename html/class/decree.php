@@ -240,10 +240,10 @@ class decree {
 		return 0;
 	}
 	
-	function setStatus($status, $date)
+	function setStatus($status, $date, $iduser)
 	{
-		$update = "UPDATE decree SET status = ?, majdate = ? WHERE iddecree = ?";
-		$params = array($status, $date, $this->getId());
+		$update = "UPDATE decree SET status = ?, majdate = ?, idmajuser = ? WHERE iddecree = ?";
+		$params = array($status, $date, $iduser, $this->getId());
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -540,7 +540,7 @@ class decree {
 					if ($status != STATUT_VALIDE)
 					{
 						// On conserve le statut si la demande est signée
-						$this->setStatus(STATUT_SUPPR_ESIGN, date("Y-m-d H:i:s"));
+						$this->setStatus(STATUT_SUPPR_ESIGN, date("Y-m-d H:i:s"), 0);
 						$this->unsetIdEsignature(0);
 						$this->unsetNumber(0);
 						return STATUT_SUPPR_ESIGN;
@@ -550,7 +550,7 @@ class decree {
 						return STATUT_VALIDE;
 					}
 				}
-				return 0;
+				return null;
 			}
 			else
 			{
@@ -620,7 +620,7 @@ class decree {
 						elog ("Nouveau statut le $date de la demande : ".$new_status);
 						if ($status != $new_status)
 						{
-							$this->setStatus($new_status, $date);
+							$this->setStatus($new_status, $date, 0);
 						}
 						return $new_status;
 					}
