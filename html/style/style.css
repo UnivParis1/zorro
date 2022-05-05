@@ -1,7 +1,7 @@
 
-/*========= Zorro mars 2022 - YAM ==========*/
+/*========= Zorro 4 avril 2022 - YAM ==========*/
 
-body {  font-family: Arial, Helvetica,Tahoma, sans-serif; font-size : 14px;  color: #444;  }
+body {  font-family: Arial, Helvetica,Tahoma, sans-serif; font-size : 13px;  color: #444;  }
 
 a { color: #2055aa ;  text-decoration: none; }
 a:hover { color: #205599 ;  text-decoration: underline; }
@@ -100,7 +100,7 @@ form #structure_div input {
     border:none ;
     outline:none;
     background:none;
-   /*width: calc(100% - 160px);*/
+    width: calc(100% - 160px); /* yam */
 }
 
 #affichecomposante:read-only {
@@ -142,7 +142,7 @@ select {
     background: #f3f6f9;
     border: 1px solid #ccc;
     padding: 4px 3px;
-	font-family: arial;
+    font-family: arial;
 }
 
 select#selectarrete {
@@ -187,7 +187,7 @@ select#selectarrete {
     border-bottom-color: #00236e9e;
     border-right-color: #00326e9e;
     border-radius: 2px;
-	margin-left: 12px;
+    margin-left: 12px;
 }
 
 .recherche input[type="submit"]:hover {
@@ -369,7 +369,7 @@ td.img[title="signature en cours"]:hover {
 /*==============*/
 
 
- @media (min-width: 710px) {
+ @media (min-width: 800px) {
 
    .marge_table {
        margin-left: 152px;
@@ -377,28 +377,44 @@ td.img[title="signature en cours"]:hover {
  }
 
 
- @media (max-width: 710px) {
 
-     nav.navigat ul li {
-	font-size : 13px;
-        padding : 6px;
-	color: white;
-     }
+@media screen and (max-width :800px) {
 
-    .droite {
+   .containerApp { width: 99%;}
+   nav.navigat { background: none;}
+   #contenu1, #contenu2 { padding:5px;}
+   #contenu1 { margin-top: 60px; }
+
+ .droite {
         display:block;
 	clear : both;
-	width:100%;
-        margin-top: 17px; margin-bottom : 30px; padding-top: 15px;
-        border : 1px #999 dotted; background: #f3f6f9;
-	 }
+	width: calc(100% - 5px);
+        margin-top: 17px;
+        padding-top: 15px;
+        margin-bottom : 30px;
+        border : 1px #999 dotted;
+        background: #f3f6f9;
+       }
 
-    .containerApp {
-	width: 99%;
-    }
+   nav.navigat ul li {
+     margin:0px;
+     padding : 6px;
+     min-width: 28%;
+     border: 2px #ccc solid;
+   }
 
-    #contenu1, #contenu2 {
-          padding:5px;
-    }
 }
 
+
+@media screen and (max-width : 660px) {
+
+   #contenu1 { margin-top: 75px; }
+   nav.navigat { background: white; }
+
+   nav.navigat ul li {
+     min-width: 39%;
+     border: 2px #ccc solid;
+   }
+   .gauche { width: 100% !important; }
+
+}
