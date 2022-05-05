@@ -280,7 +280,7 @@ class decree {
 			if ($res = mysqli_fetch_assoc($result))
 			{
 				$status = $res['status'];
-				if ($status == STATUT_EN_COURS || $status == STATUT_ANNULE)
+				if ($status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
 				{
 					$new_status = $this->synchroEsignatureStatus($status);
 					return ($new_status == NULL) ? ($status == STATUT_ANNULE ? STATUT_ANNULE : STATUT_ERREUR)  : $new_status;
