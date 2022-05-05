@@ -162,7 +162,7 @@ class reference {
 		$sql_num_dispo = "SELECT
 							number + 1 AS numero_dispo
 						FROM (SELECT d.number FROM decree d INNER JOIN number num ON num.year = d.year WHERE d.year = ? AND num.low_number <= d.number UNION SELECT num.low_number - 1 AS number FROM number num WHERE num.year = ?) AS d
-						WHERE NOT EXISTS (SELECT d2.number FROM decree d2 WHERE d2.number = d.number + 1 AND (d2.status <> 'a' OR d2.status IS NULL) AND d2.year = ?)
+						WHERE NOT EXISTS (SELECT d2.number FROM decree d2 WHERE d2.number = d.number + 1 AND d2.year = ?)
 						ORDER BY number LIMIT 1";
 		$params = array($year, $year, $year);
 		$result = prepared_select($this->_dbcon, $sql_num_dispo, $params);
