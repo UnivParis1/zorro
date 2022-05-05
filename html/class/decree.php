@@ -603,8 +603,13 @@ class decree {
 								break;
 							case 'deleted' : // TODO : Attention le document est dans la corbeille
 							case 'canceled' :
-								$new_status = STATUT_ANNULE; // aborted TODO : Libérer le numéro ??
+								$new_status = STATUT_CORBEILLE; // trash
 								$date = date("Y-m-d H:i:s");
+								if (isset($response['parentSignBook']['updateDate']))
+								{
+									$date = new DateTime($response['parentSignBook']['updateDate']);
+									$date = $date->format("Y-m-d H:i:s");
+								}
 								break;
 							case '' : elog('Erreur Statut vide esignature... Ne rien faire');
 								break;

@@ -147,7 +147,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				<?php
 				$status = $decree['status'];
 				$majdate = $decree['majdate'];
-				if ($status == STATUT_EN_COURS || $status == STATUT_ANNULE)
+				if ($status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
 				{
 					$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
 					$status = $mod_decree->getStatus();
@@ -189,6 +189,11 @@ if (sizeof($alldecrees) > 0) { ?>
 					case STATUT_SUPPR_ESIGN :
 						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='Document supprimé d\'eSignature' width='20px'></a>";
 						$title = 'Document supprimé d\'eSignature';
+						$class = "img";
+						break;
+					case STATUT_CORBEILLE :
+						$contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/supprimer.svg' alt='Document dans la corbeille d\'eSignature' width='20px'></a>";
+						$title = 'Document dans la corbeille d\'eSignature';
 						$class = "img";
 						break;
 					default :

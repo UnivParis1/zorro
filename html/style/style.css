@@ -302,12 +302,11 @@ td.green a {
      background: #19830A; color: white; text-align: left;
 }
 
-
 td.green:hover, td.red:hover { filter: brightness(150%);}
 
 td.img:hover { filter: brightness(30%);}
 
-td.img[title="signature en cours"]:hover {
+td.img[title="En cours de signature"]:hover {
 
  -webkit-filter: saturate(180%);
   filter: saturate(180%);
@@ -315,7 +314,8 @@ td.img[title="signature en cours"]:hover {
 }
 
 
-.tableausimple td.img[title="signature en cours"],
+.tableausimple td.img[title="Document dans la corbeille d'eSignature"],
+.tableausimple td.img[title="En cours de signature"],
 .tableausimple td.green,
 .tableausimple td.red {
 

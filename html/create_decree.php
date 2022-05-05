@@ -114,7 +114,7 @@
 	
 	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPR_ESIGN && $mod_decree_active)
 	{
-		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
+		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS || $mod_status == STATUT_CORBEILLE)
 		{
 			// Supprimer d'esignature
 			$mod_decree->deleteSignRequest($user->getId());
@@ -264,7 +264,7 @@
     			$mod_decree_infos = $mod_decree->getDecree();
     			if ($mod_decree_infos != NULL && $mod_decree->getStatus() != STATUT_VALIDE)
     			{
-    				if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS)
+					if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS || $mod_status == STATUT_CORBEILLE)
     				{
     					// TODO : Supprimer d'esignature
 	 					$mod_decree->deleteSignRequest($user->getId());
@@ -1089,6 +1089,15 @@ else
 								<input type='submit' name='duplique' value='Dupliquer'>
 								<input type='submit' name='supprime' value='Supprimer' disabled>
 								<input type='submit' name='valide' value='Remplacer' disabled>
+								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php } break;
+							case STATUT_CORBEILLE : ?>
+								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/trash-alt-solid.svg" alt="Document dans la corbeille d'eSignature" title="Document dans la corbeille d'eSignature" width="40px"></a>
+							</div>
+							<?php if ($mod_decree_active) { ?>
+								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+								<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
 								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 								<?php } break;
 							default : break;
