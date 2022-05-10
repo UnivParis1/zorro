@@ -151,7 +151,7 @@
 						$responsables = "TEST NON ENVOYE : ".$responsables;
 						$params = array	(
 									'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
-									//'targetEmails' => $mail_user,
+									'targetEmails' => $mail_user,
 									'recipientEmails' => "1*".$mail_user.",2*".$mail_user
 								);
 						if ($export_path != NULL)
@@ -163,7 +163,7 @@
 					{
 						$params = array	(
 									'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
-									//'targetEmails' => $mail_user,
+									'targetEmails' => $mail_user,
 									'recipientEmails' => $responsables
 								);
 						if ($export_path != NULL)
