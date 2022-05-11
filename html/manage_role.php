@@ -7,14 +7,8 @@ require_once ('./include/dbconnection.php');
 require_once ('./include/fonctions.php');
 
 $ldap = new ldap();
-if (isset($_POST["userid"]))
-{
-	$userid = $_POST["userid"];
-}
-else
-{
-	$userid = null;
-}
+$ref = new reference($dbcon, $rdbApo);
+$userid = $ref->getUserUid();
 if (is_null($userid) or ($userid == "")) {
 	elog("Redirection vers index.php (UID de l'utilisateur=" . $uid . ")");
 	header('Location: index.php');
@@ -23,6 +17,11 @@ if (is_null($userid) or ($userid == "")) {
 
 $menuItem = 'menu_role';
 require ("include/menu.php");
+if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
+{
+	$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
+	if ($userCAS->isSuperAdmin(false))
+	{
 ?>	
 <script>
 function changerole(idgroupe, i){
@@ -156,6 +155,15 @@ foreach($result as $res)
 	<input id="submitrole" type="submit" value=''>
 </form>	 
 </div>
+<?php } else { ?>
+<div id="contenu1">
+	<h2> Accès interdit </h2>
+</div>
+<?php } } else { ?>
+<div id="contenu1">
+	<h2> Accès interdit </h2>
+</div>
+<?php } ?>
 </body>
 </html>
 

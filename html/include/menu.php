@@ -155,39 +155,24 @@
 				<?php if (MODE_TEST == 'O') { ?>
 					<li>MODE TEST</li>
 					<?php } if ($user->isSuperAdmin() || (isset($_SESSION['groupes']) && sizeof($_SESSION['groupes']) > 0) || $user->isAdmin() || $user->isDaji()) { ?>
-					<li id='menu_create' <?php  echo ($menuItem == 'menu_create') ? "class='navcourant'" : '';?> onclick='document.createdecree.submit();' <?php //echo $hidemenu; ?> >
-						<form name='createdecree' method='post' action="create_decree.php">
-							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
-						</form>
-						<a href="javascript:document.createdecree.submit();">Nouveau document</a>
+					<li id='menu_create' <?php  echo ($menuItem == 'menu_create') ? "class='navcourant'" : '';?> >
+						<a href="create_decree.php">Nouveau document</a>
 					</li>
-					<li id='menu_manage' <?php echo ($menuItem == 'menu_manage') ? "class='navcourant'" : '';?> onclick='document.managedecree.submit();' <?php //echo $hidemenu; ?> >
-						<form name='managedecree' method='post' action="manage_decree.php">
-							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
-						</form>
-						<a href="javascript:document.managedecree.submit();">Mes documents</a>
+					<li id='menu_manage' <?php echo ($menuItem == 'menu_manage') ? "class='navcourant'" : '';?> >
+						<a href="manage_decree.php">Mes documents</a>
 					</li>
 					<?php } ?>
 					<?php if ($user->isSuperAdmin()) { ?>
-					<li id='menu_role' <?php echo ($menuItem == 'menu_role') ? "class='navcourant'" : '';?> onclick='document.managerole.submit();' <?php //echo $hidemenu; ?> >
-						<form name='managerole' method='post' action="manage_role.php">
-							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
-						</form>
-						<a href="javascript:document.managerole.submit();">Autorisations</a>
+					<li id='menu_role' <?php echo ($menuItem == 'menu_role') ? "class='navcourant'" : '';?> >
+						<a href="manage_role.php">Autorisations</a>
 					</li>
-					<li id='menu_model' <?php echo ($menuItem == 'menu_model') ? "class='navcourant'" : '';?> onclick='document.managemodel.submit();' <?php //echo $hidemenu; ?> >
-						<form name='managemodel' method='post' action="manage_model.php">
-							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
-						</form>
-						<a href="javascript:document.managemodel.submit();">Modèles</a>
+					<li id='menu_model' <?php echo ($menuItem == 'menu_model') ? "class='navcourant'" : '';?> >
+						<a href="manage_model.php">Modèles</a>
 					</li>
 					<?php } ?>	
 					<?php if (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
-					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> onclick='document.usurpe.submit();' <?php //echo $hidemenu; ?> >
-						<form name='usurpe' method='post' action="admin_substitution.php">
-							<input type="hidden" name="userid" value="<?php echo $userid; ?>">
-						</form>
-						<a href="javascript:document.ursurpe.submit();">Changer d'utilisateur</a>
+					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
+						<a href="admin_substitution.php">Changer d'utilisateur</a>
 					</li>	
 					<?php } ?>
 				</ul>

@@ -6,16 +6,15 @@
     require_once('./class/user.php');
 	
 	// Initialisation de l'utilisateur
-	if (isset($_POST["userid"])) {
-	 $userid = $_POST["userid"];
-	 } else {
-	 $userid = null;
-	 }
-	 if (is_null($userid) or ($userid == "")) {
-	 elog("Redirection vers index.php (UID de l'utilisateur=" . $userid . ")");
-	 header('Location: index.php');
-	 exit();
-	 }
+    $ref = new reference('', '');
+    $userid = $ref->getUserUid();
+    //echo $_SESSION['uid'];
+    if (is_null($userid) or ($userid == ""))
+    {
+		elog("Redirection vers index.php (UID de l'utilisateur=" . $uid . ")");
+		header('Location: index.php');
+		exit();
+    }
 	 if (isset($_POST['newuser']) && $_POST['newuser'] != null)
 	 {
 		elog($userid." a usurpe l identite de ".$_POST['newuser']);
