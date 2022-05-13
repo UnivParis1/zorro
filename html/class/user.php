@@ -562,10 +562,12 @@ class user {
 		}
 		if (array_key_exists('contenu', $criteres) && $criteres['contenu'] != '')
 		{
+			$select .= " AND (concat(d.year,'/',d.number) = ? ";
+			$params[] = $criteres['contenu'];
 			$list_mots = explode(" ", $criteres['contenu']);
 			if (sizeof($list_mots) > 0)
 			{
-				$select .= " AND exists (SELECT dfi.value FROM decree_field dfi WHERE dfi.iddecree = d.iddecree AND (LOWER(dfi.value) LIKE ? ";
+				$select .= " OR exists (SELECT dfi.value FROM decree_field dfi WHERE dfi.iddecree = d.iddecree AND (LOWER(dfi.value) LIKE ? ";
 				$params[] = '%'.mb_strtolower($list_mots[0],'UTF-8').'%';
 				for ($i = 1; $i < sizeof($list_mots); $i++)
 				{
@@ -574,6 +576,7 @@ class user {
 				}
 				$select .= "))";
 			}
+			$select .= ")";
 		}
 		$select .= " ORDER BY majdate DESC";
 		if (sizeof($params) == 0)
