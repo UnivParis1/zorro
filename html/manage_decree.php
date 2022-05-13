@@ -75,9 +75,9 @@
 		<select style="width:26em" name="selectarrete" id="selectarrete">
 			<?php
 			if (!isset($_POST['selectarrete'])) { ?>
-				<option value="" selected="selected">&nbsp;</option>
+				<option value="" selected="selected">Type</option>
 			<?php } else { ?>
-				<option value="">&nbsp;</option>
+				<option value="">Type</option>
 			<?php }
 			$type = 0;
 			foreach ($listModels as $model) {
@@ -97,9 +97,9 @@
 		<select style="width:26em" name="selectstatut" id="selectstatut">
 			<?php
 			if (!isset($_POST['selectstatut'])) { ?>
-				<option value="" selected="selected">&nbsp;</option>
+				<option value="" selected="selected">Statut</option>
 			<?php } else { ?>
-				<option value="">&nbsp;</option>
+				<option value="">Statut</option>
 			<?php }
 			foreach ($ref->getStatuts() as $name => $value) {
 				if (isset($post_selectstatut) && $post_selectstatut == $name) { ?>
