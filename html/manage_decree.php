@@ -143,7 +143,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
 				<td class="cellulesimple"><?php echo $ldap->getStructureName($decree['structure']); ?></td>
 				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
-				<td class="cellulesimple"><?php echo $decree['majdate']; ?></td>
+				<td class="cellulesimple date"><?php echo date('d/m/Y',strtotime($decree['majdate'])); ?></td>
 				<?php
 				$status = $decree['status'];
 				$majdate = $decree['majdate'];
@@ -213,6 +213,14 @@ if (sizeof($alldecrees) > 0) { ?>
 <script>
 const getCellValue = (tr, idx) =>
 {
+	if (tr.children[idx].className.indexOf('date', 1) != -1)
+	{
+		var tmpdate = tr.children[idx].innerText;
+		var jour  = tmpdate.substring(0,2);
+		var mois  = tmpdate.substring(3,5);
+		var annee = tmpdate.substring(6,10);
+		return annee+mois+jour;
+	}
     return tr.children[idx].innerText || tr.children[idx].textContent;
 }
 
