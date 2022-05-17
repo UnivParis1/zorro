@@ -537,6 +537,11 @@
 							{
 								$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
+							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'group')
+							{
+								$nom_struct = $ldap->getStructureName($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
+								$champsamodif[] = array("valeur" => $comp_before.$nom_struct.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+							}
 							else
 							{
 								$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
