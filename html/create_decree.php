@@ -560,6 +560,10 @@
 								$position1 = $position_fin;
 								$position2 = $position_fin;
 							}
+							elseif(key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists(0, $fieldstoinsert[$modelfieldsarrange[$field]]))
+							{
+								$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][0]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+							}
 							else
 							{
 								//echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : vide <br>";
