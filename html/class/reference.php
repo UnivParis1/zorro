@@ -326,4 +326,19 @@ class reference {
 			elog("Erreur insert Export_path cree pour la structure ".$structure." : ".$export_path." ".mysqli_error($this->_dbcon));
 		}
 	}
+
+	function getIdfieldTypeByName($name)
+	{
+		$select = "SELECT idfield_type FROM field_type WHERE name = ?";
+		$params = array($name);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				return $row['idfield_type'];
+			}
+		}
+		return NULL;
+	}
 }

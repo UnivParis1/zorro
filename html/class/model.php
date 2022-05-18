@@ -100,7 +100,7 @@ class model {
 	
 	function getModelFields()
 	{
-		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_after, mfi.lib_section, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_after, mfi.lib_section, mfi.idfield_type_section, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
 		$params = array($this->_idmodel);
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
@@ -283,5 +283,25 @@ class model {
 			elog("erreur select active from model. ".mysqli_error($this->_dbcon));
 		}
 		return false;
+	}
+
+	function getSections()
+	{
+		$select = "SELECT idmodel_field, idfield_type_section FROM model_field WHERE idmodel = ? AND idfield_type_section IS NOT NULL";
+		$params = array($this->_idmodel);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$retour = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$retour[$res['idfield_type_section']][] = $res['idmodel_field'];
+			}
+		}
+		else
+		{
+			elog("erreur select section from model_field. ".mysqli_error($this->_dbcon));
+		}
+		return $retour;
 	}
 }

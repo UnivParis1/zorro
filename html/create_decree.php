@@ -398,6 +398,16 @@
 					$fieldstoinsert = $decree->getFields();
 					// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
 					$modelfields = $modelselected->getModelFields();
+					// On repère les sections non représentées pour supprimer les lignes dans le document
+					$modelsections = $modelselected->getSections();
+					$sectionabsente = array();
+					foreach($modelsections as $section => $listIdFieldType)
+					{
+						if (sizeof(array_intersect($listIdFieldType, array_keys($fieldstoinsert))) == 0)
+						{
+							$sectionabsente[] = $section;
+						}
+					}
 					//echo "<br>modelfields <br><br>"; print_r2($modelfields);
 					$modelfieldsarrange = array_column($modelfields, 'idmodel_field', 'name');
 					$modelfieldstype = array_column($modelfields, 'datatype', 'idmodel_field');
@@ -549,7 +559,9 @@
 						}
 						else
 						{
-							if (array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+							$idfield_type = $ref->getIdfieldTypeByName($field);
+							if ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+									|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))) // Pour supprimer les lignes des sections inutilisées
 							{
 								// Pour supprimer la ligne dans le document chercher le "<text:p" précédent et "</text:p>" suivant
 								$position_debut = strrpos(substr($contenu, 0, $position1), "<text:p");
