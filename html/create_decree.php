@@ -473,7 +473,7 @@
 							// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
 							// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
 							// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
-							for ($i = 1; $i <= $nbChamps; $i++)
+							for ($i = 1; $i < $nbChamps; $i++)
 							{
 								// dupliquer le noeud
 								$clone = $noeudadupliquer->cloneNode(true);
