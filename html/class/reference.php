@@ -341,4 +341,17 @@ class reference {
 		}
 		return NULL;
 	}
+
+	function getAnneeUni()
+	{
+		if (date('m') < 9)
+		{
+			$year = (date('Y')-1).'-'.date('Y');
+		}
+		else
+		{
+			$year = date('Y').'-'.(date('Y')+1);
+		}
+		return $year;
+	}
 }

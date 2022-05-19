@@ -439,14 +439,8 @@ class decree {
 				$filename .= "_".str_replace(array( "(", ")", ","), "", str_replace(array("'", ".", " "), "_", $fields[$modelfield['idmodel_field']][0]['value']));
 			}
 		}
-		if (date('m') < 9)
-		{
-			$year = (date('Y')-1).'-'.date('Y');
-		}
-		else
-		{
-			$year = date('Y').'-'.(date('Y')+1);
-		}
+		$ref = new reference('', '');
+		$year = $ref->getAnneeUni();
 		$filename .= '_'.$year;
 		$filename .= '_'.$this->getid();
 		$this->setFilename($filename);

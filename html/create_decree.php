@@ -257,6 +257,7 @@
     	$decreefields = array();
     	if (isset($post_valide)||isset($post_duplique))
     	{
+			elog("Enregistrement du document : ".$mod_decree_id);
     		// Si le document est en mode modif et qu'il n'est pas validé dans esignature on supprime le numero d'arrêté et on crée un nouveau
 			if (isset($mod_year) && isset($mod_num) && isset($post_valide) && $post_valide == "Remplacer")
     		{
@@ -395,6 +396,7 @@
 				$modelfile = new ZipArchive();
 				if (file_exists("./models/".$modelselected->getfile()))
 				{
+					$anneeuniv = $ref->getAnneeUni();
 					$fieldstoinsert = $decree->getFields();
 					// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
 					$modelfields = $modelselected->getModelFields();
@@ -560,7 +562,11 @@
 						else
 						{
 							$idfield_type = $ref->getIdfieldTypeByName($field);
-							if ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+							if ($field == "anneeuni")
+							{
+								$champsamodif[] = array("valeur" => $anneeuniv, "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+							elseif ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
 									|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))) // Pour supprimer les lignes des sections inutilisées
 							{
 								// Pour supprimer la ligne dans le document chercher le "<text:p" précédent et "</text:p>" suivant
@@ -633,6 +639,10 @@
 					}
 					?>
 			<?php }
+			else
+			{
+				elog("Le document "."./models/".$modelselected->getfile()." n'existe pas !");
+			}
 			if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique) || (isset($post_valide) && $post_valide == "Enregistrer" && isset($mod_status) && $mod_status == STATUT_BROUILLON))
 				{
 					$mod_num = $numero_dispo;
