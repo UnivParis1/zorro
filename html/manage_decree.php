@@ -140,7 +140,7 @@ if (sizeof($alldecrees) > 0) { ?>
 				<?php } ?>
 				<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
 				<td class="cellulesimple" title="<?php echo $objdecree->getFileName(); ?>"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $nom_aff; ?></a></td>
-				<td class="cellulesimple"><?php echo $decree['decreetypename']; ?></td>
+				<td class="cellulesimple"><?php echo $decree['modelname']; ?></td>
 				<td class="cellulesimple"><?php echo $ldap->getStructureName($decree['structure']); ?></td>
 				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
 				<td class="cellulesimple date"><?php echo date('d/m/Y',strtotime($decree['majdate'])); ?></td>
