@@ -75,9 +75,9 @@
 		<select style="width:26em" name="selectarrete" id="selectarrete">
 			<?php
 			if (!isset($_POST['selectarrete'])) { ?>
-				<option value="" selected="selected">Type</option>
+				<option value="" selected="selected">Modèle</option>
 			<?php } else { ?>
-				<option value="">Type</option>
+				<option value="">Modèle</option>
 			<?php }
 			$type = 0;
 			foreach ($listModels as $model) {
@@ -121,7 +121,7 @@ if (sizeof($alldecrees) > 0) { ?>
 			<tr>
 				<th class="titresimple" style='cursor: pointer;'>Numéro <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Document <font></font></th>
-				<th class="titresimple" style='cursor: pointer;'>Type <font></font></th>
+				<th class="titresimple" style='cursor: pointer;'>Modèle <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Service/UFR<font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Créateur <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Date <font></font></th>
