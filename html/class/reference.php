@@ -342,15 +342,29 @@ class reference {
 		return NULL;
 	}
 
-	function getAnneeUni()
+	function getAnneeUni($yearafter = false)
 	{
-		if (date('m') < 9)
+		if ($yearafter)
 		{
-			$year = (date('Y')-1).'-'.date('Y');
+			if (date('m') < 9)
+			{
+				$year = (date('Y')).'-'.(date('Y')+1);
+			}
+			else
+			{
+				$year = (date('Y')+1).'-'.(date('Y')+2);
+			}
 		}
 		else
 		{
-			$year = date('Y').'-'.(date('Y')+1);
+			if (date('m') < 9)
+			{
+				$year = (date('Y')-1).'-'.date('Y');
+			}
+			else
+			{
+				$year = date('Y').'-'.(date('Y')+1);
+			}
 		}
 		return $year;
 	}

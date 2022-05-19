@@ -440,7 +440,14 @@ class decree {
 			}
 		}
 		$ref = new reference('', '');
-		$year = $ref->getAnneeUni();
+		if ($infosModel['iddecree_type'] == 2) // Commissions pour l'année suivante
+		{
+			$year = $ref->getAnneeUni(true);
+		}
+		else
+		{
+			$year = $ref->getAnneeUni();
+		}
 		$filename .= '_'.$year;
 		$filename .= '_'.$this->getid();
 		$this->setFilename($filename);

@@ -396,7 +396,14 @@
 				$modelfile = new ZipArchive();
 				if (file_exists("./models/".$modelselected->getfile()))
 				{
-					$anneeuniv = $ref->getAnneeUni();
+					if ($decree->getModel()->getModelInfo()['iddecree_type'] == 2)
+					{
+						$anneeuniv = $ref->getAnneeUni(true);
+					}
+					else
+					{
+						$anneeuniv = $ref->getAnneeUni();
+					}
 					$fieldstoinsert = $decree->getFields();
 					// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
 					$modelfields = $modelselected->getModelFields();
