@@ -248,7 +248,7 @@ class model {
 
 	function getFieldsForFileName()
 	{
-		$select = "SELECT idmodel_field, filename_position FROM model_field WHERE idmodel = ? AND filename_position IS NOT NULL AND filename_position > 0 ORDER BY filename_position";
+		$select = "SELECT mf.idmodel_field, mf.filename_position, ft.datatype FROM model_field mf INNER JOIN field_type ft ON ft.idfield_type = mf.idfield_type WHERE mf.idmodel = ? AND mf.filename_position IS NOT NULL AND mf.filename_position > 0 ORDER BY mf.filename_position";
 		$params = array($this->_idmodel);
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
