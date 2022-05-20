@@ -233,7 +233,7 @@ function readListMentions(data)
 		{
 			var listeRes = ajouteLigneSelect (listementions, "", "");
 		}
-		//else
+		else
 		{
 			var listeRes = ajouteLigneSelect (listementions, "", "", true);
 		}
