@@ -41,10 +41,18 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 	require_once './class/reference.php';
 	$ref = new reference($dbcon, $rdbApo);
 	$model = new model($dbcon, $_POST['idmodel']);
+	$cod_cmp = $_POST['cod_cmp_dom'];
 	if (!isset($_POST['coddfd']))
 	{
 		$query = $model->getQueryField(2); //domaine
-		$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+		if ($cod_cmp != '')
+		{
+			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+		}
+		else
+		{
+			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." ORDER BY 2" : " ORDER BY 2";
+		}
 		$result = $ref->executeQuery($query);
 		$valeur = '';
 		if (isset($_POST['iddecree']))
@@ -67,7 +75,9 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 	else
 	{
 		$query = $model->getQueryField(3); //mention
-		$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND dfd.lib_dfd = '".$_POST['coddfd']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND dfd.lib_dfd = '".$_POST['coddfd']."' ORDER BY 2";
+		$sql_comp = $cod_cmp != '' ? " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."'" : '';
+		$sql_dfd = $_POST['coddfd'] != '' ? " AND dfd.lib_dfd = '".$_POST['coddfd']."'" : '';
+		$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd." ORDER BY 2" : $sql_comp.$sql_dfd." ORDER BY 2";
 		//elog(var_export($query, true));
 		$result = $ref->executeQuery($query);
 		$valeur = '';
@@ -80,11 +90,11 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 		{
 			if ($valeur == $dom['value'])
 			{
-				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"true\" />";
+				echo "<item id=\"".htmlspecialchars($dom['value'])."\" libelle=\"".htmlspecialchars($dom['value'])."\" selected=\"true\" />";
 			}
 			else
 			{
-				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"false\" />";
+				echo "<item id=\"".htmlspecialchars($dom['value'])."\" libelle=\"".htmlspecialchars($dom['value'])."\" selected=\"false\" />";
 			}
 		}
 	}

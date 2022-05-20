@@ -71,33 +71,36 @@ function readListeComposantes(data)
 	var listeComposantes = document.getElementById("composantecod1");
 	if (composantes.length > 0)
 	{
-		listeComposantes.innerHTML = "";
-		var oInput, oDiv;
-		oDiv = document.getElementById("composantecod_div");
-		//alert(infos[i].getAttribute("id")+"_div");
-		if (oDiv != null)
+		if (listeComposantes !== null)
 		{
-			//oDiv.setAttribute("style", "display:block;");
-			oInput = document.getElementById("affichecomposante");
-			if (oInput == null)
+			listeComposantes.innerHTML = "";
+			var oInput, oDiv;
+			oDiv = document.getElementById("composantecod_div");
+			//alert(infos[i].getAttribute("id")+"_div");
+			if (oDiv != null)
 			{
-				oInput = document.createElement("input");
-				oInput.setAttribute("id", "affichecomposante");
-				oInput.setAttribute("type", "text");
-				oInput.setAttribute("readonly", true);
-				oInput.setAttribute("value", composantes[0].getAttribute("libelle"));
-				oDiv.appendChild(oInput);
+				//oDiv.setAttribute("style", "display:block;");
+				oInput = document.getElementById("affichecomposante");
+				if (oInput == null)
+				{
+					oInput = document.createElement("input");
+					oInput.setAttribute("id", "affichecomposante");
+					oInput.setAttribute("type", "text");
+					oInput.setAttribute("readonly", true);
+					oInput.setAttribute("value", composantes[0].getAttribute("libelle"));
+					oDiv.appendChild(oInput);
+				}
+				else
+				{
+					oInput.setAttribute("value", composantes[0].getAttribute("libelle"));
+				}
+				listeComposantes.setAttribute("value", composantes[0].getAttribute("id"));
+				listeComposantes.setAttribute("type", "hidden");
+				listeComposantes.setAttribute("readonly", true);
 			}
-			else
-			{
-				oInput.setAttribute("value", composantes[0].getAttribute("libelle"));
-			}
-			listeComposantes.setAttribute("value", composantes[0].getAttribute("id"));
-			listeComposantes.setAttribute("type", "hidden");
-			listeComposantes.setAttribute("readonly", true);
+			majDomaine(listeComposantes);
+			majMention(listeComposantes);
 		}
-		majDomaine(listeComposantes);
-		majMention(listeComposantes);
 	}
 }
 
@@ -138,30 +141,33 @@ function readListDomaines(data)
 	var domaines = data.getElementsByTagName("item");
 	var listeDomaines = document.getElementById("domaine1");
 	var domaine_div = document.getElementById("domaine_div");
-	domaine_div.setAttribute("style", "display:block;");
-	listeDomaines.innerHTML = "";
-	if (domaines.length > 0)
+	if (domaine_div !== null)
 	{
-		if (domaines.length == 1)
+		domaine_div.setAttribute("style", "display:block;");
+		listeDomaines.innerHTML = "";
+		if (domaines.length > 0)
 		{
-			var listeRes = ajouteLigneSelect (listeDomaines, "", "");
-		}
-		else
-		{
-			var listeRes = ajouteLigneSelect (listeDomaines, "", "", true);
-		}
-		for (var i=0, c=domaines.length; i<c; i++)
-		{
-			if (domaines[i].getAttribute("selected") == "true")
+			if (domaines.length == 1)
 			{
-				selected = true;
+				var listeRes = ajouteLigneSelect (listeDomaines, "", "");
 			}
 			else
 			{
-				selected = false;
+				var listeRes = ajouteLigneSelect (listeDomaines, "", "", true);
 			}
-			//alert(domaines[i].getAttribute("id")+' '+domaines[i].getAttribute("libelle"));
-			listeRes = ajouteLigneSelect (listeRes, domaines[i].getAttribute("libelle"), domaines[i].getAttribute("id"), selected);
+			for (var i=0, c=domaines.length; i<c; i++)
+			{
+				if (domaines[i].getAttribute("selected") == "true")
+				{
+					selected = true;
+				}
+				else
+				{
+					selected = false;
+				}
+				//alert(domaines[i].getAttribute("id")+' '+domaines[i].getAttribute("libelle"));
+				listeRes = ajouteLigneSelect (listeRes, domaines[i].getAttribute("libelle"), domaines[i].getAttribute("id"), selected);
+			}
 		}
 	}
 }
@@ -170,9 +176,25 @@ function readListDomaines(data)
 function majMention(select, valeur='')
 {
 	//alert("maj mention "+valeur);
-	var cod = document.getElementById("composantecod1").value;
+	var cod = document.getElementById("composantecod1");
+	if (cod === null)
+	{
+		cod = '';
+	}
+	else
+	{
+		cod = cod.value;
+	}
 	var id = document.getElementById("selectarrete").value;
-	var dom = document.getElementById("domaine1").value;
+	var dom = document.getElementById("domaine1");
+	if (dom === null)
+	{
+		dom = '';
+	}
+	else
+	{
+		dom = dom.value;
+	}
 	var xhr = getXMLHttpRequest();
 	if (valeur != '')
 	{
