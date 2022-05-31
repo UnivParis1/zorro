@@ -100,6 +100,7 @@ function readListeComposantes(data)
 			}
 			majDomaine(listeComposantes);
 			majMention(listeComposantes);
+			majSpecialite(listeComposantes);
 		}
 	}
 }
@@ -128,6 +129,7 @@ function majDomaine(select,valeur='')
 		{
 			readListDomaines(xhr.responseXML);
 			majMention('', valeur);
+			majSpecialite('', valeur);
 		}
 	}
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -212,6 +214,7 @@ function majMention(select, valeur='')
 		if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0))
 		{
 			readListMentions(xhr.responseXML);
+			majSpecialite('', valeur);
 		}
 	}
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -219,7 +222,7 @@ function majMention(select, valeur='')
 }
 
 
-/* Recupere et cree la liste des mention liees a la composante et au domaine a partir de la reponse xml */
+/* Recupere et cree la liste des mentions liees a la composante et au domaine a partir de la reponse xml */
 function readListMentions(data)
 {
 	var mentions = data.getElementsByTagName("item");
@@ -249,6 +252,87 @@ function readListMentions(data)
 			}
 			//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
 			listeRes = ajouteLigneSelect (listeRes, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("id"), selected);
+		}
+	}
+}
+
+/* Met a jour la specialite */
+function majSpecialite(select, valeur='')
+{
+	//alert("maj mention "+valeur);
+	var cod = document.getElementById("composantecod1");
+	if (cod === null)
+	{
+		cod = '';
+	}
+	else
+	{
+		cod = cod.value;
+	}
+	var id = document.getElementById("selectarrete").value;
+	var mention = document.getElementById("mention1");
+	if (mention === null)
+	{
+		mention = '';
+	}
+	else
+	{
+		mention = mention.value;
+	}
+	var xhr = getXMLHttpRequest();
+	if (valeur != '')
+	{
+		var params = "cod_cmp_dom="+cod+"&idmodel="+id+"&mention="+mention+"&iddecree="+valeur;
+		//alert(params);
+	}
+	else
+	{
+		var params = "cod_cmp_dom="+cod+"&idmodel="+id+"&mention="+mention;
+		//alert(params);
+	}
+	//alert("cod_cmp_dom="+cod+"&idmodel="+id+"&coddfd="+dom);
+	xhr.open("POST", "xml_ajax_composante.php", true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0))
+		{
+			readListSpecialites(xhr.responseXML);
+		}
+	}
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.send(params);
+}
+
+
+/* Recupere et cree la liste des specialites liees a la composante et a la mention a partir de la reponse xml */
+function readListSpecialites(data)
+{
+	var specialites = data.getElementsByTagName("item");
+	var listespecialites = document.getElementById("parcours1");
+	var specialite_div = document.getElementById("parcours_div");
+	specialite_div.setAttribute("style", "display:block;");
+	listespecialites.innerHTML = "";
+	if (specialites.length > 0)
+	{
+		if (specialites.length == 1)
+		{
+			var listeRes = ajouteLigneSelect (listespecialites, "", "");
+		}
+		else
+		{
+			var listeRes = ajouteLigneSelect (listespecialites, "", "", true);
+		}
+		for (var i=0, c=specialites.length; i<c; i++)
+		{
+			if (specialites[i].getAttribute("selected") == "true")
+			{
+				selected = true;
+			}
+			else
+			{
+				selected = false;
+			}
+			//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
+			listeRes = ajouteLigneSelect (listeRes, specialites[i].getAttribute("libelle"), specialites[i].getAttribute("id"), selected);
 		}
 	}
 }

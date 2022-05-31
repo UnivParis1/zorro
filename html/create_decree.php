@@ -926,7 +926,7 @@ else
 							$result = $ref->executeQuery($query);
 							// liste déroulante
 							if ($modelfield['idfield_type'] == 3) { ?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majSpecialite(this);">
 								</select>
 								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 								{ ?>
@@ -940,6 +940,16 @@ else
 								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 								{ ?>
 									<script>majDomaine(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
+								<?php } ?>
+							<?php
+							}
+							elseif ($modelfield['idfield_type'] == 8)
+							{ ?>
+								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+								</select>
+								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+								{ ?>
+									<script>majSpecialite(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
 								<?php } ?>
 							<?php
 							}

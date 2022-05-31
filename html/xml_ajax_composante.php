@@ -44,31 +44,65 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 	$cod_cmp = $_POST['cod_cmp_dom'];
 	if (!isset($_POST['coddfd']))
 	{
-		$query = $model->getQueryField(2); //domaine
-		if ($cod_cmp != '')
+		if (!isset($_POST['mention']))
 		{
-			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
-		}
-		else
-		{
-			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." ORDER BY 2" : " ORDER BY 2";
-		}
-		$result = $ref->executeQuery($query);
-		$valeur = '';
-		if (isset($_POST['iddecree']))
-		{
-			$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
-			$valeur = $mod_decree->getFieldForFieldType(2);
-		}
-		foreach ($result as $dom)
-		{
-			if ($valeur == $dom['value'])
+			$query = $model->getQueryField(2); //domaine
+			if ($cod_cmp != '')
 			{
-				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"true\" />";
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
 			}
 			else
 			{
-				echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"false\" />";
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." ORDER BY 2" : " ORDER BY 2";
+			}
+			$result = $ref->executeQuery($query);
+			$valeur = '';
+			if (isset($_POST['iddecree']))
+			{
+				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+				$valeur = $mod_decree->getFieldForFieldType(2);
+			}
+			foreach ($result as $dom)
+			{
+				if ($valeur == $dom['value'])
+				{
+					echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"true\" />";
+				}
+				else
+				{
+					echo "<item id=\"".$dom['value']."\" libelle=\"".$dom['value']."\" selected=\"false\" />";
+				}
+			}
+		}
+		else
+		{
+			$query = $model->getQueryField(8); //specialite
+			$sql_mention = " AND mev.lib_mev = '".str_replace("'", "''", $_POST['mention'])."' ";
+			if ($cod_cmp != '')
+			{
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_mention." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : $sql_mention." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+			}
+			else
+			{
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_mention." ORDER BY 2" : $sql_mention." ORDER BY 2";
+			}
+			$result = $ref->executeQuery($query);
+			$valeur = '';
+			if (isset($_POST['iddecree']))
+			{
+				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+				$valeur = $mod_decree->getFieldForFieldType(8);
+			}
+			foreach ($result as $spec)
+			{
+				if ($valeur == $spec['value'])
+				{
+					echo "<item id=\"".$spec['value']."\" libelle=\"".$spec['value']."\" selected=\"true\" />";
+				}
+				else
+				{
+					echo "<item id=\"".$spec['value']."\" libelle=\"".$spec['value']."\" selected=\"false\" />";
+				}
 			}
 		}
 	}
@@ -76,7 +110,7 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 	{
 		$query = $model->getQueryField(3); //mention
 		$sql_comp = $cod_cmp != '' ? " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."'" : '';
-		$sql_dfd = $_POST['coddfd'] != '' ? " AND dfd.lib_dfd = '".$_POST['coddfd']."'" : '';
+		$sql_dfd = $_POST['coddfd'] != '' ? " AND dfd.lib_dfd = '".str_replace("'", "''", $_POST['coddfd'])."'" : '';
 		$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd." ORDER BY 2" : $sql_comp.$sql_dfd." ORDER BY 2";
 		//elog(var_export($query, true));
 		$result = $ref->executeQuery($query);
