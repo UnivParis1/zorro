@@ -953,10 +953,6 @@ else
 								{ ?>
 									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
 									</select>
-									<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
-									{ ?>
-										<script>majSpecialite(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
-									<?php } ?>
 								<?php
 								}
 								else

@@ -309,30 +309,33 @@ function readListSpecialites(data)
 	var specialites = data.getElementsByTagName("item");
 	var listespecialites = document.getElementById("parcours1");
 	var specialite_div = document.getElementById("parcours_div");
-	specialite_div.setAttribute("style", "display:block;");
-	listespecialites.innerHTML = "";
-	if (specialites.length > 0)
+	if (specialite_div !== null)
 	{
-		if (specialites.length == 1)
+		specialite_div.setAttribute("style", "display:block;");
+		listespecialites.innerHTML = "";
+		if (specialites.length > 0)
 		{
-			var listeRes = ajouteLigneSelect (listespecialites, "", "");
-		}
-		else
-		{
-			var listeRes = ajouteLigneSelect (listespecialites, "", "", true);
-		}
-		for (var i=0, c=specialites.length; i<c; i++)
-		{
-			if (specialites[i].getAttribute("selected") == "true")
+			if (specialites.length == 1)
 			{
-				selected = true;
+				var listeRes = ajouteLigneSelect (listespecialites, "", "");
 			}
 			else
 			{
-				selected = false;
+				var listeRes = ajouteLigneSelect (listespecialites, "", "", true);
 			}
-			//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
-			listeRes = ajouteLigneSelect (listeRes, specialites[i].getAttribute("libelle"), specialites[i].getAttribute("id"), selected);
+			for (var i=0, c=specialites.length; i<c; i++)
+			{
+				if (specialites[i].getAttribute("selected") == "true")
+				{
+					selected = true;
+				}
+				else
+				{
+					selected = false;
+				}
+				//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
+				listeRes = ajouteLigneSelect (listeRes, specialites[i].getAttribute("libelle"), specialites[i].getAttribute("id"), selected);
+			}
 		}
 	}
 }
