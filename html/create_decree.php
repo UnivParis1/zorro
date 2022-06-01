@@ -921,55 +921,62 @@ else
 							</select>
 							<?php break;
 						case 'query':
-							// récupérer et exécuter la requête 
-							$query = $modelselected->getQueryField($modelfield['idfield_type']);
-							$result = $ref->executeQuery($query);
-							// liste déroulante
-							if ($modelfield['idfield_type'] == 3) { ?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majSpecialite(this);">
-								</select>
-								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
-								{ ?>
-									<script>majMention(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
-								<?php } ?>
-							<?php }
-							elseif ($modelfield['idfield_type'] == 2)
-							{ ?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majMention(this);">
-								</select>
-								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
-								{ ?>
-									<script>majDomaine(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
-								<?php } ?>
-							<?php
-							}
-							elseif ($modelfield['idfield_type'] == 8)
-							{ ?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
-								</select>
-								<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
-								{ ?>
-									<script>majSpecialite(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
-								<?php } ?>
-							<?php
+							if ($rdbApo == false)
+							{
+								$message = "<p class='alerte alerte-warning'>La connexion à Apogée est interrompue. Veuillez nous excuser pour la gêne occasionnée. </p>";
 							}
 							else
-							{ ?>
-								<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-									<option value="">&nbsp;</option>
-								<?php foreach($result as $value)
-									{
-										if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
-										{?>
-											<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
-										<?php }
-										else
-										{ ?>
-											<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
-										<?php }
-									} ?>
-								</select>
-							<?php
+							{
+								// récupérer et exécuter la requête
+								$query = $modelselected->getQueryField($modelfield['idfield_type']);
+								$result = $ref->executeQuery($query);
+								// liste déroulante
+								if ($modelfield['idfield_type'] == 3) { ?>
+									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majSpecialite(this);">
+									</select>
+									<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+									{ ?>
+										<script>majMention(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
+									<?php } ?>
+								<?php }
+								elseif ($modelfield['idfield_type'] == 2)
+								{ ?>
+									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majMention(this);">
+									</select>
+									<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+									{ ?>
+										<script>majDomaine(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
+									<?php } ?>
+								<?php
+								}
+								elseif ($modelfield['idfield_type'] == 8)
+								{ ?>
+									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+									</select>
+									<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+									{ ?>
+										<script>majSpecialite(document.getElementById("<?php echo $modelfield['name'];?>1"), "<?php echo $mod_decree_id; ?>");</script>
+									<?php } ?>
+								<?php
+								}
+								else
+								{ ?>
+									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+										<option value="">&nbsp;</option>
+									<?php foreach($result as $value)
+										{
+											if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
+											{?>
+												<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
+											<?php }
+											else
+											{ ?>
+												<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
+											<?php }
+										} ?>
+									</select>
+								<?php
+								}
 							}
 							break;
 						case 'list':
@@ -1159,7 +1166,11 @@ else
 			<?php } 
 		} else {?>
 		<br><input type='submit' name='valide' value='Enregistrer'><br>
-		<?php } ?>
+		<?php
+			if (isset($message)) {
+				echo $message;
+			}
+		} ?>
 		</div>
 		</div>
 		</form>
