@@ -32,6 +32,7 @@ nav.navigat ul li a { color: white;  text-decoration: none; }
 
 nav.navigat ul li.navcourant { background: #9f6c07; }
 
+nav.navigat ul li.error { background: #CF4A02; }
 
 #contenu1, #contenu2 {
          clear : both;   padding:11px;

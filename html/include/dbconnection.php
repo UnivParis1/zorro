@@ -64,34 +64,37 @@ if (!$rdbApo)
 	
 	$rdbApo = oci_pconnect(DB_APO_USER, DB_APO_PWD, DB_APO_HOST.':1521/'.DB_APO_DATABASE,"AL32UTF8"); 
 	
-	if ($rdbApo == false)
-		die("Connexion ".DB_APO_DATABASE." impossible ".OCIError($rdbApo)."\n");
+	//if ($rdbApo == false)
+	//	die("Connexion ".DB_APO_DATABASE." impossible ".OCIError($rdbApo)."\n");
 		
 }
 
-$sql = "SELECT cod_anu FROM ANNEE_UNI WHERE eta_anu_iae = 'O'";
-$sth = oci_parse($rdbApo, $sql);
-$retour = '';
-if (oci_error($rdbApo))
+if ($rdbApo !== false)
 {
-	elog("Erreur à la préparation de la requête COD_ANU");
-}
-else
-{
-	oci_execute($sth);
-	if (!oci_error($rdbApo))
+	$sql = "SELECT cod_anu FROM ANNEE_UNI WHERE eta_anu_iae = 'O'";
+	$sth = oci_parse($rdbApo, $sql);
+	$retour = '';
+	if (oci_error($rdbApo))
 	{
-		if ($row = oci_fetch_assoc($sth))
-		{
-			$retour = $row['COD_ANU'];
-		}
+		elog("Erreur à la préparation de la requête COD_ANU");
 	}
 	else
 	{
-		elog("Erreur à l\'exécution de la requête COD_ANU.");
-		elog('Erreur : '.var_export(oci_error($rdbApo), true));
+		oci_execute($sth);
+		if (!oci_error($rdbApo))
+		{
+			if ($row = oci_fetch_assoc($sth))
+			{
+				$retour = $row['COD_ANU'];
+			}
+		}
+		else
+		{
+			elog("Erreur à l\'exécution de la requête COD_ANU.");
+			elog('Erreur : '.var_export(oci_error($rdbApo), true));
+		}
+		//echo "L'année universitaire de référence dans Apogée est $retour. <br> ";
 	}
-	//echo "L'année universitaire de référence dans Apogée est $retour. <br> ";
 }
 
 

@@ -154,6 +154,8 @@
 				<ul >
 				<?php if (MODE_TEST == 'O') { ?>
 					<li>MODE TEST</li>
+					<?php } if ($rdbApo == false) { ?>
+					<li class="error">PROBLEME CONNEXION APOGEE</li>
 					<?php } if ($user->isSuperAdmin() || (isset($_SESSION['groupes']) && sizeof($_SESSION['groupes']) > 0) || $user->isAdmin() || $user->isDaji()) { ?>
 					<li id='menu_create' <?php  echo ($menuItem == 'menu_create') ? "class='navcourant'" : '';?> >
 						<a href="create_decree.php">Nouveau document</a>
