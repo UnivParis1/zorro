@@ -550,6 +550,7 @@ class user {
 			$select .= " WHERE d.iduser = ?";
 			$params[] = $iduser;
 		}
+		$select .= " AND d.status != '".STATUT_REMPLACE."' ";
 		if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
 		{
 			$select .= " AND d.idmodel = ?";

@@ -911,4 +911,54 @@ class decree {
 		}
 		return $values;
 	}
+
+	function setRefuseHisto($newid, $motif, $date)
+	{
+		$insert = "INSERT INTO decree_histo_refus (iddecree_old, iddecree_new, refus_comment, refus_date) VALUES (?,?,?,?)";
+		$oldid = $this->getid();
+		$values = array($oldid, $newid, $motif, $date);
+		$result = prepared_query($this->_dbcon, $insert, $values);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("Refus historise : (oldid, newid, motif, date) (".$oldid.",".$newid.",".htmlspecialchars($motif).",".$date.")");
+		}
+		else
+		{
+			elog("Erreur d'historisation du refus : (oldid, newid, motif, date) (".$oldid.",".$newid.",".htmlspecialchars($motif).",".$date.") ".mysqli_error($this->_dbcon));
+		}
+	}
+
+	// Récupérer le commentaire depuis la demande refusée puis dupliquée
+	function getRefuseHisto()
+	{
+		$retour = array();
+		$select = "SELECT refus_comment, refus_date FROM decree_histo_refus WHERE iddecree_new = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$retour = $res;
+			}
+		}
+		return $retour;
+	}
+
+	// Récupérer le commentaire du document refusé puis supprimé de Zorro
+	function getRefusedCommentOnDelete()
+	{
+		$retour = array();
+		$select = "SELECT refus_comment, refus_date FROM decree_histo_refus WHERE iddecree_old = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				$retour = $res;
+			}
+		}
+		return $retour;
+	}
 }

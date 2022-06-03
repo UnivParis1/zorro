@@ -114,6 +114,13 @@
 	
 	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPR_ESIGN && $mod_decree_active)
 	{
+		if ($mod_status == STATUT_REFUSE)
+		{
+			$motif_refus = $mod_decree->getRefuseComment();
+			$mod_decree_infos = $mod_decree->getDecree();
+			$date_refus = $mod_decree_infos['majdate'];
+			$mod_decree->setRefuseHisto(0, $motif_refus, $date_refus);
+		}
 		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS || $mod_status == STATUT_CORBEILLE)
 		{
 			// Supprimer d'esignature
@@ -265,6 +272,11 @@
     			$mod_decree_infos = $mod_decree->getDecree();
     			if ($mod_decree_infos != NULL && $mod_decree->getStatus() != STATUT_VALIDE)
     			{
+					if ($mod_status == STATUT_REFUSE)
+					{
+						$motif_refus = $mod_decree->getRefuseComment();
+						$date_refus = $mod_decree_infos['majdate'];
+					}
 					if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS || $mod_status == STATUT_CORBEILLE)
     				{
     					// TODO : Supprimer d'esignature
@@ -391,6 +403,11 @@
 					elog('decree cree avec numero : '.$numero_dispo);
 					$decree->save($user->getid(), $idmodel, $structure);
 					$decree->setFields($decreefields);
+					if (isset($mod_status) && $mod_status == STATUT_REFUSE)
+					{
+						$mod_decree->setRefuseHisto($decree->getid(), $motif_refus, $date_refus);
+						$mod_decree->setStatus(STATUT_REMPLACE, date("Y-m-d H:i:s"), $user->getid());
+					}
 				}
 				$modelselected = new model($dbcon, $idmodel);
 				$modelfile = new ZipArchive();
@@ -1111,7 +1128,7 @@ else
 								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/non_refuse.svg" alt="Refusé" title="Refusé : <?php echo $motif;?>" width="40px"></a>
 							</div>
 							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>
+								<input type='submit' name='duplique' value='Dupliquer' disabled>
 								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
 								<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
 								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
@@ -1124,6 +1141,11 @@ else
 								<input type='submit' name='supprime' value='Supprimer' disabled>
 								<input type='submit' name='valide' value='Remplacer' disabled>
 								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+								<?php $histo_refus_before_delete = $mod_decree->getRefusedCommentOnDelete();
+									if (sizeof($histo_refus_before_delete) > 0)
+									{ ?>
+										<p class='alerte alerte-info'>Le document a été refusé pour le motif suivant : <?php echo $histo_refus_before_delete['refus_comment'];?></p>
+								<?php } ?>
 								<?php } break;
 							case STATUT_ERREUR : ?>
 								<img src="img/erreur1.svg" alt="Document non trouvé sur eSignature" title="Document non trouvé sur eSignature" width="40px">
@@ -1157,6 +1179,11 @@ else
 				if (isset($message)) {
 					echo $message;
 				}
+				$histo_refus = $mod_decree->getRefuseHisto();
+				if (sizeof($histo_refus) > 0)
+				{ ?>
+					<p class='alerte alerte-info'>Le document remplace une demande refusée pour le motif suivant : <?php echo $histo_refus['refus_comment'];?></p>
+				<?php }
 				//echo $mod_decree->getExportPath();?>
 				<br>
 			<?php } 
