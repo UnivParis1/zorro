@@ -396,11 +396,12 @@ class ldap {
 				{
 					foreach($tab[0]['supannEtuInscription-all'] as $inscription)
 					{
-						if (array_key_exists('affect', $inscription) && array_key_exists('key', $tab[0]['supannEntiteAffectationPrincipale-all']) 
-								&& $inscription['affect'] == $tab[0]['supannEntiteAffectationPrincipale-all']['key'] && array_key_exists('etape', $inscription))
-						{
+						// Affichage de toutes les étapes
+						//if (array_key_exists('affect', $inscription) && array_key_exists('key', $tab[0]['supannEntiteAffectationPrincipale-all']) 
+						//		&& $inscription['affect'] == $tab[0]['supannEntiteAffectationPrincipale-all']['key'] && array_key_exists('etape', $inscription))
+						//{
 							$retour['infoetu'] = $inscription['etape'].' - '.$retour['infoetu'];
-						}
+						//}
 					}
 				}
 			}
@@ -432,6 +433,14 @@ class ldap {
 				// TODO : Liste Rouge...
 				$retour['infoetu'] = array_key_exists('supannentiteaffectationprincipale', $entries[0]) ? $entries[0]['supannentiteaffectationprincipale'][0] : '';
 				$retour['infoetu'] = array_key_exists('supannetuetape', $entries[0]) ? $entries[0]['supannetuetape'][0].' - '.$retour['infoetu'] : $retour['infoetu'];
+				$nbins = sizeof($entries[0]['supannetuetape']);
+				if (array_key_exists('supannetuetape', $entries[0]) &&  $nbins > 2)
+				{
+					for($i = 1; $i < $nbins - 1; $i++)
+					{
+						$retour['infoetu'] = $entries[0]['supannetuetape'][$i].' - '.$retour['infoetu'];
+					}
+				}
 			}
 		}
 		//elog(var_export($retour, true));
