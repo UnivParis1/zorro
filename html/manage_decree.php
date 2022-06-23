@@ -110,12 +110,14 @@
 		</select>
 		<input type='submit' name='rechercher' value='Rechercher'>
 	</form>
-</div>
 
 <?php 
 //$alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees();
 $alldecrees = $user->getDecreesBy($params);
-if (sizeof($alldecrees) > 0) { ?>
+$nbdecree = sizeof($alldecrees); ?>
+	<h4><?php echo $nbdecree;?> résultat(s).</h4>
+</div>
+<?php if ($nbdecree > 0) { ?>
 	<table id="tableau_documents" class="tableausimple">
 		<thead>
 			<tr>
