@@ -551,33 +551,40 @@ class user {
 			$params[] = $iduser;
 		}
 		$select .= " AND d.status != '".STATUT_REMPLACE."' ";
-		if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
+		if (sizeof($criteres) == 0)
 		{
-			$select .= " AND d.idmodel = ?";
-			$params[] = $criteres['idmodel'];
+			$select .= " AND d.status NOT IN ('".STATUT_ANNULE."', '".STATUT_CORBEILLE."', '".STATUT_SUPPR_ESIGN."') ";
 		}
-		if (array_key_exists('status', $criteres) && $criteres['status'] != null)
+		else
 		{
-			$select .= " AND d.status = ?";
-			$params[] = $criteres['status'];
-		}
-		if (array_key_exists('contenu', $criteres) && $criteres['contenu'] != '')
-		{
-			$select .= " AND (concat(d.year,'/',d.number) = ? ";
-			$params[] = $criteres['contenu'];
-			$list_mots = explode(" ", $criteres['contenu']);
-			if (sizeof($list_mots) > 0)
+			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
 			{
-				$select .= " OR exists (SELECT dfi.value FROM decree_field dfi WHERE dfi.iddecree = d.iddecree AND (LOWER(dfi.value) LIKE ? ";
-				$params[] = '%'.mb_strtolower($list_mots[0],'UTF-8').'%';
-				for ($i = 1; $i < sizeof($list_mots); $i++)
-				{
-					$select .= " OR LOWER(dfi.value) LIKE ? ";
-					$params[] = '%'.mb_strtolower($list_mots[$i],'UTF-8').'%';
-				}
-				$select .= "))";
+				$select .= " AND d.idmodel = ?";
+				$params[] = $criteres['idmodel'];
 			}
-			$select .= ")";
+			if (array_key_exists('status', $criteres) && $criteres['status'] != null)
+			{
+				$select .= " AND d.status = ?";
+				$params[] = $criteres['status'];
+			}
+			if (array_key_exists('contenu', $criteres) && $criteres['contenu'] != '')
+			{
+				$select .= " AND (concat(d.year,'/',d.number) = ? ";
+				$params[] = $criteres['contenu'];
+				$list_mots = explode(" ", $criteres['contenu']);
+				if (sizeof($list_mots) > 0)
+				{
+					$select .= " OR exists (SELECT dfi.value FROM decree_field dfi WHERE dfi.iddecree = d.iddecree AND (LOWER(dfi.value) LIKE ? ";
+					$params[] = '%'.mb_strtolower($list_mots[0],'UTF-8').'%';
+					for ($i = 1; $i < sizeof($list_mots); $i++)
+					{
+						$select .= " OR LOWER(dfi.value) LIKE ? ";
+						$params[] = '%'.mb_strtolower($list_mots[$i],'UTF-8').'%';
+					}
+					$select .= "))";
+				}
+				$select .= ")";
+			}
 		}
 		$select .= " ORDER BY majdate DESC";
 		if (sizeof($params) == 0)
