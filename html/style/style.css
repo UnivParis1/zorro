@@ -101,7 +101,7 @@ form #structure_div input {
     border:none ;
     outline:none;
     background:none;
-    width: calc(100% - 160px); /* yam */
+    /*width: calc(100% - 255px);  ebr */
 }
 
 #affichecomposante:read-only {
