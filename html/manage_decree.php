@@ -180,7 +180,8 @@ $nbdecree = sizeof($alldecrees); ?>
 						break;
 					case STATUT_EN_COURS :
 						$contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/enattente.svg' alt='signature en cours' width='20px'></a>";
-						$title = 'En cours de signature';
+						$step = $mod_decree->getSignStep();
+						$title = 'En cours de signature : '.$step;
 						$class = "img";
 						break;
 					case STATUT_ERREUR :

@@ -1107,7 +1107,7 @@ else
 								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
 								<?php } break;
 							case STATUT_EN_COURS : ?>
-								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/clock-solid.svg" alt="En cours de signature" title="En cours de signature" width="40px"></a>
+								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/clock-solid.svg" alt="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" title="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" width="40px"></a>
 							</div>
 							<?php if ($mod_decree_active) { ?>
 								<input type='submit' name='duplique' value='Dupliquer'>
