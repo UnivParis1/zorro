@@ -495,7 +495,7 @@ class ldap {
 		}
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_STRUCTURES, "(supannCodeEntite=".$supannCodeEntite.")", array('ou'));
 		$entries = ldap_get_entries($this->_con_ldap, $result);
-		if (sizeof($entries) > 0)
+		if (is_array($entries) && sizeof($entries) > 0 && array_key_exists('ou', $entries[0]))
 		{
 			$nom_court = $entries[0]['ou'][0];
 		}

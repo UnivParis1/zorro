@@ -100,7 +100,7 @@ class model {
 	
 	function getModelFields()
 	{
-		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_after, mfi.lib_section, mfi.idfield_type_section, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_after, mfi.lib_section, mfi.idfield_type_section, mfi.order, mfi.filename_position, /*mfi.tem_param_esign,*/ fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
 		$params = array($this->_idmodel);
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
@@ -303,5 +303,21 @@ class model {
 			elog("erreur select section from model_field. ".mysqli_error($this->_dbcon));
 		}
 		return $retour;
+	}
+
+	function getModelWorkflow()
+	{
+		$select = "SELECT mw.idetape, mw.recipient_type, mw.recipient_default_value FROM model_workflow mw INNER JOIN decree d ON d.idmodel = mw.idmodel WHERE d.iddecree = ? ORDER BY mw.idetape";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$values = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$values[] = $res;
+			}
+		}
+		return $values;
 	}
 }

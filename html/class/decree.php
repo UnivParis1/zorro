@@ -451,7 +451,7 @@ class decree {
 		$ref = new reference('', '');
 		if ($infosModel['iddecree_type'] == 2) // Commissions pour l'année suivante
 		{
-			$year = $ref->getAnneeUni(true);
+			$year = $ref->getAnneeUni(1);
 		}
 		else
 		{

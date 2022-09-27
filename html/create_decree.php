@@ -54,7 +54,11 @@
     {
     	$post_duplique = $_POST['duplique'];
     }
-    
+    elseif (isset($_POST['modificatif']))
+	{
+		$mode = 'create';
+		$post_modificatif = $_POST['modificatif'];
+	}
     $ldap = new ldap();
     
     /*if (isset($_POST['mod_year']) && isset($_POST['mod_num']))
@@ -112,6 +116,7 @@
 		}
 	}
 	
+	// SUPPRESSION DU DOCUMENT
 	if (isset($_POST['supprime']) && isset($mod_decree) && $mod_status != STATUT_VALIDE && $mod_status != STATUT_SUPPR_ESIGN && $mod_decree_active)
 	{
 		if ($mod_status == STATUT_REFUSE)
@@ -133,6 +138,7 @@
 		$mod_status = STATUT_ANNULE;
 		$message = "<p class='alerte alerte-success'>Le document a été supprimé.</p>";
 	}
+	// ENVOI DU DOCUMENT A LA SIGNATURE
 	elseif (isset($_POST['sign']) && isset($mod_decree) && $mod_status == STATUT_BROUILLON && $mod_decree_active) 
 	{
 		$ldap = new ldap();
@@ -245,6 +251,7 @@
 			elog("pas de code composante pour le decree ".$mod_decree_id." avant envoi à eSignature.");
 		}
 	}
+	// MODIFICATION D UN ARRETE
 	elseif (isset($post_selectarrete) && $post_selectarrete != '' || (isset($mod_select_decree) && $mod_decree_active))
     {
     	$selectarrete = isset($mod_select_decree) ? $mod_select_decree['idmodel'] : $post_selectarrete;
@@ -415,11 +422,13 @@
 				{
 					if ($decree->getModel()->getModelInfo()['iddecree_type'] == 2)
 					{
-						$anneeuniv = $ref->getAnneeUni(true);
+						$anneeuniv = $ref->getAnneeUni(1);
 					}
 					else
 					{
 						$anneeuniv = $ref->getAnneeUni();
+						$anneeunivplusun =  $ref->getAnneeUni(1);
+						$anneeunivplusdeux = $ref->getAnneeUni(2);
 					}
 					$fieldstoinsert = $decree->getFields();
 					// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
@@ -559,7 +568,7 @@
 							{
 								$champsamodif[] = array("valeur" => "- ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
-							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
+							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox' || $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox2')
 							{
 								$champsamodif[] = array("valeur" => "[x]".$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
@@ -589,6 +598,14 @@
 							if ($field == "anneeuni")
 							{
 								$champsamodif[] = array("valeur" => $anneeuniv, "position" => $position1, "longueur" => (strlen($field)+6));
+							}							
+							elseif ($field == "anneeuniplusun")
+							{
+								$champsamodif[] = array("valeur" => $anneeunivplusun, "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+							elseif ($field == "anneeuniplusdeux")
+							{
+								$champsamodif[] = array("valeur" => $anneeunivplusdeux, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 							elseif ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
 									|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))) // Pour supprimer les lignes des sections inutilisées
@@ -605,6 +622,10 @@
 							elseif(key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists(0, $fieldstoinsert[$modelfieldsarrange[$field]]))
 							{
 								$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][0]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+							}
+							elseif (array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox2')
+							{
+								$champsamodif[] = array("valeur" => "[ ]".$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 							else
 							{
@@ -637,7 +658,14 @@
 							1 => array("pipe", "w"),  // stdout
 							2 => array("pipe", "w"),  // stderr
 					);
-					$process = proc_open("unoconv --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
+					if (strpos($_SERVER['SystemRoot'], 'WINDOWS') === false)
+					{
+						$process = proc_open("unoconv --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
+					}
+					else
+					{
+						$process = proc_open("python.exe \"C:\Program Files\Unoconv\unoconv-0.8.2\unoconv\" --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
+					}
 					$stdout = stream_get_contents($pipes[1]);
 					fclose($pipes[1]);
 
@@ -1010,7 +1038,8 @@ else
 								</select>
 							<?php }
 							break;
-						case 'checkbox':
+							case 'checkbox':
+							case 'checkbox2':
 							if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 							{
 								$selected = 'checked';
