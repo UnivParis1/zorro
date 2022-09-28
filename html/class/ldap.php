@@ -400,7 +400,7 @@ class ldap {
 						//if (array_key_exists('affect', $inscription) && array_key_exists('key', $tab[0]['supannEntiteAffectationPrincipale-all']) 
 						//		&& $inscription['affect'] == $tab[0]['supannEntiteAffectationPrincipale-all']['key'] && array_key_exists('etape', $inscription))
 						//{
-							$retour['infoetu'] = $inscription['etape'].' - '.$retour['infoetu'];
+							$retour['infoetu'] = htmlspecialchars($inscription['etape']).' - '.$retour['infoetu'];
 						//}
 					}
 				}
