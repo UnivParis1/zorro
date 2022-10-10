@@ -683,7 +683,7 @@ class decree {
 					if (isset($response['comments'][0]['text']))
 					{
 						elog ("Commentaire : ".$response['comments'][0]['text']);
-						return $response['comments'][0]['text'];
+						return htmlspecialchars($response['comments'][0]['text']);
 					}
 					else
 					{
