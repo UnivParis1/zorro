@@ -171,6 +171,9 @@
 					<li id='menu_model' <?php echo ($menuItem == 'menu_model') ? "class='navcourant'" : '';?> >
 						<a href="manage_model.php">Modèles</a>
 					</li>
+					<li id='menu_signature' <?php echo ($menuItem == 'menu_signature') ? "class='navcourant'" : '';?> >
+						<a href="info_signature.php">Info Signature</a>
+					</li>
 					<?php } ?>	
 					<?php if (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
 					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
