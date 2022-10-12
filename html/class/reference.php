@@ -355,4 +355,19 @@ class reference {
 		}
 		return $year;
 	}
+
+	function idEsignatureExists($id)
+	{
+		$select = "SELECT iddecree FROM decree WHERE idesignature = ?";
+		$params = array($id);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
 }
