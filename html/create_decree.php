@@ -300,6 +300,20 @@
     				// TODO : Supprimer le PDF qui avait été créé
     			}
     		}
+			elseif($post_valide == "Enregistrer")
+			{
+				$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
+				$mod_decree_infos = $mod_decree->getDecree();
+				if ($mod_decree_infos != NULL && $mod_decree->getStatus() == STATUT_BROUILLON)
+				{
+					$oldyear = $mod_decree->getYear();
+					if ($oldyear == $year)
+					{
+						$numero_dispo = $mod_decree->getNumber();
+						elog("numero dispo remplacé par l'ancien : Enregistrement d'un brouillon.");
+					}
+				}
+			}
     		$idmodel_field_numero = $modelselected->getNumeroId();
 			$erreurnumero = false;
 			if ($idmodel_field_numero != 0)
