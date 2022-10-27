@@ -470,7 +470,7 @@
 					$modelfile->open(PDF_PATH.$odtfilename);
 					// extraction du content.xml dans le dossier temporaire pour l'arrêté
 					// TODO : nommer le document selon TAGS
-					$modelfile->extractTo(PDF_PATH.$year.'_'.$numero_dispo."/", array('content.xml'));
+					$modelfile->extractTo(PDF_PATH.$year.'_'.$numero_dispo."/", array('content.xml', 'styles.xml'));
 					// ouverture du content.xml extrait
 					$content = fopen(PDF_PATH.$year.'_'.$numero_dispo."/content.xml", 'r+');
 					// lecture du content.xml extrait
@@ -664,6 +664,29 @@
 					// Ajout du fichier dans le document
 					$modelfile->addFile(PDF_PATH.$year.'_'.$numero_dispo."/content2.xml", 'content.xml');
 					//print_r2($fieldstoinsert);
+
+					// Modification du pied de page année / numero
+					$styles = fopen(PDF_PATH.$year.'_'.$numero_dispo."/styles.xml", 'r+');
+					$stylescontenu = fread($styles, filesize(PDF_PATH.$year.'_'.$numero_dispo."/styles.xml"));
+					$stylesnew = $stylescontenu;
+					fclose($styles);
+					$styles = fopen(PDF_PATH.$year.'_'.$numero_dispo."/styles2.xml", 'w');
+					$position_annee = 0;
+					while (strpos($stylesnew, '$$$annee$$$',$position_annee) !== false)
+					{
+						$position_annee = strpos($stylesnew, '$$$annee$$$',$position_annee);
+						$stylesnew = substr_replace($stylesnew, $fieldstoinsert[$modelfieldsarrange['annee']][0]['value'], $position_annee, 11);
+					}
+					$position_numero = 0;
+					while (strpos($stylesnew, '$$$numero$$$',$position_numero) !== false)
+					{
+						$position_numero = strpos($stylesnew, '$$$numero$$$');
+						$stylesnew = substr_replace($stylesnew, $fieldstoinsert[$modelfieldsarrange['numero']][0]['value'], $position_numero, 12);
+					}
+					fwrite($styles, $stylesnew);
+					fclose($styles);
+					// Ajout du fichier dans le document
+					$modelfile->addFile(PDF_PATH.$year.'_'.$numero_dispo."/styles2.xml", 'styles.xml');
 					$modelfile->close();
 
 					// CONVERSION EN PDF
