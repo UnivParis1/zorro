@@ -271,7 +271,7 @@
     	$decreefields = array();
     	if (isset($post_valide)||isset($post_duplique))
     	{
-			elog("Enregistrement du document : ".$mod_decree_id);
+			elog("Enregistrement du document : ".(isset($mod_decree_id) ? $mod_decree_id : 'nouveau'));
     		// Si le document est en mode modif et qu'il n'est pas validé dans esignature on supprime le numero d'arrêté et on crée un nouveau
 			if (isset($mod_year) && isset($mod_num) && isset($post_valide) && $post_valide == "Remplacer")
     		{
@@ -300,7 +300,7 @@
     				// TODO : Supprimer le PDF qui avait été créé
     			}
     		}
-			elseif($post_valide == "Enregistrer")
+			elseif($post_valide == "Enregistrer" && isset($mod_decree_id))
 			{
 				$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
 				$mod_decree_infos = $mod_decree->getDecree();
