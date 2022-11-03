@@ -1106,10 +1106,19 @@ else
 							break;
 						default:
 							if ($modelfield['idfield_type'] == 10) {
-								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) {
+								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && array_key_exists($i-1, $mod_decree_fields[$modelfield['idmodel_field']])) {
 									$composante = $ref->executeQuery(array('schema'=>'APOGEE',
-											'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'"))[0];
-									$value = $composante['value']; ?>
+											'query' => "SELECT cmp.cod_cmp, cmp.lib_web_cmp FROM composante cmp WHERE cmp.tem_en_sve_cmp = 'O' AND cmp.cod_cmp = '".$mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value']."'"));
+									if (is_array($composante) && array_key_exists(0, $composante))
+									{
+										$composante = $composante[0];
+										$value = $composante['value'];
+									}
+									else
+									{
+										$composante = array('code' => '');
+										$value = "";
+									}?>
 									<input type='hidden' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' value="<?php echo $composante['code'];?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 									<input type='hidden' id='affichecomposante' value="<?php echo $value;?>" readonly>
 							<?php }
