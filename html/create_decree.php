@@ -1104,6 +1104,11 @@ else
 								<input class="calendrier" type="date" name='<?php echo $modelfield['name'].$i;?>' id='<?php echo $modelfield['name'].$i;?>' size=10 value="<?php echo date('Y-m-d');?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 							<?php }
 							break;
+						case 'textarea':
+							$value = (isset($_POST[$modelfield['name'].$i])) ? $_POST[$modelfield['name'].$i] : '';
+							$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] : '';?>
+							<textarea rows=1 cols=50 id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' value="<?php echo $value;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');"><?php echo $value;?></textarea>
+							<?php break;
 						default:
 							if ($modelfield['idfield_type'] == 10) {
 								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && array_key_exists($i-1, $mod_decree_fields[$modelfield['idmodel_field']])) {
