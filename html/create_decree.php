@@ -462,6 +462,7 @@
 					$modelfieldsarrange = array_column($modelfields, 'idmodel_field', 'name');
 					$modelfieldstype = array_column($modelfields, 'datatype', 'idmodel_field');
 					$modelfieldscomp = array_column($modelfields, 'complement_after', 'name');
+					$modelfieldscompb = array_column($modelfields, 'complement_before', 'name');
 					//echo "<br>modelfieldsarrange <br><br>"; print_r2($modelfieldsarrange);
 					//echo "<br>modelfieldstype <br><br>"; print_r2($modelfieldstype);
 					// copie du modele pour l'arrêté
@@ -575,23 +576,27 @@
 						{
 							$comp_after = $modelfieldscomp[$field];
 						}
+						if (array_key_exists($field, $modelfieldscompb) && $modelfieldscompb[$field] != null)
+						{
+							$comp_before .= $modelfieldscompb[$field];
+						}
 						if (key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists($nb_field[$field], $fieldstoinsert[$modelfieldsarrange[$field]]))
 						{
 
 							// echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']."<br>";
 							if ($modelfieldstype[$modelfieldsarrange[$field]] == 'user')
 							{
-								$champsamodif[] = array("valeur" => "- ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+								$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox' || $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox2')
 							{
-								$champsamodif[] = array("valeur" => "[x]".$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+								$champsamodif[] = array("valeur" => $comp_before."[x]".$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'date')
 							{
 								$date = new DateTime($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
 								$date = $date->format("d/m/Y");
-								$champsamodif[] = array("valeur" => $date.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+								$champsamodif[] = array("valeur" => $comp_before.$date.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 							elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'list')
 							{
@@ -604,7 +609,7 @@
 							}
 							else
 							{
-								$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+								$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 						}
 						else
@@ -636,7 +641,7 @@
 							}
 							elseif(key_exists($field, $modelfieldsarrange) && key_exists($modelfieldsarrange[$field], $fieldstoinsert) && key_exists(0, $fieldstoinsert[$modelfieldsarrange[$field]]))
 							{
-								$champsamodif[] = array("valeur" => $fieldstoinsert[$modelfieldsarrange[$field]][0]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+								$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][0]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 							}
 							elseif (array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox2')
 							{
