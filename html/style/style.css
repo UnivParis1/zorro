@@ -72,7 +72,7 @@ form {
 
 }
 
-form select,form input {
+form select,form input,form textarea {
      font-size: 13px;
      color: #00326e;
      border: 1px solid #00326e5c;

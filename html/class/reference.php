@@ -290,7 +290,8 @@ class reference {
 				STATUT_ANNULE => 'Annulé',
 				STATUT_CORBEILLE => 'Document dans la corbeille d\'eSignature',
 				STATUT_SUPPR_ESIGN => 'Document supprimé d\'eSignature',
-				STATUT_ERREUR => 'Document non trouvé sur eSignature');
+				STATUT_ERREUR => 'Document non trouvé sur eSignature',
+				STATUT_HORS_ZORRO => 'Document Hors Zorro');
 	}
 
 	function getStructureExportPath($structure)

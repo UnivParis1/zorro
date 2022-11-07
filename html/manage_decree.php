@@ -173,6 +173,11 @@ $nbdecree = sizeof($alldecrees); ?>
 						$title = 'Brouillon';
 						$class = "img";
 						break;
+					case STATUT_HORS_ZORRO :
+						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/valide_OK.svg' alt='hors_zorro' width='20px'></a>";
+						$title = 'Hors Zorro';
+						$class = "img";
+						break;
 					case STATUT_VALIDE :
 						$contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
 						$title = 'Validé';

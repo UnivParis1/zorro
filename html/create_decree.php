@@ -304,7 +304,7 @@
 			{
 				$mod_decree = new decree($dbcon, null, null, $mod_decree_id);
 				$mod_decree_infos = $mod_decree->getDecree();
-				if ($mod_decree_infos != NULL && $mod_decree->getStatus() == STATUT_BROUILLON)
+				if ($mod_decree_infos != NULL && ($mod_decree->getStatus() == STATUT_BROUILLON || $mod_decree->getStatus() == STATUT_HORS_ZORRO))
 				{
 					$oldyear = $mod_decree->getYear();
 					if ($oldyear == $year)
@@ -409,7 +409,7 @@
 				}
 				$idmodel = $post_selectarrete;
 				$structure = htmlspecialchars($_POST['structure1']);
-				if (isset($post_valide) && $post_valide == "Enregistrer" && isset($mod_status) && $mod_status == STATUT_BROUILLON)
+				if (isset($post_valide) && $post_valide == "Enregistrer" && isset($mod_status) && ($mod_status == STATUT_BROUILLON || $mod_status == STATUT_HORS_ZORRO))
 				{
 					// update le decree
 					$decree = new decree($dbcon, null, null, $mod_decree_id);
@@ -738,12 +738,19 @@
 			{
 				elog("Le document "."./models/".$modelselected->getfile()." n'existe pas !");
 			}
-			if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique) || (isset($post_valide) && $post_valide == "Enregistrer" && isset($mod_status) && $mod_status == STATUT_BROUILLON))
+			if ($mode == 'create' || (isset($post_valide) && $post_valide == "Remplacer") || isset($post_duplique) || (isset($post_valide) && $post_valide == "Enregistrer" && isset($mod_status) && ($mod_status == STATUT_BROUILLON || $mod_status == STATUT_HORS_ZORRO)))
 				{
 					$mod_num = $numero_dispo;
 					$mod_year = $year;
 					$mod_decree_id = $decree->getId();
-					$mod_status = STATUT_BROUILLON;
+					if ($decree->getModelId() == 27)
+					{
+						$mod_status = STATUT_HORS_ZORRO;
+					}
+					else
+					{
+						$mod_status = STATUT_BROUILLON;
+					}
 					$mode = 'modif';
 				}
 			}
@@ -1182,85 +1189,108 @@ else
 			if (isset($mod_decree))
 			{ ?>
 				<div id="aff_numero_div"><?php echo $mod_year.' / '.$mod_num;?>
-				<?php switch ($mod_status) {
-							case STATUT_BROUILLON : ?>
-								<img src="img/file-signature-solid.svg" alt="Brouillon" title="Brouillon" width="40px">
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>	
-								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
-								<input type='submit' name='valide' value='Enregistrer'>
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
-								<?php } break;
-							case STATUT_EN_COURS : ?>
-								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/clock-solid.svg" alt="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" title="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" width="40px"></a>
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>
-								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
-								<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php } break;
-							case STATUT_VALIDE : ?>
-								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/valide_OK.svg" alt="Validé" title="Validé" width="40px"></a>
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>
-								<input type='submit' name='supprime' value='Supprimer' disabled>
-								<input type='submit' name='valide' value='Remplacer' disabled>
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php } break;
-							case STATUT_REFUSE : $motif = $mod_decree->getRefuseComment();?>
-								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/non_refuse.svg" alt="Refusé" title="Refusé : <?php echo $motif;?>" width="40px"></a>
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer' disabled>
-								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
-								<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php } break;
-							case STATUT_ANNULE : ?>
-								<img src="img/trash-alt-solid.svg" alt="Supprimé" title="Supprimé" width="40px">
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>
-								<input type='submit' name='supprime' value='Supprimer' disabled>
-								<input type='submit' name='valide' value='Remplacer' disabled>
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php $histo_refus_before_delete = $mod_decree->getRefusedCommentOnDelete();
-									if (sizeof($histo_refus_before_delete) > 0)
-									{ ?>
-										<p class='alerte alerte-info'>Le document a été refusé pour le motif suivant : <?php echo $histo_refus_before_delete['refus_comment'];?></p>
-								<?php } ?>
-								<?php } break;
-							case STATUT_ERREUR : ?>
-								<img src="img/erreur1.svg" alt="Document non trouvé sur eSignature" title="Document non trouvé sur eSignature" width="40px">
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>
-								<input type='submit' name='supprime' value='Supprimer' disabled>
-								<input type='submit' name='valide' value='Remplacer' disabled>
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php } break;
-							case STATUT_SUPPR_ESIGN : ?>
-								<img src="img/trash-alt-solid.svg" alt="Document supprimé d'eSignature" title="Document supprimé d'eSignature" width="40px">
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>
-								<input type='submit' name='supprime' value='Supprimer' disabled>
-								<input type='submit' name='valide' value='Remplacer' disabled>
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php } break;
-							case STATUT_CORBEILLE : ?>
-								<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/trash-alt-solid.svg" alt="Document dans la corbeille d'eSignature" title="Document dans la corbeille d'eSignature" width="40px"></a>
-							</div>
-							<?php if ($mod_decree_active) { ?>
-								<input type='submit' name='duplique' value='Dupliquer'>
-								<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
-								<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
-								<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
-								<?php } break;
-							default : break;
+				<?php if ($mod_decree->getModelId() == 27) {
+					if ($mod_status == STATUT_HORS_ZORRO) { ?>
+						<img src="img/valide_OK.svg" alt="Hors Zorro" title="Hors Zorro" width="40px">
+						</div>
+						<?php if ($mod_decree_active) { ?>
+							<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre arrêté Hors Zorro ?')">
+							<input type='submit' name='valide' value='Enregistrer'>
+						<?php }
+					}
+					else
+					{ ?>
+							<img src="img/trash-alt-solid.svg" alt="Supprimé" title="Supprimé" width="40px">
+						</div>
+					<?php }
+
+				}
+				else
+				{?>
+					<?php switch ($mod_status) {
+								case STATUT_BROUILLON : ?>
+									<img src="img/file-signature-solid.svg" alt="Brouillon" title="Brouillon" width="40px">
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer'>
+									<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre brouillon ?')">
+									<input type='submit' name='valide' value='Enregistrer'>
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
+									<?php } break;
+								case STATUT_EN_COURS : ?>
+									<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/clock-solid.svg" alt="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" title="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" width="40px"></a>
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer'>
+									<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+									<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+									<?php } break;
+								case STATUT_VALIDE : ?>
+									<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/valide_OK.svg" alt="Validé" title="Validé" width="40px"></a>
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer'>
+									<input type='submit' name='supprime' value='Supprimer' disabled>
+									<input type='submit' name='valide' value='Remplacer' disabled>
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+									<?php $iddecree_type = $modelselected->getDecreeType()['iddecree_type'];
+									if ($iddecree_type == '1' || $iddecree_type == '2') { ?>
+										<input type="submit" name='modificatif' value="Arrêté modificatif">
+									<?php } ?>
+									<?php } break;
+								case STATUT_REFUSE : $motif = $mod_decree->getRefuseComment();?>
+									<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/non_refuse.svg" alt="Refusé" title="Refusé : <?php echo $motif;?>" width="40px"></a>
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer' disabled>
+									<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+									<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+									<?php } break;
+								case STATUT_ANNULE : ?>
+									<img src="img/trash-alt-solid.svg" alt="Supprimé" title="Supprimé" width="40px">
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer'>
+									<input type='submit' name='supprime' value='Supprimer' disabled>
+									<input type='submit' name='valide' value='Remplacer' disabled>
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+									<?php $histo_refus_before_delete = $mod_decree->getRefusedCommentOnDelete();
+										if (sizeof($histo_refus_before_delete) > 0)
+										{ ?>
+											<p class='alerte alerte-info'>Le document a été refusé pour le motif suivant : <?php echo $histo_refus_before_delete['refus_comment'];?></p>
+									<?php } ?>
+									<?php } break;
+								case STATUT_ERREUR : ?>
+									<img src="img/erreur1.svg" alt="Document non trouvé sur eSignature" title="Document non trouvé sur eSignature" width="40px">
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer'>
+									<input type='submit' name='supprime' value='Supprimer' disabled>
+									<input type='submit' name='valide' value='Remplacer' disabled>
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+									<?php } break;
+								case STATUT_SUPPR_ESIGN : ?>
+									<img src="img/trash-alt-solid.svg" alt="Document supprimé d'eSignature" title="Document supprimé d'eSignature" width="40px">
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer'>
+									<input type='submit' name='supprime' value='Supprimer' disabled>
+									<input type='submit' name='valide' value='Remplacer' disabled>
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+									<?php } break;
+								case STATUT_CORBEILLE : ?>
+									<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/trash-alt-solid.svg" alt="Document dans la corbeille d'eSignature" title="Document dans la corbeille d'eSignature" width="40px"></a>
+								</div>
+								<?php if ($mod_decree_active) { ?>
+									<input type='submit' name='duplique' value='Dupliquer'>
+									<input type='submit' name='supprime' value='Supprimer' onclick="return confirm('Êtes-vous sûr de vouloir supprimer la demande initiale ? La demande de signature sera également supprimée.')">
+									<input type='submit' name='valide' value='Remplacer' onclick="return confirm('Êtes-vous sûr de vouloir remplacer la demande initiale ? La demande de signature sera également supprimée.')">
+									<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
+									<?php } break;
+								default : break;
+					}
 				}
 				if (isset($message)) {
 					echo $message;

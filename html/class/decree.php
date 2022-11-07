@@ -297,15 +297,20 @@ class decree {
 	
 	function save($iduser, $idmodel, $structure, $update=false)
 	{
+		$status = STATUT_BROUILLON;
+		if ($idmodel == 27)
+		{
+			$status = STATUT_HORS_ZORRO;
+		}
 		if ($update)
 		{
 			$insert = "UPDATE decree SET year = ?, number = ?, majdate = NOW(), idmajuser = ?, idmodel = ?, status = ?, structure = ? WHERE iddecree = ?";
-			$params = array($this->getYear(), $this->getNumber(), $iduser, $idmodel, STATUT_BROUILLON, $structure, $this->getid());
+			$params = array($this->getYear(), $this->getNumber(), $iduser, $idmodel, $status, $structure, $this->getid());
 		}
 		else 
 		{
 			$insert = "INSERT INTO decree (`year`, `number`, `createdate`, `iduser`, `idmodel`, `status`, `structure`) VALUES (?, ?, NOW(), ?, ?, ?, ?)";
-			$params = array($this->_year, $this->_number, $iduser, $idmodel, STATUT_BROUILLON, $structure);
+			$params = array($this->_year, $this->_number, $iduser, $idmodel, $status, $structure);
 		}
 		$result = prepared_query($this->_dbcon, $insert, $params);
 		if ( !mysqli_error($this->_dbcon))
