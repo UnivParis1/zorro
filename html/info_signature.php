@@ -154,8 +154,15 @@
                 else
                 {
                     echo "<B>En attente de l'étape : Pas d'étape en attente (circuit terminé)</B><br>";
-                    $displaydatefin = date("d/m/Y H:i:s", strtotime($response["parentSignBook"]["endDate"]));
-                    echo "Date de fin : " . $displaydatefin . " (Valeur brute : " . $response["parentSignBook"]["endDate"] . ")<br>";
+                    if(isset($response["parentSignBook"]["endDate"]))
+                    {
+                        $displaydatefin = date("d/m/Y H:i:s", strtotime($response["parentSignBook"]["endDate"]));
+                        echo "Date de fin : " . $displaydatefin . " (Valeur brute : " . $response["parentSignBook"]["endDate"] . ")<br>";
+                    }
+                    if (isset($response['comments'][0]['text']))
+                    {
+                        echo "Commentaire de refus : ".htmlspecialchars($response['comments'][0]['text'])."<br>";
+                    }
                 }
                 echo "<br><br>";
             }
