@@ -112,7 +112,16 @@
             {
                 echo "<br><br>Créateur : " . $response["parentSignBook"]["createBy"]["firstname"] . " " . $response["parentSignBook"]["createBy"]["name"] . "<br>";
                 //echo "Date de création : " . date("d/m/Y H:i:s", substr($response["parentSignBook"]["createDate"],0,strlen($response["parentSignBook"]["createDate"])-3)) . " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
-                $displaydate = date("d/m/Y H:i:s", strtotime($response["parentSignBook"]["createDate"])); // substr($response["parentSignBook"]["createDate"],0,10);
+                if (!is_int($response['parentSignBook']['createDate']))
+                {
+                    $date = new DateTime($response['parentSignBook']['createDate']);
+                    $displaydate = $date->format("Y-m-d H:i:s");
+                }
+                else
+                {
+                    // FORMAT /1000 pour ôter les millisecondes
+                    $displaydate = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['createDate'], 1000));
+                }
                 echo "Date de création : " . $displaydate . " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
                 echo "Statut de la demande : " . $response["parentSignBook"]["status"] . "<br>";
                 echo "<br>";
@@ -156,7 +165,16 @@
                     echo "<B>En attente de l'étape : Pas d'étape en attente (circuit terminé)</B><br>";
                     if(isset($response["parentSignBook"]["endDate"]))
                     {
-                        $displaydatefin = date("d/m/Y H:i:s", strtotime($response["parentSignBook"]["endDate"]));
+                        if (!is_int($response['parentSignBook']['endDate']))
+						{
+							$date = new DateTime($response['parentSignBook']['endDate']);
+							$displaydatefin = $date->format("Y-m-d H:i:s");
+						}
+						else
+						{
+							// FORMAT /1000 pour ôter les millisecondes
+							$displaydatefin = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
+						}
                         echo "Date de fin : " . $displaydatefin . " (Valeur brute : " . $response["parentSignBook"]["endDate"] . ")<br>";
                     }
                     if (isset($response['comments'][0]['text']))

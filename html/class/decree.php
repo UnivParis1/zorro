@@ -603,8 +603,16 @@ class decree {
 								$date = date("Y-m-d H:i:s");
 								if (isset($response['parentSignBook']['endDate']))
 								{
-									$date = new DateTime($response['parentSignBook']['endDate']);
-									$date = $date->format("Y-m-d H:i:s");
+									if (!is_int($response['parentSignBook']['endDate']))
+									{
+										$date = new DateTime($response['parentSignBook']['endDate']);
+										$date = $date->format("Y-m-d H:i:s");
+									}
+									else
+									{
+										// FORMAT /1000 pour ôter les nanosecondes
+										$date = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
+									}
 								}
 								break;
 							case 'refused':
@@ -612,18 +620,32 @@ class decree {
 								$date = date("Y-m-d H:i:s");
 								if (isset($response['parentSignBook']['endDate']))
 								{
-									$date = new DateTime($response['parentSignBook']['endDate']);
-									$date = $date->format("Y-m-d H:i:s");
+									if (!is_int($response['parentSignBook']['endDate']))
+									{
+										$date = new DateTime($response['parentSignBook']['endDate']);
+										$date = $date->format("Y-m-d H:i:s");
+									}
+									else
+									{
+										// FORMAT /1000 pour ôter les nanosecondes
+										$date = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
+									}
 								}
+								// TODO : Libérer le numéro
 								break;
 							case 'deleted' : // TODO : Attention le document est dans la corbeille
 							case 'canceled' :
 								$new_status = STATUT_CORBEILLE; // trash
 								$date = date("Y-m-d H:i:s");
-								if (isset($response['parentSignBook']['updateDate']))
+								if (!is_int($response['parentSignBook']['endDate']))
 								{
-									$date = new DateTime($response['parentSignBook']['updateDate']);
+									$date = new DateTime($response['parentSignBook']['endDate']);
 									$date = $date->format("Y-m-d H:i:s");
+								}
+								else
+								{
+									// FORMAT /1000 pour ôter les millisecondes
+									$date = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
 								}
 								break;
 							case '' : elog('Erreur Statut vide esignature... Ne rien faire');
