@@ -138,7 +138,7 @@ $nbdecree = sizeof($alldecrees); ?>
 				<?php if ($decree['number'] == 0) {?>
 					<td></td>
 				<?php } else {?>
-					<td class="cellulesimple"><?php echo $decree['year'].'/'.$decree['number'];?></td>
+					<td class="cellulesimple"><?php echo 'A-'.$decree['year'].'-'.$decree['number'];?></td>
 				<?php } ?>
 				<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
 				<td class="cellulesimple" title="<?php echo $objdecree->getFileName(); ?>"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $nom_aff; ?></a></td>

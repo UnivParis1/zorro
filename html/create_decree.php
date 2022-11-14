@@ -1188,7 +1188,7 @@ else
 			<?php // Contrôler l'état de la demande dans esignature 
 			if (isset($mod_decree))
 			{ ?>
-				<div id="aff_numero_div"><?php echo $mod_year.' / '.$mod_num;?>
+				<div id="aff_numero_div"><?php echo 'A-'.$mod_year.'-'.$mod_num;?>
 				<?php if ($mod_decree->getModelId() == 27) {
 					if ($mod_status == STATUT_HORS_ZORRO) { ?>
 						<img src="img/valide_OK.svg" alt="Hors Zorro" title="Hors Zorro" width="40px">
