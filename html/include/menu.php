@@ -31,6 +31,8 @@
     }
     require_once('./class/ldap.php');
     $ldap = new ldap();
+    require_once('./class/reference.php');
+    $ref = new reference($dbcon, $rdbApo);
 
 ?>
 
@@ -152,7 +154,9 @@
 		<header id="header-zorro">
 			<nav class="navigat" >
 				<ul >
-				<?php if (MODE_TEST == 'O') { ?>
+				<?php if ($ref->getModeMaintenance()) { ?>
+					<li>MAINTENANCE</li>
+				<?php } elseif (MODE_TEST == 'O') { ?>
 					<li>MODE TEST</li>
 					<?php } if ($rdbApo == false && $user->isSuperAdmin()) { ?>
 					<li class="error">PROBLEME CONNEXION APOGEE</li>
@@ -179,6 +183,11 @@
 					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
 						<a href="admin_substitution.php">Changer d'utilisateur</a>
 					</li>	
+					<?php } ?>
+					<?php if ($user->isSuperAdmin()) { ?>
+					<li id='menu_maintenance' <?php echo ($menuItem == 'menu_maintenance') ? "class='navcourant'" : '';?> >
+						<a href="maintenance.php">Mode Maintenance</a>
+					</li>
 					<?php } ?>
 				</ul>
 			</nav>

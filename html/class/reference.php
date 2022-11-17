@@ -371,4 +371,39 @@ class reference {
 		}
 		return FALSE;
 	}
+
+	function getModeMaintenance()
+	{
+		$select= "SELECT value FROM constant WHERE name = 'MAINTENANCE'";
+		$result = mysqli_query($this->_dbcon, $select);
+		if (mysqli_error($this->_dbcon))
+		{
+			elog("Erreur a l'execution de la requete select MAINTENANCE.");
+		}
+		else {
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				//elog('MODE MAINTENANCE :'.$row['value']);
+				return ($row['value'] == 'TRUE' ? TRUE : FALSE);
+			}
+		}
+		return FALSE;
+	}
+
+	function setModeMaintenance($mode)
+	{
+		$update = "UPDATE constant SET constant.value = ? WHERE constant.name = 'MAINTENANCE'";
+		$params = array($mode);
+		$result = prepared_query($this->_dbcon, $update, $params);
+		if (mysqli_error($this->_dbcon))
+		{
+			elog("Erreur a l'execution de la requete update MAINTENANCE : ".htmlspecialchars($mode));
+			return FALSE;
+		}
+		else
+		{
+			elog('SET MODE MAINTENANCE : '.htmlspecialchars($mode));
+			return TRUE;
+		}
+	}
 }
