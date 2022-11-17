@@ -13,6 +13,7 @@
         $userid = $_POST["userid"];
     else
         $userid = null;*/
+	$message = '';
     $ref = new reference($dbcon, $rdbApo);
     $userid = $ref->getUserUid();
     //echo $_SESSION['uid'];
@@ -129,14 +130,21 @@
 		if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS || $mod_status == STATUT_CORBEILLE)
 		{
 			// Supprimer d'esignature
-			$mod_decree->deleteSignRequest($user->getId());
+			$retour_suppr = $mod_decree->deleteSignRequest($user->getId());
 		}
 		elog("Suppression du numero...");
 		$mod_decree->unsetNumber($user->getId());
 		$mod_decree->setStatus(STATUT_ANNULE, date("Y-m-d H:i:s"), $user->getId());
 		$mod_num = 0;
 		$mod_status = STATUT_ANNULE;
-		$message = "<p class='alerte alerte-success'>Le document a été supprimé.</p>";
+		if (isset($retour_suppr))
+		{
+			$message .= $retour_suppr;
+		}
+		else
+		{
+			$message .= "<p class='alerte alerte-success'>Le document a été supprimé.</p>";
+		}
 	}
 	// ENVOI DU DOCUMENT A LA SIGNATURE
 	elseif (isset($_POST['sign']) && isset($mod_decree) && $mod_status == STATUT_BROUILLON && $mod_decree_active) 
@@ -191,7 +199,7 @@
 					$idworkflow = $mod_decree->getWorkflow();
 					if ($idworkflow == NULL)
 					{
-						$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature. Le circuit n'est pas renseigné.</p>";
+						$message .= "<p class='alerte alerte-danger'>Echec de création dans eSignature. Le circuit n'est pas renseigné.</p>";
 					}
 					else
 					{
@@ -224,30 +232,30 @@
 						if (is_int($id) && $id > 0)
 						{
 							$mod_decree->setIdEsignature($id);
-							$message = "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables</p>";
+							$message .= "<p class='alerte alerte-success'>Le document a été envoyé à eSignature. Responsable(s) : $responsables</p>";
 							$mod_status = $mod_decree->getStatus();
 						}
 						else
 						{
-							$message = "<p class='alerte alerte-danger'>Echec de création dans eSignature.</p>";
+							$message .= "<p class='alerte alerte-danger'>Echec de création dans eSignature.</p>";
 						}
 					}
 				}
 				else
 				{
-					$message = "<p class='alerte alerte-danger'>Liste des signataires incomplète.</p>";
+					$message .= "<p class='alerte alerte-danger'>Liste des signataires incomplète.</p>";
 					elog("Liste des signataires incomplète pour le decree ".$mod_decree_id.' '.$responsables);
 				}
 			}
 			else
 			{
-				$message = "<p class='alerte alerte-danger'>Erreur de chargement du document.</p>";
+				$message .= "<p class='alerte alerte-danger'>Erreur de chargement du document.</p>";
 				elog ("fichier pdf absent pour le decree ".$mod_decree_id." avant envoi à eSignature ".PDF_PATH.$filename);
 			}
 		}
 		else
 		{
-			$message = "<p class='alerte alerte-danger'>La structure référente n'est pas renseignée.</p>";
+			$message .= "<p class='alerte alerte-danger'>La structure référente n'est pas renseignée.</p>";
 			elog("pas de code composante pour le decree ".$mod_decree_id." avant envoi à eSignature.");
 		}
 	}
@@ -287,7 +295,8 @@
 					if ($mod_status == STATUT_REFUSE || $mod_status == STATUT_EN_COURS || $mod_status == STATUT_CORBEILLE)
     				{
     					// TODO : Supprimer d'esignature
-	 					$mod_decree->deleteSignRequest($user->getId());
+						$retour_suppr = $mod_decree->deleteSignRequest($user->getId());
+						$message .= $retour_suppr;
     				}
     				elog("Suppression du numero...");
     				$oldyear = $mod_decree->getYear();
@@ -719,18 +728,18 @@
 						elog( "stdout : \n");
 						elog($stdout);
 						elog( "La création du document PDF a échoué. <br>");
-						$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
+						$message .= "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
 					}
 					elseif ($stderr != "")
 					{
 						elog( "stderr :\n");
 						elog($stderr);
 						elog( "La création du document PDF a échoué. <br>");
-						$message = "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
+						$message .= "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
 					}
 					else
 					{
-						$message = "<p class='alerte alerte-success'>Document enregistré.</p>";
+						$message .= "<p class='alerte alerte-success'>Document enregistré.</p>";
 					}
 					?>
 			<?php }
@@ -756,7 +765,7 @@
 			}
 			else
 			{
-				$message = "<p class='alerte alerte-danger'>Le numéro existe déjà pour cette année.</p>";
+				$message .= "<p class='alerte alerte-danger'>Le numéro existe déjà pour cette année.</p>";
 			}
 		}
     }
@@ -764,7 +773,7 @@
 	{
 		if(!$mod_decree_active)
 		{
-			$message = "<p class='alerte alerte-danger'>Le modèle de document est désactivé.</p>";
+			$message .= "<p class='alerte alerte-danger'>Le modèle de document est désactivé.</p>";
 		}
 	}
 ?>
@@ -1018,7 +1027,7 @@ else
 						case 'query':
 							if ($rdbApo == false)
 							{
-								$message = "<p class='alerte alerte-warning'>La connexion à Apogée est interrompue. Veuillez nous excuser pour la gêne occasionnée. </p>";
+								$message .= "<p class='alerte alerte-warning'>La connexion à Apogée est interrompue. Veuillez nous excuser pour la gêne occasionnée. </p>";
 							}
 							else
 							{

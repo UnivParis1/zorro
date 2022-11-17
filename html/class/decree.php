@@ -792,12 +792,15 @@ class decree {
 		if (!is_null($result))
 		{
 			elog(" Erreur lors de la suppression de l arrete dans Esignature : ".var_export($result, true));
+			$message = "<p class='alerte alerte-danger'>Erreur lors de la suppression de l'arrêté dans eSignature.</p>";
 		}
 		else
 		{
 			$this->unsetIdEsignature($userid);
 			elog("Demande de signature supprimée pour le decree  ".$this->getId()." par l'utilisateur ".$userid);
+			$message = "<p class='alerte alerte-success'>Demande de signature supprimée.</p>";
 		}
+		return $message;
 	}
 
 	function getExportPath()
