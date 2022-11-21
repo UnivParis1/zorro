@@ -449,7 +449,7 @@ class decree {
 				}
 				else
 				{
-					$filename .= "_".str_replace(array( "(", ")", ","), "", str_replace(array("'", ".", " ", "/"), "_", $fields[$modelfield['idmodel_field']][0]['value']));
+					$filename .= "_".str_replace(array( "(", ")", ","), "", str_replace(array("'", ".", " ", "/", "&amp;"), "_", $fields[$modelfield['idmodel_field']][0]['value']));
 				}
 			}
 		}
