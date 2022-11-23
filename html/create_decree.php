@@ -101,7 +101,7 @@
     
     $menuItem = 'menu_create';
     require ("include/menu.php");
-	if ($ref->getModeMaintenance())
+	if ($ref->getModeMaintenance() && !(isset($userCAS) && $userCAS->isSuperAdmin(false)))
 	{ ?>
 		<p class="alerte alerte-warning"> L'application est en maintenance. Merci de votre compréhension. </p>
 	<?php }
