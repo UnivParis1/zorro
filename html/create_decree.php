@@ -55,11 +55,11 @@
     {
     	$post_duplique = $_POST['duplique'];
     }
-    elseif (isset($_POST['modificatif']))
+   /* elseif (isset($_POST['modificatif']))
 	{
 		$mode = 'create';
 		$post_modificatif = $_POST['modificatif'];
-	}
+	}*/
     $ldap = new ldap();
     
     /*if (isset($_POST['mod_year']) && isset($_POST['mod_num']))
@@ -1248,7 +1248,7 @@
 										<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 										<?php $iddecree_type = $modelselected->getDecreeType()['iddecree_type'];
 										if ($iddecree_type == '1' || $iddecree_type == '2') { ?>
-											<input type="submit" name='modificatif' value="Arrêté modificatif">
+											<!--<input type="submit" name='modificatif' value="Arrêté modificatif">-->
 										<?php } ?>
 										<?php } break;
 									case STATUT_REFUSE : $motif = $mod_decree->getRefuseComment();?>
