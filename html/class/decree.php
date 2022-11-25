@@ -425,15 +425,15 @@ class decree {
 			}
 		}
 		$model = $this->getModel();
-		//$filename .= substr($model->getfile(), 0, -4).$this->getYear().'_'.$this->getNumber();
+		$filename = "Arrêté n°".$this->getYear().'-'.$this->getNumber()." ";
 		$infosModel = $model->getModelInfo();
 		if ($infosModel['iddecree_type'] == 1)
 		{
-			$filename = 'Jury';
+			$filename .= 'Jury';
 		}
 		else
 		{
-			$filename = str_replace(array(" "), "_",$infosModel['name']);
+			$filename .= str_replace(array(" "), "_",$infosModel['name']);
 		}
 		$modelfields = $model->getFieldsForFileName();
 		$fields = $this->getFields();

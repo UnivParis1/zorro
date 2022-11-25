@@ -715,11 +715,11 @@
 						);
 						if (strpos($_SERVER['SystemRoot'], 'WINDOWS') === false)
 						{
-							$process = proc_open("unoconv --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
+							$process = proc_open("unoconv --doctype=document --format=pdf \"".PDF_PATH.$decree->getFileName("odt")."\"", $descriptorspec, $pipes);
 						}
 						else
 						{
-							$process = proc_open("python.exe \"C:\Program Files\Unoconv\unoconv-0.8.2\unoconv\" --doctype=document --format=pdf ".PDF_PATH.$decree->getFileName("odt"), $descriptorspec, $pipes);
+							$process = proc_open("python.exe \"C:\Program Files\Unoconv\unoconv-0.8.2\unoconv\" --doctype=document --format=pdf \"".PDF_PATH.$decree->getFileName("odt")."\"", $descriptorspec, $pipes);
 						}
 						$stdout = stream_get_contents($pipes[1]);
 						fclose($pipes[1]);
@@ -1200,7 +1200,7 @@
 				<?php // Contrôler l'état de la demande dans esignature
 				if (isset($mod_decree))
 				{ ?>
-					<div id="aff_numero_div"><?php echo 'A-'.$mod_year.'-'.$mod_num;?>
+					<div id="aff_numero_div"><?php echo $mod_year.'-'.$mod_num;?>
 					<?php if ($mod_decree->getModelId() == 27) {
 						if ($mod_status == STATUT_HORS_ZORRO) { ?>
 							<img src="img/valide_OK.svg" alt="Hors Zorro" title="Hors Zorro" width="40px">
