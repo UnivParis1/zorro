@@ -579,10 +579,6 @@
 							{
 								$nb_field[$field] = 0;
 							}
-							else
-							{
-								$comp_before = ', ';
-							}
 							$comp_after = '';
 							if (array_key_exists($field, $modelfieldscomp) && $modelfieldscomp[$field] != null)
 							{
@@ -612,6 +608,10 @@
 								}
 								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'list')
 								{
+									if ($nb_field[$field] != 0)
+									{
+										$comp_before = ', ';
+									}
 									$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
 								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'group')
