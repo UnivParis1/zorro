@@ -152,7 +152,7 @@ $nbdecree = sizeof($alldecrees); ?>
 				if ($status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
 				{
 					$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
-					$status = $mod_decree->getStatus();
+					$status = $mod_decree->getStatus(false);
 					$majdate = $mod_decree->getMajDate();
 				}
 				switch ($status) {

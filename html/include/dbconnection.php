@@ -1,7 +1,7 @@
 <?php
 
-require_once './include/const.php';
-require_once './include/fonctions.php';
+require_once dirname(__FILE__,2).'/include/const.php';
+require_once dirname(__FILE__,2).'/include/fonctions.php';
 	
 global $rdbApo;
 global $dbcon;

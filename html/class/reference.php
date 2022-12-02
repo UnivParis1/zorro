@@ -1,6 +1,6 @@
 <?php
-require_once './include/const.php';
-require_once './include/fonctions.php';
+require_once dirname(__FILE__,2).'/include/const.php';
+require_once dirname(__FILE__,2).'/include/fonctions.php';
 
 class reference {
 	
@@ -9,7 +9,7 @@ class reference {
 	
 	function __construct($dbcon, $rdbApo)
 	{
-		require_once ("./include/dbconnection.php");
+		require_once (dirname(__FILE__,2)."/include/dbconnection.php");
 		$this->_dbcon = $dbcon;
 		$this->_rdbApo = $rdbApo;
 	}
@@ -367,6 +367,22 @@ class reference {
 			if ($row = mysqli_fetch_assoc($result))
 			{
 				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+
+	function getDecreeByIdEsignature($id)
+	{
+		$select = "SELECT iddecree FROM decree WHERE idesignature = ?";
+		$params = array($id);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				require_once dirname(__FILE__,2)."/class/decree.php";
+				return new decree($this->_dbcon, null, null, $row['iddecree']);
 			}
 		}
 		return FALSE;

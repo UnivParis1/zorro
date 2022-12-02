@@ -1,9 +1,9 @@
 <?php
-require_once './include/const.php';
-require_once './include/fonctions.php';
-require_once './class/model.php';
-require_once './class/reference.php';
-require_once './class/ldap.php';
+require_once dirname(__FILE__,2).'/include/const.php';
+require_once dirname(__FILE__,2).'/include/fonctions.php';
+require_once dirname(__FILE__,2).'/class/model.php';
+require_once dirname(__FILE__,2).'/class/reference.php';
+require_once dirname(__FILE__,2).'/class/ldap.php';
 
 class decree {
 	
@@ -19,7 +19,7 @@ class decree {
 	
 	function __construct($dbcon, $year=null, $number=null, $id=null)
 	{
-		require_once ("./include/dbconnection.php");
+		require_once (dirname(__FILE__,2)."/include/dbconnection.php");
 		if ($year != null && $number != null)
 		{
 			$this->_year = intval($year);
@@ -270,7 +270,7 @@ class decree {
 		}
 	}
 
-	function getStatus()
+	function getStatus($synchro = true)
 	{
 		$select = "SELECT status FROM decree WHERE iddecree = ?";
 		$params = array($this->getId());
@@ -280,7 +280,7 @@ class decree {
 			if ($res = mysqli_fetch_assoc($result))
 			{
 				$status = $res['status'];
-				if ($status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
+				if ($synchro && $status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
 				{
 					$new_status = $this->synchroEsignatureStatus($status);
 					return ($new_status == NULL) ? ($status == STATUT_ANNULE ? STATUT_ANNULE : STATUT_ERREUR)  : $new_status;
@@ -528,10 +528,10 @@ class decree {
 			elog("Le json est =>  " . var_export($json,true));
 			
 			//elog("La réponse est =>  " . var_export($response,true));
-			if ($json == '')
+			if ($json == '' || $json == 'null')
 			{
 				// on vérifie si le document a été supprimé d'esignature
-				elog("Le json est vide pour l'id ".$idesignature);
+				elog("Le json est vide ou null pour l'id ".$idesignature);
 				$curl = curl_init();
 				$opts = array(
 						CURLOPT_URL => ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_STATUS . $idesignature,
@@ -631,7 +631,7 @@ class decree {
 										$date = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
 									}
 								}
-								// TODO : Libérer le numéro
+								$this->unsetNumber(0);
 								break;
 							case 'deleted' : // TODO : Attention le document est dans la corbeille
 							case 'canceled' :

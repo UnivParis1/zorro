@@ -1,6 +1,6 @@
 <?php
-require_once './include/const.php';
-require_once './include/fonctions.php';
+require_once dirname(__FILE__,2).'/include/const.php';
+require_once dirname(__FILE__,2).'/include/fonctions.php';
 
 class model {
 	
@@ -18,7 +18,7 @@ class model {
 	
 	function __construct($dbcon, $idmodel)
 	{
-		require_once ("./include/dbconnection.php");
+		require_once (dirname(__FILE__,2)."/include/dbconnection.php");
 		$this->_idmodel = intval($idmodel);
 		$this->_dbcon = $dbcon;
 	}

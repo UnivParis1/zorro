@@ -13,6 +13,7 @@ require_once './include/dbconnection.php';
 	if (!isset($_SESSION['uid']))
 	{
 		$_SESSION['uid'] = $uid;
+		elog('Connexion de '.$uid);
 	}
 //echo "uid CAS du user :".var_export($_SESSION['uid'], true)."<br>";
 ?>
