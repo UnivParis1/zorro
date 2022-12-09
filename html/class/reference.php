@@ -388,6 +388,22 @@ class reference {
 		return FALSE;
 	}
 
+	function getAllDecreeEnCoursSign()
+	{
+		require_once dirname(__FILE__,2)."/class/decree.php";
+		$select = "SELECT iddecree FROM decree WHERE decree.status = 'p'";
+		$result = mysqli_query($this->_dbcon, $select);
+		$list = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$list[] = new decree($this->_dbcon, null, null, $row['iddecree']);
+			}
+		}
+		return $list;
+	}
+
 	function getModeMaintenance()
 	{
 		$select= "SELECT value FROM constant WHERE name = 'MAINTENANCE'";
