@@ -11,7 +11,18 @@
     {
         echo "statut de la demande ".$decree->getid()." avant synchro fin de circuit eSignature : ".$decree->getStatus(false)."\n";
         $decree->synchroEsignatureStatus($decree->getStatus(false));
-        echo "statut de la demande ".$decree->getid()." après synchro fin de circuit eSignature : ".$decree->getStatus(false)."\n";
+        $newstatus = $decree->getStatus(false);
+        echo "statut de la demande ".$decree->getid()." après synchro fin de circuit eSignature : ".$newstatus."\n";
+        if ($newstatus == STATUT_REFUSE)
+        {
+            $comment = $decree->getRefuseComment(true);
+            echo "commentaire de refus : ".$comment;
+        }
+        elseif ($newstatus == STATUT_EN_COURS)
+        {
+            $step = $decree->getSignStep(true);
+            echo "étape en cours : ".$step;
+        }
     }
     echo date("d/m/Y H:i:s")." fin de la synchronisation globale.\n";
 ?>

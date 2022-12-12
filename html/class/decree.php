@@ -674,15 +674,33 @@ class decree {
 		}
 		return null;
 	}
+
+	function getEsignInfo()
+	{
+		$select = "SELECT * FROM esignature_info WHERE idesignature = ?";
+		$param = array($this->getIdEsignature());
+		$result = prepared_select($this->_dbcon, $select, $param);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if (mysqli_num_rows($result) > 0)
+			{
+				if ($row = mysqli_fetch_assoc($result))
+				{
+					return $row;
+				}
+			}
+		}
+		return NULL;
+	}
 	
-	function getRefuseComment()
+	function getRefuseComment($synchro=false)
 	{
 		$idesignature = $this->getIdEsignature();
 		if ($idesignature == 0)
 		{
 			elog("Le document ".$this->getId()." n'a pas d'identifiant eSignature.");
 		}
-		else
+		elseif($synchro)
 		{
 			elog("Récupération du commentaire de refus... ".ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
 			$curl = curl_init();
@@ -710,6 +728,27 @@ class decree {
 					if (isset($response['comments'][0]['text']))
 					{
 						elog ("Commentaire : ".$response['comments'][0]['text']);
+						$esign_info = $this->getEsignInfo();
+						if ($esign_info != null)
+						{
+							$update = "UPDATE esignature_info SET refuse_comment = ? WHERE idesignature = ?";
+							$params = array($response['comments'][0]['text'], $idesignature);
+							$result = prepared_select($this->_dbcon, $update, $params);
+							if (mysqli_error($this->_dbcon))
+							{
+								elog("Erreur lors de l'update du commentaire de refus. idesignature : ".$idesignature.", commentaire : ".htmlspecialchars($response['comments'][0]['text']));
+							}
+						}
+						else
+						{
+							$insert = "INSERT INTO esignature_info (idesignature, refuse_comment, sign_step) VALUES (?,?,NULL)";
+							$params = array($idesignature, $response['comments'][0]['text']);
+							$result = prepared_select($this->_dbcon, $insert, $params);
+							if (mysqli_error($this->_dbcon))
+							{
+								elog("Erreur lors de l'insert du commentaire de refus. idesignature : ".$idesignature.", commentaire : ".htmlspecialchars($response['comments'][0]['text']));
+							}
+						}
 						return htmlspecialchars($response['comments'][0]['text']);
 					}
 					else
@@ -719,17 +758,28 @@ class decree {
 				}
 			}
 		}
+		else
+		{
+			$esign_info = $this->getEsignInfo();
+			if ($esign_info != null)
+			{
+				if (array_key_exists("refuse_comment", $esign_info))
+				{
+					return $esign_info["refuse_comment"];
+				}
+			}
+		}
 		return 'erreur eSignature';
 	}
 
-	function getSignStep()
+	function getSignStep($synchro=false)
 	{
 		$idesignature = $this->getIdEsignature();
 		if ($idesignature == 0)
 		{
 			elog("Le document ".$this->getId()." n'a pas d'identifiant eSignature.");
 		}
-		else
+		elseif($synchro)
 		{
 			elog("Récupération de l'etape de signature... ".ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
 			$curl = curl_init();
@@ -757,12 +807,44 @@ class decree {
 					if (isset($response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']))
 					{
 						elog ("Signataire en attente : ".$response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']);
+						$esign_info = $this->getEsignInfo();
+						if ($esign_info != null)
+						{
+							$update = "UPDATE esignature_info SET sign_step = ? WHERE idesignature = ?";
+							$params = array($response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description'], $idesignature);
+							$result = prepared_select($this->_dbcon, $update, $params);
+							if (mysqli_error($this->_dbcon))
+							{
+								elog("Erreur lors de l'update de l'étape de signature. idesignature : ".$idesignature.", étape : ".htmlspecialchars($response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']));
+							}
+						}
+						else
+						{
+							$insert = "INSERT INTO esignature_info (idesignature, refuse_comment, sign_step) VALUES (?,NULL,?)";
+							$params = array($idesignature, $response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']);
+							$result = prepared_select($this->_dbcon, $insert, $params);
+							if (mysqli_error($this->_dbcon))
+							{
+								elog("Erreur lors de l'insert de l'étape de signature. idesignature : ".$idesignature.", commentaire : ".htmlspecialchars($response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']));
+							}
+						}
 						return $response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description'];
 					}
 					else
 					{
 						elog ("Erreur pas de signature en attente...");
 					}
+				}
+			}
+		}
+		else
+		{
+			$esign_info = $this->getEsignInfo();
+			if ($esign_info != null)
+			{
+				if (array_key_exists("sign_step", $esign_info))
+				{
+					return $esign_info["sign_step"];
 				}
 			}
 		}
