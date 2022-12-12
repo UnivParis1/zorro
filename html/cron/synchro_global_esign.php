@@ -16,12 +16,12 @@
         if ($newstatus == STATUT_REFUSE)
         {
             $comment = $decree->getRefuseComment(true);
-            echo "commentaire de refus : ".$comment;
+            echo "commentaire de refus : ".$comment."\n";
         }
         elseif ($newstatus == STATUT_EN_COURS)
         {
             $step = $decree->getSignStep(true);
-            echo "étape en cours : ".$step;
+            echo "étape en cours : ".$step."\n";
         }
     }
     echo date("d/m/Y H:i:s")." fin de la synchronisation globale.\n";

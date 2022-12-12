@@ -391,7 +391,7 @@ class reference {
 	function getAllDecreeEnCoursSign()
 	{
 		require_once dirname(__FILE__,2)."/class/decree.php";
-		$select = "SELECT iddecree FROM decree WHERE decree.status IN ('".STATUT_EN_COURS."', '".STATUT_CORBEILLE."', '".STATUT_ERREUR."')";
+		$select = "SELECT iddecree FROM decree WHERE decree.status IN ('".STATUT_EN_COURS."', '".STATUT_CORBEILLE."', '".STATUT_ERREUR."', '".STATUT_REFUSE."')";
 		$result = mysqli_query($this->_dbcon, $select);
 		$list = array();
 		if ( !mysqli_error($this->_dbcon))
