@@ -119,7 +119,7 @@
 //$alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees();
 $alldecrees = $user->getDecreesBy($params, 0);
 $nbdecree = sizeof($alldecrees);
-$alldecrees = $user->getDecreesBy($params, 15); ?>
+$alldecrees = $user->getDecreesBy($params, 20); ?>
 	<h4><?php echo $nbdecree;?> résultat(s).</h4>
 </div>
 <?php if ($nbdecree > 0) { ?>
