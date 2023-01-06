@@ -150,6 +150,9 @@ select#selectarrete {
     background-color: #fdf5e2;  background-color: #f5c95c5e;
 }
 
+option.inactive {
+    color: #bbd5f5;
+}
 
 .recherche   {
     margin-bottom: 25px;

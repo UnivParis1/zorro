@@ -80,15 +80,20 @@
 			<?php }
 			$type = 0;
 			foreach ($listModels as $model) {
+				$color = "";
+				if ($model['active'] == 'N')
+				{
+					$color = "class='inactive'";
+				}
 				if ($model['iddecree_type'] != $type) {
 					if ($type != 0) { ?>
 						</optgroup>
 					<?php } $type = $model['iddecree_type']; ?>
 					<optgroup label="<?php echo $model['namedecree_type'];?>">
 				<?php } if (isset($post_selectarrete) && $post_selectarrete == $model['idmodel']) { ?>
-					<option value="<?php echo $model['idmodel'];?>" selected="selected"><?php echo $model['name'];?></option>
+					<option value="<?php echo $model['idmodel'];?>" selected="selected" <?php echo $color;?>><?php echo $model['name'];?></option>
 				<?php } else { ?>
-					<option value="<?php echo $model['idmodel'];?>"><?php echo $model['name'];?></option>
+					<option value="<?php echo $model['idmodel'];?>" <?php echo $color;?>><?php echo $model['name'];?></option>
 				<?php }
 			} ?>
 			</optgroup>
