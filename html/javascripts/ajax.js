@@ -398,3 +398,51 @@ function readInfosEtu(data)
 		}
 	//}
 }
+
+// infinite scroll manage_decree
+var scrollLoad = true;
+$(window).scroll(function() {
+    if(scrollLoad && $(window).scrollTop() + $(window).height() > $(document).height()-100) {
+        var nbaff = parseInt(document.getElementById('nbaff').value);
+		var userid = document.getElementById('userid').value;
+		var orderby = document.getElementById('orderby').value;
+		var desc = document.getElementById('desc').value;
+		var status = document.getElementById('status').value;
+		var idmodel = document.getElementById('idmodel').value;
+		var contenu = document.getElementById('contenu').value;
+		loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu);
+		scrollLoad = false;
+    }
+});
+
+function loadMore(last_id, userid, orderby, desc, idmodel, status, contenu){
+  $.ajax({
+      url: 'load-more.php?last_id=' + last_id + '&userid=' + userid + '&orderby=' + orderby + '&desc=' + desc + '&status=' + status + '&idmodel=' + idmodel + '&contenu=' + contenu ,
+      type: "get",
+      beforeSend: function(){
+          $('#ajax-load').show();
+      }
+  }).done(function(data){
+      $('#ajax-load').hide();
+      $("#post-data").append(data);
+	  var nbaff = document.getElementById("nbaff");
+	  nbaff.setAttribute("value", parseInt(nbaff.value)+20);
+	  scrollLoad = true;
+  }).fail(function(jqXHR, ajaxOptions, thrownError){
+      alert('server not responding...');
+  });
+}
+
+function refreshtab(){
+	$("#post-data").empty();
+	scrollLoad = false;
+	var userid = document.getElementById('userid').value;
+	var orderby = document.getElementById('orderby').value;
+	var desc = document.getElementById('desc').value;
+	var nbaff = parseInt(document.getElementById("nbaff").value);
+	var status = document.getElementById('status').value;
+	var idmodel = document.getElementById('idmodel').value;
+	var contenu = document.getElementById('contenu').value;
+	loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu);
+	scrollLoad = false;
+}

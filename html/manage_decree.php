@@ -69,7 +69,7 @@
 ?>
 <div class="recherche">
 	<form name="formselectdecree" action="manage_decree.php" method="post">
-		<input type="hidden" name='userid' value='<?php echo $userid;?>'>
+		<input type="hidden" name='userid' id='userid' value='<?php echo $userid;?>'>
 		<input type="text" name="contenu" id="contenu" value='<?php echo (isset($post_contenu)) ? $post_contenu : '';?>' placeholder="Contenu, numéro..."/>
 		<select style="width:26em" name="selectarrete" id="selectarrete">
 			<?php
@@ -107,13 +107,19 @@
 					<option value="<?php echo $name;?>"><?php echo $value;?></option>
 			<?php } } ?>
 		</select>
+		<input type="hidden" id="orderby" value=5>
+		<input type="hidden" id="desc" value="FALSE">
+		<input type="hidden" id="nbaff" value=0>
+		<input type="hidden" id="status" value=<?php echo isset($post_selectstatut) ? $post_selectstatut : '';?>>
+		<input type="hidden" id="idmodel" value=<?php echo isset($post_selectarrete) ? $post_selectarrete : '';?>>
 		<input type='submit' name='rechercher' value='Rechercher'>
 	</form>
 
 <?php 
 //$alldecrees = isset($post_selectarrete) ? $user->getAllDecrees($post_selectarrete) : $user->getAllDecrees();
-$alldecrees = $user->getDecreesBy($params);
-$nbdecree = sizeof($alldecrees); ?>
+$alldecrees = $user->getDecreesBy($params, 0);
+$nbdecree = sizeof($alldecrees);
+$alldecrees = $user->getDecreesBy($params, 15); ?>
 	<h4><?php echo $nbdecree;?> résultat(s).</h4>
 </div>
 <?php if ($nbdecree > 0) { ?>
@@ -129,94 +135,15 @@ $nbdecree = sizeof($alldecrees); ?>
 				<th class="titresimple" >Statut</th>
 			</tr>
 		</thead>
-		<tbody>
-	<?php 	foreach ($alldecrees as $decree) {
-				$objdecree = new decree($dbcon, null, null, $decree['iddecree']);
-				$nom_aff = $objdecree->getFileNameAff();?>
-			<tr>
-				<?php if ($decree['number'] == 0) {?>
-					<td></td>
-				<?php } else {?>
-					<td class="cellulesimple"><?php echo $decree['year'].'-'.$decree['number'];?></td>
-				<?php } ?>
-				<!--  <td class="cellulesimple"><a href="create_decree.php?num=<?php echo $decree['number'];?>&year=<?php echo $decree['year'];?>"><?php echo $decree['decreetypename'].' '.$decree['modelname']; ?></a></td>-->
-				<td class="cellulesimple" title="<?php echo $objdecree->getFileName(); ?>"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $nom_aff; ?></a></td>
-				<td class="cellulesimple"><?php echo $decree['modelname']; ?></td>
-				<td class="cellulesimple"><?php echo $ldap->getStructureName($decree['structure']); ?></td>
-				<td class="cellulesimple"><?php echo $decree['uid']; ?></td>
-				<td class="cellulesimple date"><?php echo date('d/m/Y',strtotime($decree['majdate'])); ?></td>
-				<?php
-				$status = $decree['status'];
-				$majdate = $decree['majdate'];
-				if ($status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
-				{
-					$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
-					$status = $mod_decree->getStatus(false);
-					$majdate = $mod_decree->getMajDate();
-				}
-				switch ($status) {
-					case STATUT_ANNULE :
-						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
-						$title = 'Annulé';
-						$class = "img";
-						break;
-					case STATUT_REFUSE :
-						$mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
-						$comment = $mod_decree->getRefuseComment();
-						$contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
-						$title = 'Refusé : '.$comment;
-						$class = "red";
-						break;
-					case STATUT_BROUILLON :
-						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/brouillon.svg' alt='brouillon' width='20px'></a>";
-						$title = 'Brouillon';
-						$class = "img";
-						break;
-					case STATUT_HORS_ZORRO :
-						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/valide_OK.svg' alt='hors_zorro' width='20px'></a>";
-						$title = 'Hors Zorro';
-						$class = "img";
-						break;
-					case STATUT_VALIDE :
-						$contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
-						$title = 'Validé';
-						$class = "green";
-						break;
-					case STATUT_EN_COURS :
-						$contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/enattente.svg' alt='signature en cours' width='20px'></a>";
-						$step = $mod_decree->getSignStep();
-						$title = 'En cours de signature : '.$step;
-						$class = "img";
-						break;
-					case STATUT_ERREUR :
-						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/erreur1.svg' alt='Document non trouvé sur eSignature' width='20px'></a>";
-						$title = 'erreur';
-						$class = "img";
-						break;
-					case STATUT_SUPPR_ESIGN :
-						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='Document supprimé d\'eSignature' width='20px'></a>";
-						$title = 'Document supprimé d\'eSignature';
-						$class = "img";
-						break;
-					case STATUT_CORBEILLE :
-						$contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/supprimer.svg' alt='Document dans la corbeille d\'eSignature' width='20px'></a>";
-						$title = 'Document dans la corbeille d\'eSignature';
-						$class = "img";
-						break;
-					default :
-						$contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
-						$title = 'Annulé';
-						$class = "img";
-						break;
-				}?>
-				<td class="<?php echo $class;?>" title="<?php echo $title;?>"><?php echo $contenu; ?></td>
-			</tr>
-		<?php } ?>
-		</tbody>
+		<tbody id="post-data">
+<?php include 'display_decrees.php';?>
+<!--		</tbody>-->
+		<!--<tbody id="post-data">--><!-- dynamically load posts via ajax --></tbody>
 </table>
+		<div id="ajax-load">Veuillez patienter...</div>
 <?php } ?>
-
 </div>
+
 <script>
 const getCellValue = (tr, idx) =>
 {
@@ -241,8 +168,12 @@ document.getElementById('tableau_documents').querySelectorAll('th').forEach(th =
     const tbody = table.querySelector('tbody');
     Array.from(tbody.querySelectorAll('tr'))
         .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-        .forEach(tr => tbody.appendChild(tr) );
+       .forEach(tr => tbody.appendChild(tr) );
     theader = table.querySelector('theader');
+	var orderby = document.getElementById("orderby");
+	orderby.setAttribute("value", th.cellIndex);
+	var nbaff = document.getElementById("nbaff");
+	nbaff.setAttribute("value", 0);
 
     //alert(Array.from(th.parentNode.querySelectorAll('th')));
 
@@ -259,19 +190,23 @@ document.getElementById('tableau_documents').querySelectorAll('th').forEach(th =
 
     if (this.asc)
     {
-        th.querySelector('font').innerHTML = '&darr;'; // fleche qui descend
+        th.querySelector('font').innerHTML = '&uarr;'; // fleche qui monte
+		var desc = document.getElementById("desc");
+		desc.setAttribute("value", "TRUE");
     }
     else
     {
-        th.querySelector('font').innerHTML = '&uarr;'; // fleche qui monte
+        th.querySelector('font').innerHTML = '&darr;'; // fleche qui descend
+		var desc = document.getElementById("desc");
+		desc.setAttribute("value", "FALSE");
     }
-
+	refreshtab();
 })));
 
 document.getElementById('tableau_documents').querySelectorAll('th')[5].click(); // On simule le clic sur la 6e colonne pour faire afficher la fleche et initialiser le asc
-document.getElementById('tableau_documents').querySelectorAll('th')[5].click(); // On simule le clic sur la 6e colonne pour trier par ordre chronologique inverse
-
+//document.getElementById('tableau_documents').querySelectorAll('th')[5].click(); // On simule le clic sur la 6e colonne pour trier par ordre chronologique inverse
 </script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
 </body>
 </html>
 

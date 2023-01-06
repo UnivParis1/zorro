@@ -225,26 +225,30 @@ class user {
 
 	function isAdmin()
 	{
+		$ldap = new ldap();
 		if (isset($_SESSION['supannentiteaffectation']))
 		{
 			$structure = 'structures-'.$_SESSION['supannentiteaffectation'];
-			//print_r2($structure);
-			$ldap = new ldap();
-			$infostruct = $ldap->getStructureInfos($structure);
-			//print_r2($infostruct);
-			if (array_key_exists('superGroups', $infostruct) && array_key_exists($structure, $infostruct['superGroups']) 
-					&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($_SESSION['uid']) && array_key_exists($_SESSION['uid'], $infostruct['superGroups'][$structure]['roles'])
-					&& ($infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable administratif' || $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Responsable'
-							|| $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Directrice' || $infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role'] == 'Directeur' ))
-			{
-				elog("L'utilisateur ".$_SESSION['uid']." est ".$infostruct['superGroups'][$structure]['roles'][$_SESSION['uid']]['role']." de sa structure ".$_SESSION['supannentiteaffectation']);
-				return TRUE;
-			}
-			else 
-			{
-				elog("L'utilisateur ".$_SESSION['uid']." n'a pas de responsabilité sur sa structure");
-				return FALSE;
-			}
+		}
+		else
+		{
+			$structure = 'structures-'.$ldap->getInfos($this->_uid, false)['supannentiteaffectation'];
+		}
+		//print_r2($structure);
+		$infostruct = $ldap->getStructureInfos($structure);
+		//print_r2($infostruct);
+		if (array_key_exists('superGroups', $infostruct) && array_key_exists($structure, $infostruct['superGroups'])
+				&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($this->_uid) && array_key_exists($this->_uid, $infostruct['superGroups'][$structure]['roles'])
+				&& ($infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Responsable administratif' || $infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Responsable'
+						|| $infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Directrice' || $infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Directeur' ))
+		{
+			elog("L'utilisateur ".$this->_uid." est ".$infostruct['superGroups'][$structure]['roles'][$this->_uid]['role']." de sa structure ".$structure);
+			return TRUE;
+		}
+		else
+		{
+			elog("L'utilisateur ".$_SESSION['uid']." n'a pas de responsabilité sur sa structure");
+			return FALSE;
 		}
 		elog( "L'utilisateur n'a pas d'affectation <br>");
 		return FALSE;
@@ -351,7 +355,7 @@ class user {
 		}
 		else // user lambda
 		{
-			$select .= " WHERE d.iduser = ?";
+			$select .= " WHERE d.iduser = '?'";
 			$params[] = $iduser;
 		}
 		if ($idmodel != null)
@@ -501,24 +505,29 @@ class user {
 		}
 	}
 	
-	function getDecreesBy($criteres)
+	function getDecreesBy($criteres, $limit, $last_id = 0, $orderby = -1, $desc = false)
 	{
 		// TODO
 		$listdecrees = array();
 		$iduser = $this->getid();
 		$params = array();
 		$select = " SELECT DISTINCT
+						concat(d.year, '-', d.number) as numero,
+						d.filename,
+						m.name as modelname,
+						d.structure,
+						user.uid as uid,
+						IFNULL(d.majdate, d.createdate) AS majdate,
+						d.status,
 						d.iddecree,
 						d.number,
 						d.year,
 						d.createdate,
-						IFNULL(d.majdate, d.createdate) AS majdate,
 						d.idesignature,
-						m.name as modelname,
 						dt.name as decreetypename,
-						user.uid as uid,
-						d.structure,
-						d.status
+						YEAR(IFNULL(d.majdate, d.createdate)) as y,
+						MONTH(IFNULL(d.majdate, d.createdate)) as m,
+						DAY(IFNULL(d.majdate, d.createdate)) as d
 					FROM
 						decree d
 						INNER JOIN model m
@@ -533,8 +542,10 @@ class user {
 		}
 		elseif ($this->isAdmin())
 		{
-			$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
-			$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
+			$ldap = new ldap();
+			$structure = isset($_SESSION['supannentiteaffectation']) ? $_SESSION['supannentiteaffectation'] : $ldap->getInfos($this->_uid, false)['supannentiteaffectation'];
+			$listStructuresFilles = $this->getAdminSubStructs($structure);
+			$listStructuresFilles[] = 'structures-'.$structure;
 			//print_r2($listStructuresFilles);
 			$select .= " WHERE d.structure IN (?";
 			$params[] = $listStructuresFilles[0];
@@ -586,7 +597,40 @@ class user {
 				$select .= ")";
 			}
 		}
-		$select .= " ORDER BY majdate DESC";
+		$select .= ' ORDER BY ';
+		if ($orderby >= 0)
+		{
+			if ($orderby == 5)
+			{
+				if ($desc == 'TRUE')
+				{
+					$select .= ' y DESC, m DESC, d DESC ';
+				} else {
+				$select .= ' y, m, d ';
+				}
+			}
+			else
+			{
+				$select .= $orderby+1;
+				if ($desc == 'TRUE')
+				{
+					$select .= ' DESC ';
+				}
+			}
+			$select .= ', ';
+		}
+		$select .= ' d.iddecree DESC ';
+		if (is_int($limit) && $limit > 0)
+		{
+			$select .= " LIMIT ";
+			if ($last_id >= 0)
+			{
+				$select .= " ? , ";
+				$params[] = $last_id;
+			}
+			$select .= " ? ";
+			$params[] = $limit;
+		}
 		if (sizeof($params) == 0)
 		{
 			$result = mysqli_query($this->_dbcon, $select);
