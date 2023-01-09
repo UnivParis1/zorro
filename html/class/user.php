@@ -578,6 +578,10 @@ class user {
 				$select .= " AND d.status = ?";
 				$params[] = $criteres['status'];
 			}
+			else
+			{
+				$select .= " AND d.status NOT IN ('".STATUT_ANNULE."', '".STATUT_CORBEILLE."', '".STATUT_SUPPR_ESIGN."') ";
+			}
 			if (array_key_exists('contenu', $criteres) && $criteres['contenu'] != '')
 			{
 				$select .= " AND (concat(d.year,'/',d.number) = ? ";
