@@ -247,7 +247,7 @@ class user {
 		}
 		else
 		{
-			elog("L'utilisateur ".$_SESSION['uid']." n'a pas de responsabilité sur sa structure");
+			elog("L'utilisateur n'a pas de responsabilité sur sa structure");
 			return FALSE;
 		}
 		elog( "L'utilisateur n'a pas d'affectation <br>");
