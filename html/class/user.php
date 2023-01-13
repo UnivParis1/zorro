@@ -215,10 +215,15 @@ class user {
 		if (isset($_SESSION['supannentiteaffectation']))
 		{
 			$structure = $_SESSION['supannentiteaffectation'];
-			if ($structure == 'DGC' || $structure == 'DGCB')
-			{
-				return true;
-			}
+		}
+		else
+		{
+			$ldap = new ldap();
+			$structure = $ldap->getInfos($this->_uid, false)['supannentiteaffectation'];
+		}
+		if ($structure == 'DGC' || $structure == 'DGCB')
+		{
+			return true;
 		}
 		return false;
 	}
