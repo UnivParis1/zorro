@@ -618,6 +618,15 @@ class user {
 				$select .= ' y, m, d ';
 				}
 			}
+			elseif ($orderby == 0)
+			{
+				if ($desc == 'TRUE')
+				{
+					$select .= ' 10 DESC, 9 DESC ';
+				} else {
+				$select .= ' 10, 9 ';
+				}
+			}
 			else
 			{
 				$select .= $orderby+1;
