@@ -25,6 +25,16 @@ if (isset($_GET['last_id']))
 		$post_contenu = $_GET['contenu'];
 		$params['contenu'] = $post_contenu;
     }
+    if (isset($_GET['year']) && $_GET['year'] != '')
+    {
+		$post_year = $_GET['year'];
+		$params['year'] = $post_year;
+    }
+    if (isset($_GET['number']) && $_GET['number'] != '')
+    {
+		$post_number = $_GET['number'];
+		$params['findnum'] = $post_number;
+    }
     $userid = $_GET['userid'];
     $user = new user($dbcon, $userid);
     $alldecrees = $user->getDecreesBy($params, 20, intval($_GET['last_id']), $_GET['orderby'], $_GET['desc']);

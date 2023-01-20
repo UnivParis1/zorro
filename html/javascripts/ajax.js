@@ -410,14 +410,16 @@ $(window).scroll(function() {
 		var status = document.getElementById('status').value;
 		var idmodel = document.getElementById('idmodel').value;
 		var contenu = document.getElementById('contenu').value;
-		loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu);
+		var findnum = document.getElementById('findnum').value;
+		var year = document.getElementById('findannee').value;
+		loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu, findnum, year);
 		scrollLoad = false;
     }
 });
 
-function loadMore(last_id, userid, orderby, desc, idmodel, status, contenu){
+function loadMore(last_id, userid, orderby, desc, idmodel, status, contenu, num, year){
   $.ajax({
-      url: 'load-more.php?last_id=' + last_id + '&userid=' + userid + '&orderby=' + orderby + '&desc=' + desc + '&status=' + status + '&idmodel=' + idmodel + '&contenu=' + contenu ,
+      url: 'load-more.php?last_id=' + last_id + '&userid=' + userid + '&orderby=' + orderby + '&desc=' + desc + '&status=' + status + '&idmodel=' + idmodel + '&contenu=' + contenu + '&number=' + num + '&year=' + year ,
       type: "get",
       beforeSend: function(){
           $('#ajax-load').show();
@@ -443,6 +445,8 @@ function refreshtab(){
 	var status = document.getElementById('status').value;
 	var idmodel = document.getElementById('idmodel').value;
 	var contenu = document.getElementById('contenu').value;
-	loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu);
+	var findnum = document.getElementById('findnum').value;
+	var year = document.getElementById('findannee').value;
+	loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu, findnum, year);
 	scrollLoad = false;
 }

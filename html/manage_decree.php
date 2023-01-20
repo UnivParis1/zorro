@@ -35,6 +35,16 @@
 		$post_contenu = $_POST['contenu'];
 		$params['contenu'] = $post_contenu;
     }
+    if (isset($_POST['findnum']) && $_POST['findnum'] != '')
+    {
+		$post_findnum = $_POST['findnum'];
+		$params['findnum'] = $post_findnum;
+    }
+    if (isset($_POST['findannee']) && $_POST['findannee'] != '')
+    {
+		$post_findannee = $_POST['findannee'];
+		$params['year'] = $post_findannee;
+    }
      
     // Récupération des modeles auxquels à accès l'utilisateur
     $user = new user($dbcon, $userid);
@@ -56,6 +66,7 @@
 	    	$listModels[] = $model->getModelInfo();
 	    }
     }
+	$listYears = $ref->getYears();
     $menuItem = "menu_manage";
     require ("include/menu.php");
 ?>
@@ -70,7 +81,23 @@
 <div class="recherche">
 	<form name="formselectdecree" action="manage_decree.php" method="post">
 		<input type="hidden" name='userid' id='userid' value='<?php echo $userid;?>'>
-		<input type="text" name="contenu" id="contenu" value='<?php echo (isset($post_contenu)) ? $post_contenu : '';?>' placeholder="Contenu, numéro..."/>
+		<input type="text" name="contenu" id="contenu" value='<?php echo (isset($post_contenu)) ? $post_contenu : '';?>' placeholder="Contenu..."/>
+		<input type="text" name="findnum" id="findnum" value='<?php echo (isset($post_findnum)) ? $post_findnum : '';?>' placeholder="Numéro"/>
+		<select style="width:26em" name="findannee" id="findannee">
+		<?php if (!isset($_POST['selectarrete'])) { ?>
+				<option value="" selected="selected">Année</option>
+			<?php } else { ?>
+				<option value="">Année</option>
+			<?php }
+			foreach ($listYears as $year)
+			{
+				if (isset($post_findannee) && $post_findannee == $year) { ?>
+				<option value="<?php echo $year;?>" selected="selected"><?php echo $year;?></option>
+			<?php } else { ?>
+				<option value="<?php echo $year;?>"><?php echo $year;?></option>
+			<?php }
+			} ?>
+		</select>
 		<select style="width:26em" name="selectarrete" id="selectarrete">
 			<?php
 			if (!isset($_POST['selectarrete'])) { ?>

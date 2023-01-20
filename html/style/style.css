@@ -156,7 +156,7 @@ option.inactive {
 
 .recherche   {
     margin-bottom: 25px;
-    max-width: 620px;
+    max-width: 820px;
     margin-left:auto; margin-right: auto;
 }
 
@@ -173,11 +173,19 @@ option.inactive {
 }
 
  .recherche select#selectarrete  {
-      width: 15em !important;
+      width: 13em !important;
 }
 
- .recherche select#selectstatut{
-      width: 8em !important;
+.recherche select#selectstatut{
+    width: 8em !important;
+}
+
+.recherche select#findannee{
+    width:6em !important;
+}
+
+.recherche input#findnum{
+     width: 4em !important;
 }
 
 

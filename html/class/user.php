@@ -578,6 +578,16 @@ class user {
 				$select .= " AND d.idmodel = ?";
 				$params[] = $criteres['idmodel'];
 			}
+			if (array_key_exists('year', $criteres) && $criteres['year'] != null)
+			{
+				$select .= " AND d.year = ?";
+				$params[] = $criteres['year'];
+			}
+			if (array_key_exists('findnum', $criteres) && $criteres['findnum'] != null)
+			{
+				$select .= " AND d.number = ?";
+				$params[] = $criteres['findnum'];
+			}
 			if (array_key_exists('status', $criteres) && $criteres['status'] != null)
 			{
 				$select .= " AND d.status = ?";

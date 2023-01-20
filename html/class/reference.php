@@ -438,4 +438,22 @@ class reference {
 			return TRUE;
 		}
 	}
+	function getYears()
+	{
+		$select = 'SELECT DISTINCT year FROM decree';
+		$result = mysqli_query($this->_dbcon, $select);
+		$years = array();
+		if (mysqli_error($this->_dbcon))
+		{
+			elog("Erreur a l'execution de la requete select year.");
+		}
+		else {
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$years[] = $row['year'];
+			}
+		}
+		return $years;
+	}
+
 }
