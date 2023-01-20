@@ -27,7 +27,8 @@
         <td class="cellulesimple"><?php echo $decree['uid']; ?></td>
         <td class="cellulesimple date"><?php echo date('d/m/Y',strtotime($decree['majdate'])); ?></td>
         <?php
-        $status = $decree['status'];
+        $aff_statut = $objdecree->getStatusAff();
+        /*$status = $decree['status'];
         $majdate = $decree['majdate'];
         if ($status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
         {
@@ -89,7 +90,7 @@
                 $title = 'Annulé';
                 $class = "img";
                 break;
-        }?>
-        <td class="<?php echo $class;?>" title="<?php echo $title;?>"><?php echo $contenu; ?></td>
+        }*/?>
+        <td class="<?php echo $aff_statut['class'];?>" title="<?php echo $aff_statut['title'];?>"><?php echo $aff_statut['contenu']; ?></td>
     </tr>
 <?php } ?>
