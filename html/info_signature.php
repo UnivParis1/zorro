@@ -50,7 +50,11 @@
     
     $menuItem = 'menu_signature';
     require ("include/menu.php");
-    
+    if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
+    {
+        $userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
+        if ($userCAS->isSuperAdmin(false))
+        {
     //echo "<br>" . print_r($_POST,true) . "<br>";
 
     echo "<form name='infosignature'  method='post' action='info_signature.php' >";
@@ -230,10 +234,16 @@
             }
             
         }
-}
-    
-?>
-
+    } else { ?>
+        <div id="contenu1">
+            <h2> Accès interdit </h2>
+        </div>
+        <?php }
+} else { ?>
+<div id="contenu1">
+	<h2> Accès interdit </h2>
+</div>
+<?php } ?>
 </body>
 </html>
 
