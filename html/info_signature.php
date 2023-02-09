@@ -43,7 +43,10 @@
             $error = "Impossible de déterminer si c'est une option ou une alimentation.<br><br>";
         }*/
     }
-
+    if (isset($_GET["esignatureid"]))
+    {
+        $esignatureid = $_GET["esignatureid"];
+    }
     
     $menuItem = 'menu_signature';
     require ("include/menu.php");
@@ -53,7 +56,7 @@
     echo "<form name='infosignature'  method='post' action='info_signature.php' >";
     
     echo "Numéro eSignature à afficher : <br>";    
-    echo "<input type='text' name='esignatureid' id='esignatureid'>";
+    echo "<input type='text' name='esignatureid' id='esignatureid' autofocus>";
     echo "<br>";
     echo "<input type='hidden' name='userid' value='" . $userid . "'>";
     echo "<input type='submit' value='Soumettre' >";
@@ -176,6 +179,10 @@
 							$displaydatefin = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
 						}
                         echo "Date de fin : " . $displaydatefin . " (Valeur brute : " . $response["parentSignBook"]["endDate"] . ")<br>";
+                    }
+                    else
+                    {
+                        echo "Pas de date de fin définie. <br>";
                     }
                     if (isset($response['comments'][0]['text']))
                     {

@@ -92,5 +92,12 @@
                 break;
         }*/?>
         <td class="<?php echo $aff_statut['class'];?>" title="<?php echo $aff_statut['title'];?>"><?php echo $aff_statut['contenu']; ?></td>
+        <?php if ($user->isSuperAdmin()) {
+                if ($objdecree->getIdEsignature() != NULL) { ?>
+                    <td><a href="<?php echo 'info_signature.php?esignatureid='.$objdecree->getIdEsignature(); ?>">=></a></td>
+                <?php } else { ?>
+                    <td></td>
+        <?php }
+        } ?>
     </tr>
 <?php } ?>
