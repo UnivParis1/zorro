@@ -135,6 +135,15 @@ class reference {
 					$select .= $tab['query_clause'];
 				}
 				$sth = oci_parse($this->_rdbApo, $select);
+				if (array_key_exists('code', $tab) && $tab['code'] != NULL AND is_array($tab['code']))
+				{
+					foreach ($tab['code'] as $code)
+					{
+						error_log("bind params : ".var_export($code, true));
+						oci_bind_by_name($sth, $code['codename'], $code['codevalue']);
+					}
+					error_log("bind_params terminé");
+				}
 				$fields = array();
 				if ( !oci_error($this->_rdbApo))
 				{
@@ -143,7 +152,7 @@ class reference {
 					{
 						while ($res = oci_fetch_row($sth))
 						{
-							$fields[] = array ('code' => $res[0], 'value' => $res[1]);
+							$fields[] = array ('code' => $res[0], 'value' => $res[1], 'cmp' => array_key_exists(2, $res) ? $res[2] : null);
 						}
 					}
 				}
@@ -438,9 +447,33 @@ class reference {
 			return TRUE;
 		}
 	}
+
+	function getListComp()
+	{
+		return $this->executeQuery(array('schema' => 'APOGEE', 'query' => "SELECT cod_cmp, lic_cmp FROM composante WHERE tem_en_sve_cmp = 'O' ORDER BY lic_cmp"));
+	}
+
 	function getYears()
 	{
 		$select = 'SELECT DISTINCT year FROM decree';
+		$result = mysqli_query($this->_dbcon, $select);
+		$years = array();
+		if (mysqli_error($this->_dbcon))
+		{
+			elog("Erreur a l'execution de la requete select year.");
+		}
+		else {
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$years[] = $row['year'];
+			}
+		}
+		return $years;
+	}
+
+	function getCreationYears()
+	{
+		$select = "SELECT DISTINCT case when month(createdate) >= 9 THEN year(createdate) else year(createdate) - 1 end as \"year\" FROM decree ORDER BY iddecree";
 		$result = mysqli_query($this->_dbcon, $select);
 		$years = array();
 		if (mysqli_error($this->_dbcon))

@@ -5,6 +5,8 @@ require_once dirname(__FILE__,2).'/include/fonctions.php';
 class model {
 	
 	private $_dbcon;
+
+	private $_rdbApo;
 	
 	private $_idmodel;
 	
@@ -15,12 +17,17 @@ class model {
 	private $_model_path;
 	
 	private $_export_path;
+
+	private $_ref;
 	
 	function __construct($dbcon, $idmodel)
 	{
-		require_once (dirname(__FILE__,2)."/include/dbconnection.php");
+		include (dirname(__FILE__,2)."/include/dbconnection.php");
 		$this->_idmodel = intval($idmodel);
 		$this->_dbcon = $dbcon;
+		$this->_rdbApo = $rdbApo;
+		require_once dirname(__FILE__,1).'/reference.php';
+		$this->_ref = new reference($this->_dbcon, $this->_rdbApo);
 	}
 	
 	function getid()
@@ -100,7 +107,7 @@ class model {
 	
 	function getModelFields()
 	{
-		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_before, mfi.complement_after, mfi.lib_section, mfi.idfield_type_section, mfi.order, mfi.filename_position, /*mfi.tem_param_esign,*/ fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_before, mfi.complement_after, mfi.lib_section, mfi.idfield_type_section, mfi.order, mfi.filename_position, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
 		$params = array($this->_idmodel);
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
@@ -307,7 +314,7 @@ class model {
 
 	function getModelWorkflow()
 	{
-		$select = "SELECT mw.idetape, mw.recipient_type, mw.recipient_default_value FROM model_workflow mw INNER JOIN decree d ON d.idmodel = mw.idmodel WHERE d.iddecree = ? ORDER BY mw.idetape";
+		$select = "SELECT mw.idetape, mw.recipient_type, mw.recipient_default_value FROM model_workflow mw INNER JOIN model m ON m.idmodel = mw.idmodel WHERE m.idmodel = ? ORDER BY mw.idetape";
 		$params = array($this->getId());
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$values = array();
@@ -317,6 +324,44 @@ class model {
 			{
 				$values[] = $res;
 			}
+		}
+		else
+		{
+			elog("erreur select section from model_field. ".mysqli_error($this->_dbcon));
+		}
+		return $values;
+	}
+
+	function getLastQuery()
+	{
+		// Récupérer la requête la plus basse pour le modèle : field_type.datatype = 'query' et max(position)
+		$fields = $this->getModelFields();
+		$max = 0;
+		$field_type = NULL;
+		foreach ($fields as $field)
+		{
+			if ($field['datatype'] == 'query' && $field['order'] > $max && $field['number'] > 0)
+			{
+				$max = $field['order'];
+				$field_type = $field['idfield_type'];
+			}
+		}
+		return $field_type;
+	}
+
+	function getListDecreesToEditForComp($composante = null)
+	{
+		$values = array();
+		$field_type = $this->getLastQuery();
+		if ($field_type != null)
+		{
+			$select = $this->getQueryField($field_type);
+			if ($composante != null)
+			{
+				$select['query_clause'] .= " AND chv.cod_cmp = '".$composante."'";
+			}
+			$select['query_clause'] .= ' ORDER BY 3, 2 ';
+			$values = $this->_ref->executeQuery($select);
 		}
 		return $values;
 	}

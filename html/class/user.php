@@ -583,6 +583,12 @@ class user {
 				$select .= " AND d.year = ?";
 				$params[] = $criteres['year'];
 			}
+			if (array_key_exists('createyear', $criteres) && $criteres['createyear'] != null)
+			{
+				$select .= " AND ((year(createdate) = ? AND month(createdate) >= 9) OR (year(createdate) = ? + 1 AND month(createdate) < 9)) ";
+				$params[] = $criteres['createyear'];
+				$params[] = $criteres['createyear'];
+			}
 			if (array_key_exists('findnum', $criteres) && $criteres['findnum'] != null)
 			{
 				$select .= " AND d.number = ?";
@@ -614,6 +620,11 @@ class user {
 					$select .= "))";
 				}
 				$select .= ")";
+			}
+			if (array_key_exists('composante', $criteres) && $criteres['composante'] != '')
+			{
+				$select .= " AND d.structure = ? ";
+				$params[] = $criteres['composante'];
 			}
 		}
 		$select .= ' ORDER BY ';
