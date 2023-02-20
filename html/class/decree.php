@@ -765,7 +765,7 @@ class decree {
 			{
 				if (array_key_exists("refuse_comment", $esign_info))
 				{
-					return $esign_info["refuse_comment"];
+					return htmlspecialchars($esign_info["refuse_comment"]);
 				}
 			}
 		}
