@@ -234,6 +234,7 @@
             }
             
         }
+    }
     } else { ?>
         <div id="contenu1">
             <h2> Accès interdit </h2>
