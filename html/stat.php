@@ -93,7 +93,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 						break;
 					case STATUT_VALIDE :
 						$decree_made_by_status['Validé']++;
-						if ($query_value != '' && !array_key_exists($query_value.$periode_value, $liste_valide))
+						if ($query_value != '' && !array_key_exists($query_value.$periode_value, $liste_valide) && in_array($query_value, $liste_etp_to_do))
 						{
 							$liste_valide[$query_value.$periode_value] = 1;
 							switch ($periode_value)
