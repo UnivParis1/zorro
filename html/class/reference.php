@@ -473,7 +473,7 @@ class reference {
 
 	function getCreationYears()
 	{
-		$select = "SELECT DISTINCT case when month(createdate) >= 9 THEN year(createdate) else year(createdate) - 1 end as \"year\" FROM decree ORDER BY iddecree";
+		$select = "SELECT DISTINCT case when month(createdate) >= 9 THEN year(createdate) else year(createdate) - 1 end as \"year\" FROM decree ORDER BY iddecree desc";
 		$result = mysqli_query($this->_dbcon, $select);
 		$years = array();
 		if (mysqli_error($this->_dbcon))
