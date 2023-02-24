@@ -73,7 +73,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 				$periode_value =  $decree->getFieldForFieldType($idfield_periode);
 				if (in_array($query_value, $liste_etp_to_do))
 				{
-					$liste_edit[$query_value][] = $decree->getStatusAff();
+					$liste_edit[$query_value][] = array('statut' => $decree->getStatusAff(), 'periode' => $periode_value);
 
 					$gerer_doublon = false;
 					switch ($periode_value)
@@ -482,11 +482,12 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 		{ ?>
 			<div>
 				<table class="tableausimple">
-					<tr><th class="titresimple" colspan=4>Arrêtés à produire</th></tr>
+					<tr><th class="titresimple" colspan=5>Arrêtés à produire</th></tr>
 					<tr>
 						<th class="titresimple">Code</th>
 						<th class="titresimple">Libellé</th>
 						<th class="titresimple">Composante</th>
+						<th class="titresimple">Période</th>
 						<th class="titresimple">Statut</th>
 					</tr>
 				<?php foreach ($liste_to_do as $todo)
@@ -501,14 +502,17 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 						<td rowspan=<?php echo $rowspan;?>><?php echo $liste_comp[$todo['cmp']];?></td>
 						<?php if ($decree_edited) 
 						{ ?>
-							<td class="<?php echo $liste_edit[$valeur][0]['class'];?>" title="<?php echo $liste_edit[$valeur][0]['title'];?>"><?php echo $liste_edit[$valeur][0]['contenu']; ?></td>
+							<td><?php echo $liste_edit[$valeur][0]['periode'] == '' ? "Année" : $liste_edit[$valeur][0]['periode'];?></td>
+							<td class="<?php echo $liste_edit[$valeur][0]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][0]['statut']['title'];?>"><?php echo $liste_edit[$valeur][0]['statut']['contenu']; ?></td>
 						<?php } else { ?>
+							<td></td>
 							<td></td>
 						<?php } ?>
 					</tr>
 					<?php for($i = 1; $i < $rowspan; $i++)
 					{ ?>
-						<tr><td class="<?php echo $liste_edit[$valeur][$i]['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['title'];?>"><?php echo $liste_edit[$valeur][$i]['contenu']; ?></td></tr>
+						<tr><td><?php echo $liste_edit[$valeur][$i]['periode'] == '' ? "Année" : $liste_edit[$valeur][$i]['periode'];?></td>
+						<td class="<?php echo $liste_edit[$valeur][$i]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['statut']['title'];?>"><?php echo $liste_edit[$valeur][$i]['statut']['contenu']; ?></td></tr>
 					<?php } ?>
 				<?php } ?>
 				</table>
