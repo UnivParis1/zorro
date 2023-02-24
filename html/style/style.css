@@ -338,8 +338,16 @@ td.img[title="En cours de signature"]:hover {
    width: 79px;
 }
 
+.labstat {
+    font-weight: bold;
+    font-size: larger;
+    padding-right: 15px;
+}
 
-
+.labsubstat {
+    font-weight: bold;
+    padding-right: 15px;
+}
 
 /** LES ALERTES **/
 

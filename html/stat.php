@@ -60,62 +60,293 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 			$query_field = $model_selected->getLastQuery();
 			$idfield_periode = ($post_selectarrete == 12) ? 104 : 7; // idfield_type de la période 7 ou 104 pour capacité
 			$liste_edit = array();
-			$liste_valide = array();
-			$decree_made_by_status = array("Validé" => 0, "En cours signature présidence" => 0, "En cours visa composante" => 0, 'Brouillon' => 0);
-			$decree_made_by_periode = array("Annuel" => 0, "S1" => 0, "S2" => 0, "Y1" => 0, "Y2" => 0);
-			$not_made = sizeof($liste_to_do);
-			$liste_etp_to_do = array_column($liste_to_do,'value');
+			$decree_made_by_periode = array("Annuel" => array(), "P1" => array(), "P2" => array());
+			$decree_doublon = array();
+			$nb_decree_made = 0;
+			$periode_weight = array("Annuel" => 1, "P1" => 0.5, "P2" => 0.5);
+			$liste_etp_to_do = array_map('htmlspecialchars',array_column($liste_to_do,'value'));
+			$decree_made = array(STATUT_VALIDE => $decree_made_by_periode, STATUT_EN_COURS => $decree_made_by_periode, "Validation de la présidence" => $decree_made_by_periode, "Visa de la composante" => $decree_made_by_periode, STATUT_BROUILLON => $decree_made_by_periode);
 			foreach($model_decrees as $mdecree)
 			{
 				$decree = new decree($dbcon, null, null, $mdecree['iddecree']);
 				$query_value =  $decree->getFieldForFieldType($query_field);
 				$periode_value =  $decree->getFieldForFieldType($idfield_periode);
-				if (in_array($query_value, $liste_etp_to_do) && !array_key_exists($query_value, $liste_edit))
+				if (in_array($query_value, $liste_etp_to_do))
 				{
-					$not_made--;
-				}
-				$liste_edit[$query_value][] = $decree->getStatusAff();
-				switch ($decree->getStatus(false))
-				{
-					case STATUT_BROUILLON :
-						$decree_made_by_status['Brouillon']++;
-						break;
-					case STATUT_EN_COURS :
-						$signStep = $decree->getSignStep();
-						if ($signStep == "Visa de la composante")
-						{
-							$decree_made_by_status['En cours visa composante']++;
-						}
-						elseif ($signStep == "Validation de la présidence")
-						{
-							$decree_made_by_status['En cours signature présidence']++;
-						}
-						break;
-					case STATUT_VALIDE :
-						$decree_made_by_status['Validé']++;
-						if ($query_value != '' && !array_key_exists($query_value.$periode_value, $liste_valide) && in_array($query_value, $liste_etp_to_do))
-						{
-							$liste_valide[$query_value.$periode_value] = 1;
-							switch ($periode_value)
+					$liste_edit[$query_value][] = $decree->getStatusAff();
+
+					$gerer_doublon = false;
+					switch ($periode_value)
+					{
+						case '' : // Cas annuel
+							$status = $decree->getStatus(false);
+							switch ($status)
 							{
-								case '' :
-									$decree_made_by_periode["Annuel"]++;
+								case STATUT_BROUILLON :
+									// On ne compte l'arrêté annuel en brouillon que si aucun arrêté annuel ou semestriel n'a été compté sur un statut supérieur
+									if (!in_array($query_value, $decree_made[$status]["Annuel"]) 
+										&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["Annuel"])
+										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["Annuel"]) 
+										&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["P1"])
+										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P1"]) 
+										&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["P2"])
+										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P2"]))
+									{
+										// Contrôle de la présence d'un arrêté pour un semestre dans le même statut
+										$liste_statuts_inf = array($status);
+										$liste_periodes = array("P1", "P2");
+										foreach ($liste_statuts_inf as $st)
+										{
+											foreach ($liste_periodes as $pe)
+											{
+												$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+												if ($query_value_in_P !== FALSE)
+												{
+													unset($decree_made[$st][$pe][$query_value_in_P]);
+													$nb_decree_made -= $periode_weight[$pe];
+													$gerer_doublon = true;
+												}
+											}
+										}
+										$decree_made[$status]["Annuel"][] = $query_value;
+										$nb_decree_made += $periode_weight["Annuel"];
+									}
+									else
+									{
+										$gerer_doublon = true;
+									}
+									if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
+									{
+										$decree_doublon[] = $query_value;
+									}
 									break;
-								case 'semestre 1' :
-									$decree_made_by_periode["S1"]++;
+								case STATUT_EN_COURS :
+									if (!in_array($query_value, $decree_made[$status]["Annuel"])
+										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["Annuel"])
+										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P1"])
+										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P2"]))
+									{
+										// Contrôle de la présence d'un arrêté pour un semestre ou année dans le même statut et statuts inférieurs
+										$liste_statuts_inf = array($status, STATUT_BROUILLON);
+										$liste_periodes = array("P1", "P2", "Annuel");
+										$signStep = $decree->getSignStep();
+										foreach ($liste_statuts_inf as $st)
+										{
+											foreach ($liste_periodes as $pe)
+											{
+												$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+												if ($query_value_in_P !== FALSE)
+												{
+													unset($decree_made[$st][$pe][$query_value_in_P]);
+													$nb_decree_made -= $periode_weight[$pe];
+													$gerer_doublon = true;
+												}
+											}
+										}
+										$decree_made[$status]["Annuel"][] = $query_value;
+										$nb_decree_made += $periode_weight["Annuel"];
+										$search_in = array("Visa de la composante");
+										if ($signStep == "Validation de la présidence")
+										{
+											$search_in[] = "Validation de la présidence";
+										}
+										if ($gerer_doublon)
+										{
+											foreach($search_in as $si)
+											{
+												foreach ($liste_periodes as $pe)
+												{
+													$query_value_in_P = array_search($query_value, $decree_made[$si][$pe]);
+													if ($query_value_in_P !== FALSE)
+													{
+														unset($decree_made[$si][$pe][$query_value_in_P]);
+													}
+												}
+											}
+										}
+										$decree_made[$signStep]["Annuel"][] = $query_value;
+									}
+									elseif(in_array($query_value, $decree_made[$status]["Annuel"]))
+									{
+										// Le seul cas où on doit modifier la stat est si l'arrêté annuel à compter est à la validation de la présidence et l'arrêté annuel présent est au visa de la composante
+										$signStep = $decree->getSignStep();
+										$query_value_in_P = array_search($query_value, $decree_made["Visa de la composante"]["Annuel"]);
+										if ($signStep == "Validation de la présidence" && $query_value_in_P !== FALSE)
+										{
+											unset($decree_made["Visa de la composante"]["Annuel"][$query_value_in_P]);
+											$decree_made["Validation de la présidence"]["Annuel"][] = $query_value;
+										}
+										$gerer_doublon = true;
+									}
+									else
+									{
+										$gerer_doublon = true;
+									}
+									if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
+									{
+										$decree_doublon[] = $query_value;
+									}
 									break;
-								case 'semestre 2' :
-									$decree_made_by_periode["S2"]++;
-									break;
-								case 'première année' :
-									$decree_made_by_periode["Y1"]++;
-									break;
-								case 'deuxième année' :
-									$decree_made_by_periode["Y2"]++;
+								case STATUT_VALIDE :
+									if (!in_array($query_value, $decree_made[$status]["Annuel"]))
+									{
+										// Contrôle de la présence d'un arrêté pour un semestre ou année dans le même statut et statuts inférieurs
+										$liste_statuts_inf = array($status, STATUT_EN_COURS, STATUT_BROUILLON);
+										$liste_periodes = array("P1", "P2", "Annuel");
+										foreach ($liste_statuts_inf as $st)
+										{
+											foreach ($liste_periodes as $pe)
+											{
+												$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+												if ($query_value_in_P !== FALSE)
+												{
+													unset($decree_made[$st][$pe][$query_value_in_P]);
+													$nb_decree_made -= $periode_weight[$pe];
+													$gerer_doublon = true;
+												}
+											}
+										}
+										$decree_made[$status]["Annuel"][] = $query_value;
+										$nb_decree_made += $periode_weight["Annuel"];
+									}
+									else
+									{
+										$gerer_doublon = true;
+									}
+									if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
+									{
+										$decree_doublon[] = $query_value;
+									}
 									break;
 							}
-						}
-						break;
+							break;
+						case 'semestre 1' :
+						case 'première année' :
+						case 'semestre 2' :
+						case 'deuxième année' :
+							if ($periode_value == 'semestre 1' || $periode_value == 'première année')
+							{
+								$p = "P1";
+							}
+							else
+							{
+								$p = "P2";
+							}
+							$status = $decree->getStatus(false);
+							// Contrôle de la présence d'un arrêté pour le semestre ou année dans le même statut ou statuts supérieurs
+							switch ($status)
+							{
+								case STATUT_BROUILLON :
+									$liste_statuts_sup = array($status, STATUT_EN_COURS, STATUT_VALIDE);
+									$liste_periodes = array($p, "Annuel");
+									foreach ($liste_statuts_sup as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											if (in_array($query_value, $decree_made[$st][$pe]))
+											{
+												$gerer_doublon = true;
+											}
+										}
+									}
+									if ($gerer_doublon)
+									{
+										if (!array_key_exists($query_value, $decree_doublon))
+										{
+											$decree_doublon[] = $query_value;
+										}
+									}
+									else
+									{
+										$decree_made[$status][$p][] = $query_value;
+										$nb_decree_made += $periode_weight[$p];
+									}
+									break;
+								case STATUT_EN_COURS :
+									$liste_statuts_sup = array($status, STATUT_VALIDE);
+									$liste_statuts_inf = array(STATUT_BROUILLON);
+									$liste_periodes = array($p, "Annuel");
+									foreach ($liste_statuts_sup as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											if (in_array($query_value, $decree_made[$st][$pe]))
+											{
+												$gerer_doublon = true;
+											}
+										}
+									}
+									// chercher dans les statuts inférieurs pour les supprimer
+									foreach ($liste_statuts_inf as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+											if ($query_value_in_P !== FALSE)
+											{
+												unset($decree_made[$st][$pe][$query_value_in_P]);
+												$nb_decree_made -= $periode_weight[$pe];
+												$gerer_doublon = true;
+											}
+										}
+									}
+									if ($gerer_doublon)
+									{
+										if (!array_key_exists($query_value, $decree_doublon))
+										{
+											$decree_doublon[] = $query_value;
+										}
+									}
+									else
+									{
+										$decree_made[$status][$p][] = $query_value;
+										$nb_decree_made += $periode_weight[$p];
+									}
+									break;
+								case STATUT_VALIDE :
+									$liste_statuts_sup = array($status);
+									$liste_statuts_inf = array(STATUT_BROUILLON, STATUT_EN_COURS);
+									$liste_periodes = array($p, "Annuel");
+									foreach ($liste_statuts_sup as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											if (in_array($query_value, $decree_made[$st][$pe]))
+											{
+												$gerer_doublon = true;
+											}
+										}
+									}
+									// chercher dans les statuts inférieurs pour les supprimer
+									foreach ($liste_statuts_inf as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+											if ($query_value_in_P !== FALSE)
+											{
+												unset($decree_made[$st][$pe][$query_value_in_P]);
+												$nb_decree_made -= $periode_weight[$pe];
+												$gerer_doublon = true;
+											}
+										}
+									}
+									if ($gerer_doublon)
+									{
+										if (!array_key_exists($query_value, $decree_doublon))
+										{
+											$decree_doublon[] = $query_value;
+										}
+									}
+									else
+									{
+										$decree_made[$status][$p][] = $query_value;
+										$nb_decree_made += $periode_weight[$p];
+									}
+									break;
+							}
+							break;
+					}
 				}
 			}
 		}
@@ -224,22 +455,29 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 	{
 		//print_r2($model_selected_infos);
 		?>
-		<label>Nombre d'arrêtés annuels attendus : </label><?php if ($query_field == NULL) { echo "1" ;} else { echo sizeof($liste_to_do);} ?><br>
-		<label>Nombre d'arrêtés validés (mentions et périodes distinctes) : </label><?php echo sizeof($liste_valide);?><br>
-		<label> -> Annuel : </label><?php echo $decree_made_by_periode["Annuel"];?><br>
-		<?php if ($post_selectarrete == 12) { ?>
-			<label> -> 1ère année : </label><?php echo $decree_made_by_periode["Y1"];?><br>
-			<label> -> 2ème année : </label><?php echo $decree_made_by_periode["Y2"];?><br><br>
-		<?php } else { ?>
-			<label> -> Semestre 1 : </label><?php echo $decree_made_by_periode["S1"];?><br>
-			<label> -> Semestre 2 : </label><?php echo $decree_made_by_periode["S2"];?><br><br>
-		<?php } ?>
-		<label>Nombre d'arrêtés NON créés : </label><?php echo $not_made;?><br>
-		<label>Nombre d'arrêtés créés : </label><?php echo sizeof($model_decrees);?><br>
-		<label> -> Validés : </label><?php echo $decree_made_by_status["Validé"]; ?><br>
-		<label> -> En cours de signature présidence : </label><?php echo $decree_made_by_status["En cours signature présidence"]; ?><br>
-		<label> -> En cours de visa composante : </label><?php echo $decree_made_by_status["En cours visa composante"]; ?><br>
-		<label> -> Brouillon : </label><?php echo $decree_made_by_status["Brouillon"]; ?><br><br>
+		<label class="labstat">Nombre d'arrêtés annuels attendus : </label><?php if ($query_field == NULL) { echo "1" ;} else { echo sizeof($liste_to_do);} ?><br>
+		<label class="labstat" title="On ne compte qu'une seule fois les arrêtés créés pour une mention. Un arrêté semestriel est compté 0.5. Si plusieurs arrêtés créés pour une mention couvrent la même période, la priorité est donnée au statut le plus avancé puis à la période la plus longue.">Nombre d'arrêtés créés (?) : </label><?php echo $nb_decree_made;?>
+		<ul>
+			<li><label class="labsubstat">Validé : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]) + (sizeof($decree_made[STATUT_VALIDE]["P1"]) / 2) + (sizeof($decree_made[STATUT_VALIDE]["P2"]) / 2); ?></li>
+			<ul>
+				<li><label class="labsubstat">Annuel : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]);?></li>
+				<?php if ($post_selectarrete == 12) { ?>
+					<li><label class="labsubstat">1ère année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
+					<li><label class="labsubstat">2ème année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
+				<?php } else { ?>
+					<li><label class="labsubstat">Semestre 1 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
+					<li><label class="labsubstat">Semestre 2 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
+				<?php } ?>
+			</ul>
+			<li><label class="labsubstat">En cours de signature : </label><?php echo sizeof($decree_made[STATUT_EN_COURS]["Annuel"]) + (sizeof($decree_made[STATUT_EN_COURS]["P1"]) / 2) + (sizeof($decree_made[STATUT_EN_COURS]["P2"]) / 2); ?></li>
+			<ul>
+				<li><label class="labsubstat">Présidence : </label><?php echo sizeof($decree_made["Validation de la présidence"]["Annuel"]) + (sizeof($decree_made["Validation de la présidence"]["P1"]) / 2) + (sizeof($decree_made["Validation de la présidence"]["P2"]) / 2); ?></li>
+				<li><label class="labsubstat">Composante : </label><?php echo sizeof($decree_made["Visa de la composante"]["Annuel"]) + (sizeof($decree_made["Visa de la composante"]["P1"]) / 2) + (sizeof($decree_made["Visa de la composante"]["P2"]) / 2); ?></li>
+			</ul>
+			<li><label class="labsubstat">Brouillon : </label><?php echo sizeof($decree_made[STATUT_BROUILLON]["Annuel"]) + (sizeof($decree_made[STATUT_BROUILLON]["P1"]) / 2) + (sizeof($decree_made[STATUT_BROUILLON]["P2"]) / 2); ?></li>
+		</ul>
+		<label class="labstat">Nombre d'arrêtés NON créés : </label><?php echo sizeof($liste_to_do) - $nb_decree_made;?><br>
+		<label class="labstat" title="Les arrêtés en doublon sont présentés sur plusieurs lignes dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon (?) : </label><?php echo sizeof($decree_doublon);?><br><br>
 		<?php if (sizeof($liste_to_do) > 0)
 		{ ?>
 			<div>
