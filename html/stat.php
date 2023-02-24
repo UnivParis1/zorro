@@ -455,29 +455,31 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 	{
 		//print_r2($model_selected_infos);
 		?>
-		<label class="labstat">Nombre d'arrêtés annuels attendus : </label><?php if ($query_field == NULL) { echo "1" ;} else { echo sizeof($liste_to_do);} ?><br>
-		<label class="labstat" title="On ne compte qu'une seule fois les arrêtés créés pour une mention. Un arrêté semestriel est compté 0.5. Si plusieurs arrêtés créés pour une mention couvrent la même période, la priorité est donnée au statut le plus avancé puis à la période la plus longue.">Nombre d'arrêtés créés ❔ : </label><?php echo $nb_decree_made;?>
-		<ul>
-			<li><label class="labsubstat">Validé : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]) + (sizeof($decree_made[STATUT_VALIDE]["P1"]) / 2) + (sizeof($decree_made[STATUT_VALIDE]["P2"]) / 2); ?></li>
+		<div class="stat">
+			<label class="labstat">Nombre d'arrêtés annuels attendus : </label><?php if ($query_field == NULL) { echo "1" ;} else { echo sizeof($liste_to_do);} ?><br>
+			<label class="labstat" title="On ne compte qu'une seule fois les arrêtés créés pour une mention. Un arrêté semestriel est compté 0.5. Si plusieurs arrêtés créés pour une mention couvrent la même période, la priorité est donnée au statut le plus avancé puis à la période la plus longue.">Nombre d'arrêtés créés ❔ : </label><?php echo $nb_decree_made;?>
 			<ul>
-				<li><label class="labsubsubstat">Annuel : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]);?></li>
-				<?php if ($post_selectarrete == 12) { ?>
-					<li><label class="labsubsubstat">1ère année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
-					<li><label class="labsubsubstat">2ème année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
-				<?php } else { ?>
-					<li><label class="labsubsubstat">Semestre 1 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
-					<li><label class="labsubsubstat">Semestre 2 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
-				<?php } ?>
+				<li><label class="labsubstat">Validé : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]) + (sizeof($decree_made[STATUT_VALIDE]["P1"]) / 2) + (sizeof($decree_made[STATUT_VALIDE]["P2"]) / 2); ?></li>
+				<ul>
+					<li><label class="labsubsubstat">Annuel : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]);?></li>
+					<?php if ($post_selectarrete == 12) { ?>
+						<li><label class="labsubsubstat">1ère année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
+						<li><label class="labsubsubstat">2ème année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
+					<?php } else { ?>
+						<li><label class="labsubsubstat">Semestre 1 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
+						<li><label class="labsubsubstat">Semestre 2 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
+					<?php } ?>
+				</ul>
+				<li><label class="labsubstat">En cours de signature : </label><?php echo sizeof($decree_made[STATUT_EN_COURS]["Annuel"]) + (sizeof($decree_made[STATUT_EN_COURS]["P1"]) / 2) + (sizeof($decree_made[STATUT_EN_COURS]["P2"]) / 2); ?></li>
+				<ul>
+					<li><label class="labsubsubstat">Présidence : </label><?php echo sizeof($decree_made["Validation de la présidence"]["Annuel"]) + (sizeof($decree_made["Validation de la présidence"]["P1"]) / 2) + (sizeof($decree_made["Validation de la présidence"]["P2"]) / 2); ?></li>
+					<li><label class="labsubsubstat">Composante : </label><?php echo sizeof($decree_made["Visa de la composante"]["Annuel"]) + (sizeof($decree_made["Visa de la composante"]["P1"]) / 2) + (sizeof($decree_made["Visa de la composante"]["P2"]) / 2); ?></li>
+				</ul>
+				<li><label class="labsubstat">Brouillon : </label><?php echo sizeof($decree_made[STATUT_BROUILLON]["Annuel"]) + (sizeof($decree_made[STATUT_BROUILLON]["P1"]) / 2) + (sizeof($decree_made[STATUT_BROUILLON]["P2"]) / 2); ?></li>
 			</ul>
-			<li><label class="labsubstat">En cours de signature : </label><?php echo sizeof($decree_made[STATUT_EN_COURS]["Annuel"]) + (sizeof($decree_made[STATUT_EN_COURS]["P1"]) / 2) + (sizeof($decree_made[STATUT_EN_COURS]["P2"]) / 2); ?></li>
-			<ul>
-				<li><label class="labsubsubstat">Présidence : </label><?php echo sizeof($decree_made["Validation de la présidence"]["Annuel"]) + (sizeof($decree_made["Validation de la présidence"]["P1"]) / 2) + (sizeof($decree_made["Validation de la présidence"]["P2"]) / 2); ?></li>
-				<li><label class="labsubsubstat">Composante : </label><?php echo sizeof($decree_made["Visa de la composante"]["Annuel"]) + (sizeof($decree_made["Visa de la composante"]["P1"]) / 2) + (sizeof($decree_made["Visa de la composante"]["P2"]) / 2); ?></li>
-			</ul>
-			<li><label class="labsubstat">Brouillon : </label><?php echo sizeof($decree_made[STATUT_BROUILLON]["Annuel"]) + (sizeof($decree_made[STATUT_BROUILLON]["P1"]) / 2) + (sizeof($decree_made[STATUT_BROUILLON]["P2"]) / 2); ?></li>
-		</ul>
-		<label class="labstat">Nombre d'arrêtés NON créés : </label><?php echo sizeof($liste_to_do) - $nb_decree_made;?><br>
-		<label class="labstat" title="Les arrêtés en doublon sont présentés sur plusieurs lignes dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><?php echo sizeof($decree_doublon);?><br><br>
+			<label class="labstat">Nombre d'arrêtés NON créés : </label><?php echo sizeof($liste_to_do) - $nb_decree_made;?><br>
+			<label class="labstat" title="Les arrêtés en doublon sont présentés sur plusieurs lignes dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><?php echo sizeof($decree_doublon);?><br><br>
+		</div>
 		<?php if (sizeof($liste_to_do) > 0)
 		{ ?>
 			<div>
