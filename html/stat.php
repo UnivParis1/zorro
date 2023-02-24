@@ -367,8 +367,11 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 		$models = $ref->getListModel();
 		foreach ($models as $idmodel => $infos)
 		{
-			$model = new model($dbcon, $idmodel);
-			$listModels[] = $model->getModelInfo();
+			if ($infos['iddecree_type'] == 1 || $infos['iddecree_type'] == 2)
+			{
+				$model = new model($dbcon, $idmodel);
+				$listModels[] = $model->getModelInfo();
+			}
 		}
 	}
 	else
