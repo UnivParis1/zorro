@@ -167,11 +167,13 @@
 					<li id='menu_manage' <?php echo ($menuItem == 'menu_manage') ? "class='navcourant'" : '';?> >
 						<a href="manage_decree.php">Mes documents</a>
 					</li>
+					<?php } ?>
+					<?php if ($user->isSuperAdmin() || $user->isDaji()) { ?>
 					<li id='menu_stat' <?php echo ($menuItem == 'menu_stat') ? "class='navcourant'" : '';?> >
 						<a href="stat.php">Indicateurs</a>
 					</li>
-					<?php } ?>
-					<?php if ($user->isSuperAdmin()) { ?>
+					<?php }
+					if ($user->isSuperAdmin()) { ?>
 					<li id='menu_role' <?php echo ($menuItem == 'menu_role') ? "class='navcourant'" : '';?> >
 						<a href="manage_role.php">Autorisations</a>
 					</li>
