@@ -60,6 +60,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 			$query_field = $model_selected->getLastQuery();
 			$idfield_periode = ($post_selectarrete == 12) ? 104 : 7; // idfield_type de la période 7 ou 104 pour capacité
 			$liste_edit = array();
+			$corresp_period = array("semestre 1" => "P1", "1ère année" => "P1", "semestre 2" => "P2", "2ème année" => "P2", "Annuel" => "Annuel");
 			$decree_made_by_periode = array("Annuel" => array(), "P1" => array(), "P2" => array());
 			$decree_doublon = array();
 			$nb_decree_made = 0;
@@ -206,6 +207,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 													if ($st == STATUT_VALIDE)
 													{
 														$doublon_valide = true;
+														$doublon_periode = ($pe == "Annuel") ? array("Annuel") : array("Annuel", $pe);
 													}
 												}
 											}
@@ -217,10 +219,24 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									{
 										$gerer_doublon = true;
 										$doublon_valide = true;
+										$doublon_periode = array("Annuel");
 									}
-									if ($gerer_doublon && $doublon_valide && !in_array($query_value, $decree_doublon))
+									if ($gerer_doublon && $doublon_valide)
 									{
-										$decree_doublon[] = $query_value;
+										if (!array_key_exists($query_value, $decree_doublon))
+										{
+											$decree_doublon[$query_value] = $doublon_periode;
+										}
+										else
+										{
+											foreach($doublon_periode as $dp)
+											{
+												if (!in_array($dp,$decree_doublon[$query_value]))
+												{
+													$decree_doublon[$query_value][] = $dp;
+												}
+											}
+										}
 									}
 									break;
 							}
@@ -320,6 +336,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 											{
 												$gerer_doublon = true;
 												$doublon_valide = true;
+												$doublon_periode = ($pe == $p) ? array($p) : array($pe, $p);
 											}
 										}
 									}
@@ -339,9 +356,22 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									}
 									if ($gerer_doublon)
 									{
-										if (!in_array($query_value, $decree_doublon) && $doublon_valide)
+										if ($doublon_valide)
 										{
-											$decree_doublon[] = $query_value;
+											if (!array_key_exists($query_value, $decree_doublon))
+											{
+												$decree_doublon[$query_value] = $doublon_periode;
+											}
+											else
+											{
+												foreach($doublon_periode as $dp)
+												{
+													if (!in_array($dp,$decree_doublon[$query_value]))
+													{
+														$decree_doublon[$query_value][] = $dp;
+													}
+												}
+											}
 										}
 									}
 									else
@@ -487,7 +517,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 				<li><label class="labsubstat">Brouillon : </label><?php echo sizeof($decree_made[STATUT_BROUILLON]["Annuel"]) + (sizeof($decree_made[STATUT_BROUILLON]["P1"]) / 2) + (sizeof($decree_made[STATUT_BROUILLON]["P2"]) / 2); ?></li>
 			</ul>
 			<label class="labstat">Nombre d'arrêtés NON créés : </label><?php echo sizeof($liste_to_do) - $nb_decree_made;?><br>
-			<label class="labstat" title="Le libellé des arrêtés en doublon est affiché en orange dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><?php echo sizeof($decree_doublon);?><br><br>
+			<label class="labstat" title="La période des arrêtés en doublon est affichée en orange dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><span class='warning_doublon'><?php echo sizeof($decree_doublon);?></span><br><br>
 		</div>
 		<?php if (sizeof($liste_to_do) > 0)
 		{ ?>
@@ -510,14 +540,16 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 						<?php 
 						$valeur = htmlspecialchars($todo['value']);
 						$decree_edited = array_key_exists($valeur, $liste_edit);
-						$class_doublon = in_array($valeur, $decree_doublon) ? "class='warning_doublon'": "";
 						$rowspan =  $decree_edited ? sizeof($liste_edit[$valeur]) : 1; ?>
 						<td rowspan=<?php echo $rowspan;?> ><?php echo $todo['code'];?></td>
-						<td rowspan=<?php echo $rowspan;?> <?php echo $class_doublon; ?>><?php echo $todo['value'];?></td>
+						<td rowspan=<?php echo $rowspan;?>s><?php echo $todo['value'];?></td>
 						<td rowspan=<?php echo $rowspan;?>><?php echo $liste_comp[$todo['cmp']];?></td>
 						<?php if ($decree_edited) 
 						{ ?>
-							<td><?php echo $liste_edit[$valeur][0]['periode'] == '' ? "Année" : $liste_edit[$valeur][0]['periode'];?></td>
+							<?php ?>
+							<?php $periode = $liste_edit[$valeur][0]['periode'] == '' ? "Annuel" : $liste_edit[$valeur][0]['periode'];
+							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon'" : "";?>
+							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
 							<td class="<?php echo $liste_edit[$valeur][0]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][0]['statut']['title'];?>"><?php echo $liste_edit[$valeur][0]['statut']['contenu']; ?></td>
 							<?php if ($user->isSuperAdmin()) {
 								$pos = strpos($liste_edit[$valeur][0]['statut']['contenu'], "signrequests");
@@ -537,17 +569,20 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 					</tr>
 					<?php for($i = 1; $i < $rowspan; $i++)
 					{ ?>
-						<tr><td><?php echo $liste_edit[$valeur][$i]['periode'] == '' ? "Année" : $liste_edit[$valeur][$i]['periode'];?></td>
-						<td class="<?php echo $liste_edit[$valeur][$i]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['statut']['title'];?>"><?php echo $liste_edit[$valeur][$i]['statut']['contenu']; ?></td>
-						<?php if ($user->isSuperAdmin()) {
-							$pos = strpos($liste_edit[$valeur][$i]['statut']['contenu'], "signrequests");
-							if ($pos !== FALSE) { ?>
-								<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][$i]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
-							<?php } else { ?>
-								<td></td>
-						<?php }
-						} ?>
-					</tr>
+						<tr>
+							<?php $periode = $liste_edit[$valeur][$i]['periode'] == '' ? "Annuel" : $liste_edit[$valeur][$i]['periode'];
+							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon'" : "";?>
+							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
+							<td class="<?php echo $liste_edit[$valeur][$i]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['statut']['title'];?>"><?php echo $liste_edit[$valeur][$i]['statut']['contenu']; ?></td>
+							<?php if ($user->isSuperAdmin()) {
+								$pos = strpos($liste_edit[$valeur][$i]['statut']['contenu'], "signrequests");
+								if ($pos !== FALSE) { ?>
+									<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][$i]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
+								<?php } else { ?>
+									<td></td>
+							<?php }
+							} ?>
+						</tr>
 					<?php } ?>
 				<?php } ?>
 				</table>

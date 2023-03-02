@@ -338,7 +338,7 @@ td.img[title="En cours de signature"]:hover {
    width: 79px;
 }
 
-.tableausimple td.warning_doublon {
+.warning_doublon {
     color: #CF4A02;
 }
 
