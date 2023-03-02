@@ -75,7 +75,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 				{
 					$liste_edit[$query_value][] = array('statut' => $decree->getStatusAff(), 'periode' => $periode_value);
 
-					$gerer_doublon = false;
+					$gerer_doublon = false; $doublon_valide = false;
 					switch ($periode_value)
 					{
 						case '' : // Cas annuel
@@ -104,21 +104,21 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 												{
 													unset($decree_made[$st][$pe][$query_value_in_P]);
 													$nb_decree_made -= $periode_weight[$pe];
-													$gerer_doublon = true;
+													//$gerer_doublon = true;
 												}
 											}
 										}
 										$decree_made[$status]["Annuel"][] = $query_value;
 										$nb_decree_made += $periode_weight["Annuel"];
 									}
-									else
+									/*else
 									{
 										$gerer_doublon = true;
 									}
 									if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
 									{
 										$decree_doublon[] = $query_value;
-									}
+									}*/
 									break;
 								case STATUT_EN_COURS :
 									if (!in_array($query_value, $decree_made[$status]["Annuel"])
@@ -182,10 +182,10 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									{
 										$gerer_doublon = true;
 									}
-									if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
+									/*if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
 									{
 										$decree_doublon[] = $query_value;
-									}
+									}*/
 									break;
 								case STATUT_VALIDE :
 									if (!in_array($query_value, $decree_made[$status]["Annuel"]))
@@ -203,6 +203,10 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 													unset($decree_made[$st][$pe][$query_value_in_P]);
 													$nb_decree_made -= $periode_weight[$pe];
 													$gerer_doublon = true;
+													if ($st == STATUT_VALIDE)
+													{
+														$doublon_valide = true;
+													}
 												}
 											}
 										}
@@ -212,8 +216,9 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									else
 									{
 										$gerer_doublon = true;
+										$doublon_valide = true;
 									}
-									if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
+									if ($gerer_doublon && $doublon_valide && !in_array($query_value, $decree_doublon))
 									{
 										$decree_doublon[] = $query_value;
 									}
@@ -251,10 +256,10 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									}
 									if ($gerer_doublon)
 									{
-										if (!array_key_exists($query_value, $decree_doublon))
+										/*if (!array_key_exists($query_value, $decree_doublon))
 										{
 											$decree_doublon[] = $query_value;
-										}
+										}*/
 									}
 									else
 									{
@@ -292,10 +297,10 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									}
 									if ($gerer_doublon)
 									{
-										if (!array_key_exists($query_value, $decree_doublon))
+										/*if (!array_key_exists($query_value, $decree_doublon))
 										{
 											$decree_doublon[] = $query_value;
-										}
+										}*/
 									}
 									else
 									{
@@ -314,6 +319,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 											if (in_array($query_value, $decree_made[$st][$pe]))
 											{
 												$gerer_doublon = true;
+												$doublon_valide = true;
 											}
 										}
 									}
@@ -333,7 +339,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									}
 									if ($gerer_doublon)
 									{
-										if (!array_key_exists($query_value, $decree_doublon))
+										if (!in_array($query_value, $decree_doublon) && $doublon_valide)
 										{
 											$decree_doublon[] = $query_value;
 										}
