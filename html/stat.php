@@ -487,7 +487,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 				<li><label class="labsubstat">Brouillon : </label><?php echo sizeof($decree_made[STATUT_BROUILLON]["Annuel"]) + (sizeof($decree_made[STATUT_BROUILLON]["P1"]) / 2) + (sizeof($decree_made[STATUT_BROUILLON]["P2"]) / 2); ?></li>
 			</ul>
 			<label class="labstat">Nombre d'arrêtés NON créés : </label><?php echo sizeof($liste_to_do) - $nb_decree_made;?><br>
-			<label class="labstat" title="Les arrêtés en doublon sont présentés sur plusieurs lignes dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><?php echo sizeof($decree_doublon);?><br><br>
+			<label class="labstat" title="Le libellé des arrêtés en doublon est affiché en orange dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><?php echo sizeof($decree_doublon);?><br><br>
 		</div>
 		<?php if (sizeof($liste_to_do) > 0)
 		{ ?>
@@ -510,9 +510,10 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 						<?php 
 						$valeur = htmlspecialchars($todo['value']);
 						$decree_edited = array_key_exists($valeur, $liste_edit);
+						$class_doublon = in_array($valeur, $decree_doublon) ? "class='warning_doublon'": "";
 						$rowspan =  $decree_edited ? sizeof($liste_edit[$valeur]) : 1; ?>
 						<td rowspan=<?php echo $rowspan;?> ><?php echo $todo['code'];?></td>
-						<td rowspan=<?php echo $rowspan;?>><?php echo $todo['value'];?></td>
+						<td rowspan=<?php echo $rowspan;?> <?php echo $class_doublon; ?>><?php echo $todo['value'];?></td>
 						<td rowspan=<?php echo $rowspan;?>><?php echo $liste_comp[$todo['cmp']];?></td>
 						<?php if ($decree_edited) 
 						{ ?>
