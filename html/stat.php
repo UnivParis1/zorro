@@ -548,7 +548,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 						{ ?>
 							<?php ?>
 							<?php $periode = $liste_edit[$valeur][0]['periode'] == '' ? "Annuel" : $liste_edit[$valeur][0]['periode'];
-							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon'" : "";?>
+							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
 							<td class="<?php echo $liste_edit[$valeur][0]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][0]['statut']['title'];?>"><?php echo $liste_edit[$valeur][0]['statut']['contenu']; ?></td>
 							<?php if ($user->isSuperAdmin()) {
@@ -571,7 +571,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 					{ ?>
 						<tr>
 							<?php $periode = $liste_edit[$valeur][$i]['periode'] == '' ? "Annuel" : $liste_edit[$valeur][$i]['periode'];
-							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon'" : "";?>
+							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
 							<td class="<?php echo $liste_edit[$valeur][$i]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['statut']['title'];?>"><?php echo $liste_edit[$valeur][$i]['statut']['contenu']; ?></td>
 							<?php if ($user->isSuperAdmin()) {
