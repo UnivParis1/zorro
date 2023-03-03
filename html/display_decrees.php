@@ -27,70 +27,7 @@
         <td class="cellulesimple"><?php echo $decree['uid']; ?></td>
         <td class="cellulesimple date"><?php echo date('d/m/Y',strtotime($decree['majdate'])); ?></td>
         <?php
-        $aff_statut = $objdecree->getStatusAff();
-        /*$status = $decree['status'];
-        $majdate = $decree['majdate'];
-        if ($status == STATUT_EN_COURS || $status == STATUT_CORBEILLE)
-        {
-            $mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
-            $status = $mod_decree->getStatus(false);
-            $majdate = $mod_decree->getMajDate();
-        }
-        switch ($status) {
-            case STATUT_ANNULE :
-                $contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
-                $title = 'Annulé';
-                $class = "img";
-                break;
-            case STATUT_REFUSE :
-                $mod_decree = new decree($dbcon, null, null, $decree['iddecree']);
-                $comment = $mod_decree->getRefuseComment();
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
-                $title = 'Refusé : '.$comment;
-                $class = "red";
-                break;
-            case STATUT_BROUILLON :
-                $contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/brouillon.svg' alt='brouillon' width='20px'></a>";
-                $title = 'Brouillon';
-                $class = "img";
-                break;
-            case STATUT_HORS_ZORRO :
-                $contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/valide_OK.svg' alt='hors_zorro' width='20px'></a>";
-                $title = 'Hors Zorro';
-                $class = "img";
-                break;
-            case STATUT_VALIDE :
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'>".date('d/m/Y', strtotime($majdate))."</a>";
-                $title = 'Validé';
-                $class = "green";
-                break;
-            case STATUT_EN_COURS :
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/enattente.svg' alt='signature en cours' width='20px'></a>";
-                $step = $mod_decree->getSignStep();
-                $title = 'En cours de signature : '.$step;
-                $class = "img";
-                break;
-            case STATUT_ERREUR :
-                $contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/erreur1.svg' alt='Document non trouvé sur eSignature' width='20px'></a>";
-                $title = 'erreur';
-                $class = "img";
-                break;
-            case STATUT_SUPPR_ESIGN :
-                $contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='Document supprimé d\'eSignature' width='20px'></a>";
-                $title = 'Document supprimé d\'eSignature';
-                $class = "img";
-                break;
-            case STATUT_CORBEILLE :
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$decree['idesignature']."' target='_blank'><img src='img/supprimer.svg' alt='Document dans la corbeille d\'eSignature' width='20px'></a>";
-                $title = 'Document dans la corbeille d\'eSignature';
-                $class = "img";
-                break;
-            default :
-                $contenu = "<a href='create_decree.php?id=".$decree['iddecree']."'><img src='img/supprimer.svg' alt='annulé' width='20px'></a>";
-                $title = 'Annulé';
-                $class = "img";
-                break;
-        }*/?>
+        $aff_statut = $objdecree->getStatusAff();?>
         <td class="<?php echo $aff_statut['class'];?>" title="<?php echo $aff_statut['title'];?>"><?php echo $aff_statut['contenu']; ?></td>
         <?php if ($user->isSuperAdmin()) {
                 if ($objdecree->getIdEsignature() != NULL) { ?>

@@ -808,10 +808,21 @@ class decree {
 					{
 						elog ("Signataire en attente : ".$response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']);
 						$esign_info = $this->getEsignInfo();
+						$nb_sign = 0;
+						if (isset($response['parentSignBook']['liveWorkflow']['currentStep']['recipients']))
+						{
+							foreach ($response['parentSignBook']['liveWorkflow']['currentStep']['recipients'] as $recipient)
+							{
+								if (isset($recipient['signed']) && $recipient['signed'])
+								{
+									$nb_sign ++;
+								}
+							}
+						}
 						if ($esign_info != null)
 						{
-							$update = "UPDATE esignature_info SET sign_step = ? WHERE idesignature = ?";
-							$params = array($response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description'], $idesignature);
+							$update = "UPDATE esignature_info SET sign_step = ?, nb_sign = ? WHERE idesignature = ?";
+							$params = array($response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description'], $nb_sign, $idesignature);
 							$result = prepared_select($this->_dbcon, $update, $params);
 							if (mysqli_error($this->_dbcon))
 							{
@@ -820,8 +831,8 @@ class decree {
 						}
 						else
 						{
-							$insert = "INSERT INTO esignature_info (idesignature, refuse_comment, sign_step) VALUES (?,NULL,?)";
-							$params = array($idesignature, $response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']);
+							$insert = "INSERT INTO esignature_info (idesignature, refuse_comment, sign_step, nb_sign) VALUES (?,NULL,?,?)";
+							$params = array($idesignature, $response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description'], $nb_sign);
 							$result = prepared_select($this->_dbcon, $insert, $params);
 							if (mysqli_error($this->_dbcon))
 							{
@@ -849,6 +860,22 @@ class decree {
 			}
 		}
 		return 'erreur eSignature';
+	}
+
+	function getNbSignForStep()
+	{
+		$select = "SELECT nb_sign FROM esignature_info WHERE idesignature = ?";
+		$param = array($this->getIdEsignature());
+		$result = prepared_select($this->_dbcon, $select, $param);
+		$nb_sign = 0;
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				$nb_sign = $row['nb_sign'];
+			}
+		}
+		return $nb_sign;
 	}
 
 	function deleteSignRequest($userid)
@@ -1151,9 +1178,23 @@ class decree {
                 $class = "green";
                 break;
             case STATUT_EN_COURS :
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature()."' target='_blank'><img src='img/enattente.svg' alt='signature en cours' width='".$width."px'></a>";
                 $step = $this->getSignStep();
-                $title = 'En cours de signature : '.$step;
+				if ($step == 'Visa de la composante')
+				{
+					$img = "<img src='img/enattenteA.svg' alt='visa composante en attente' width='".$width."px'>";
+					$title = 'En cours de signature : '.$step;
+					if ($this->getNbSignForStep() == 1)
+					{
+						$img = "<img src='img/enattenteB.svg' alt='2e visa composante en attente' width='".$width."px'>";
+						$title = 'En cours de signature : 2e '.$step;
+					}
+				}
+				elseif ($step == 'Validation de la présidence')
+				{
+					$img = "<img src='img/enattenteC.svg' alt='validation présidence en attente' width='".$width."px'>";
+					$title = 'En cours de signature : '.$step;
+				}
+                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature()."' target='_blank'>$img</a>";
                 $class = "img";
                 break;
             case STATUT_ERREUR :
