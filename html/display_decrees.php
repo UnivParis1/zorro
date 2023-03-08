@@ -24,7 +24,7 @@
         <td class="cellulesimple" title="<?php echo $objdecree->getFileName(); ?>"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $nom_aff; ?></a></td>
         <td class="cellulesimple"><?php echo $decree['modelname']; ?></td>
         <td class="cellulesimple"><?php echo $ldap->getStructureName($decree['structure']); ?></td>
-        <td class="cellulesimple"><?php echo $decree['uid']; ?></td>
+        <td class="cellulesimple"><?php echo $ldap->getDisplayName($decree['uid']); ?></td>
         <td class="cellulesimple date"><?php echo date('d/m/Y',strtotime($decree['majdate'])); ?></td>
         <?php
         $aff_statut = $objdecree->getStatusAff();?>

@@ -554,4 +554,37 @@ class ldap {
 		}
 		return '';
 	}
+
+	function getDisplayName($uid)
+	{
+		$retour = array();
+		$curl = curl_init();
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SEARCH_USERTRUSTED."?filter_uid=".$uid;
+		$opts = array(
+				CURLOPT_URL => $curl_opt_url,
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_PROXY => ''
+		);
+		curl_setopt_array($curl, $opts);
+		$json = curl_exec($curl);
+		$error = curl_error ($curl);
+		curl_close($curl);
+		if ($error != "")
+		{
+			elog( "Erreur Curl = " . $error );
+		}
+		//print_r2($json);
+		$tab = json_decode($json, true);
+		//print_r2($tab);
+		if (is_array($tab) && sizeof($tab) > 0)
+		{
+			if (isset($tab[0]['displayName']))
+			{
+				return $tab[0]['displayName'];
+			}
+		}
+		return $uid;
+	}
 }
