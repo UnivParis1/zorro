@@ -447,7 +447,7 @@
 					if (file_exists("./models/".$modelselected->getfile()))
 					{
 						// TODO : Rendre l'année universitaire d'affichage paramétrable en BDD dans le modèle
-						if ($decree->getModel()->getModelInfo()['iddecree_type'] == 2 && $decree->getModel()->getModelInfo()['idmodel'] != 7)
+						if (($decree->getModel()->getModelInfo()['iddecree_type'] == 2 || $decree->getModel()->getModelInfo()['iddecree_type'] == 6) && $decree->getModel()->getModelInfo()['idmodel'] != 7)
 						{
 							$anneeuniv = $ref->getAnneeUni(1);
 						}
