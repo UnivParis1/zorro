@@ -93,9 +93,16 @@ foreach($result as $res)
 	{
 		$position += $nb_roles * $list_decree_type[$i]['nb_model'];
 	}
-	$position += (array_search($res['idmodel'], array_keys($list_model[$res['iddecree_type']])) * $nb_roles);
-	$position += array_search($res['idrole'], array_keys($list_roles)) + 1;
-	$listgroupesroles[$res['idgroupe']][$position] = $res;
+	if($res['idmodel'] != NULL)
+	{
+		$position += (array_search($res['idmodel'], array_keys($list_model[$res['iddecree_type']])) * $nb_roles);
+		$position += array_search($res['idrole'], array_keys($list_roles)) + 1;
+		$listgroupesroles[$res['idgroupe']][$position] = $res;
+	}
+	else
+	{
+		$listgroupesroles[$res['idgroupe']][] = $res;
+	}
 }
 ?>
 </tr><tr>
