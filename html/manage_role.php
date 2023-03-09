@@ -120,20 +120,21 @@ foreach($result as $res)
 } 
 ?> 
 </tr><tr>
-<?php foreach($listgroupesroles as $idgroupe => $roles) { ?>
-<th class="cellulesimple" title="<?php echo $ref->getGroupeById($idgroupe)['name'];?>"><?php echo $ref->getGroupeById($idgroupe)['name']; ?></th>
+<?php foreach($listgroupesroles as $idgroupe => $roles) {
+	$rolename = $ref->getGroupeById($idgroupe)['name'];?>
+<th class="cellulesimple" title="<?php echo $rolename;?>"><?php echo $ref->getGroupeById($idgroupe)['name']; ?></th>
 	<?php for ($i = 1; $i <= $nb_col * $nb_roles; $i++) { 
 		if (isset($roles[$i]) && $roles[$i]['active'] != NULL) {
-			if ($roles[$i]['active'] == 'O') { 
+			if ($roles[$i]['active'] == 'O') {
 		?>
-			<th class="cellulesimple">
+			<th class="cellulesimple" title="<?php echo $rolename;?>">
 			<select style="width:4em" name="selectrole" id="<?php echo 'selectrole'.$idgroupe.'_'.$i; ?>" onchange="changerole('<?php echo $idgroupe;?>', '<?php echo $i;?>');">
 				<option value="O" selected="selected"><?php echo 'O';?></option>
 				<option value="N"><?php echo 'N';?></option>
 			</select>
 			</th>
 			<?php } else { ?>
-				<th class="cellulesimple">			
+				<th class="cellulesimple" title="<?php echo $rolename;?>">
 				<select style="width:4em" name="selectrole" id="<?php echo 'selectrole'.$idgroupe.'_'.$i; ?>" onchange="changerole('<?php echo $idgroupe;?>', '<?php echo $i;?>');">
 					<option value="O"><?php echo 'O';?></option>
 					<option value="N" selected="selected"><?php echo 'N';?></option>
@@ -142,7 +143,7 @@ foreach($result as $res)
 		else 
 		{
 			?>
-			<th class="cellulesimple">			
+			<th class="cellulesimple" title="<?php echo $rolename;?>">
 				<select style="width:4em" name="selectrole" id="<?php echo 'selectrole'.$idgroupe.'_'.$i; ?>" onchange="changerole('<?php echo $idgroupe;?>', '<?php echo $i;?>');">
 					<option value="" selected="selected">&nbsp;</option>
 					<option value="O"><?php echo 'O';?></option>
