@@ -952,6 +952,11 @@ class decree {
 		}
 		else
 		{
+			if ($decree_type['iddecree_type'] == 2 || $decree_type['iddecree_type'] == 6)
+			{
+				// Les arrêtés de commissions sont générés pour l'année universitaire suivante
+				$year ++;
+			}
 			// TARGET_ULR.export_path_decree_type.structure_export_path.year.export_path_model
 			$structure = $this->getStructure();
 			$struct_export_path = $ref->getStructureExportPath($structure);
