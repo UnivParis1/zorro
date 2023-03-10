@@ -349,14 +349,15 @@ class user {
 			$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
 			$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
 			//print_r2($listStructuresFilles);
-			$select .= " WHERE d.structure IN (?";
+			$select .= " WHERE (d.structure IN (?";
 			$params[] = $listStructuresFilles[0];
 			for($i = 1; $i < sizeof($listStructuresFilles); $i++)
 			{
 				$select .= ', ?';
 				$params[] = $listStructuresFilles[$i];
 			}
-			$select .= ')';
+			$select .= ') OR d.iduser = ? )';
+			$params[] = $iduser;
 		}
 		else // user lambda
 		{
@@ -370,9 +371,11 @@ class user {
 		}
 		if (sizeof($params) == 0)
 		{
+			echo $select;
 			$result = mysqli_query($this->_dbcon, $select);
 		}
 		else {
+			echo $select; var_dump($params);
 			$result = prepared_select($this->_dbcon, $select, $params);
 		}
 		if ( !mysqli_error($this->_dbcon))
@@ -552,14 +555,15 @@ class user {
 			$listStructuresFilles = $this->getAdminSubStructs($structure);
 			$listStructuresFilles[] = 'structures-'.$structure;
 			//print_r2($listStructuresFilles);
-			$select .= " WHERE d.structure IN (?";
+			$select .= " WHERE (d.structure IN (?";
 			$params[] = $listStructuresFilles[0];
 			for($i = 1; $i < sizeof($listStructuresFilles); $i++)
 			{
 				$select .= ', ?';
 				$params[] = $listStructuresFilles[$i];
 			}
-			$select .= ')';
+			$select .= ') OR d.iduser = ? )';
+			$params[] = $iduser;
 		}
 		else // user lambda
 		{
