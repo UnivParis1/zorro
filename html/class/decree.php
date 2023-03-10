@@ -375,10 +375,18 @@ class decree {
 		return $fields;
 	}
 	
-	function unsetNumber($iduser)
+	function unsetNumber($iduser, $majdate = true)
 	{
-		$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW() WHERE iddecree = ?";
-		$params = array($iduser, $this->getid());
+		if ($majdate === TRUE)
+		{
+			$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = NOW() WHERE iddecree = ?";
+			$params = array($iduser, $this->getid());
+		}
+		else
+		{
+			$update = "UPDATE decree SET number = NULL, idmajuser = ?, majdate = ? WHERE iddecree = ?";
+			$params = array($iduser, $majdate, $this->getid());
+		}
 		$result = prepared_query($this->_dbcon, $update, $params);
 		if ( !mysqli_error($this->_dbcon))
 		{
@@ -631,7 +639,7 @@ class decree {
 										$date = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
 									}
 								}
-								$this->unsetNumber(0);
+								$this->unsetNumber(0, $date);
 								break;
 							case 'deleted' : // TODO : Attention le document est dans la corbeille
 							case 'canceled' :
