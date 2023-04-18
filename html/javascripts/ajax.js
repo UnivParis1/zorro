@@ -100,6 +100,7 @@ function readListeComposantes(data)
 			}
 			majDomaine(listeComposantes);
 			majMention(listeComposantes);
+			majMention2(listeComposantes);
 			majSpecialite(listeComposantes);
 		}
 	}
@@ -129,6 +130,7 @@ function majDomaine(select,valeur='')
 		{
 			readListDomaines(xhr.responseXML);
 			majMention('', valeur);
+			majMention2('', valeur);
 			majSpecialite('', valeur);
 		}
 	}
@@ -174,7 +176,7 @@ function readListDomaines(data)
 	}
 }
 
-/* Met a jour le domaine */
+/* Met a jour la mention */
 function majMention(select, valeur='')
 {
 	//alert("maj mention "+valeur);
@@ -215,6 +217,7 @@ function majMention(select, valeur='')
 		{
 			readListMentions(xhr.responseXML);
 			majSpecialite('', valeur);
+			majMention2('', valeur);
 		}
 	}
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -336,6 +339,96 @@ function readListSpecialites(data)
 				//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
 				listeRes = ajouteLigneSelect (listeRes, specialites[i].getAttribute("libelle"), specialites[i].getAttribute("id"), selected);
 			}
+		}
+	}
+}
+
+/* Met a jour la 2e mention */
+function majMention2(select, valeur='')
+{
+	//alert("maj mention "+valeur);
+	var cod = document.getElementById("composantecod1");
+	if (cod === null)
+	{
+		cod = '';
+	}
+	else
+	{
+		cod = cod.value;
+	}
+	var id = document.getElementById("selectarrete").value;
+	var dom = document.getElementById("domaine1");
+	if (dom === null)
+	{
+		dom = '';
+	}
+	else
+	{
+		dom = dom.value;
+	}
+	var etp = document.getElementById("mention1");
+	if (dom === null)
+	{
+		etp = '';
+	}
+	else
+	{
+		etp = etp.value;
+	}
+	var xhr = getXMLHttpRequest();
+	if (valeur != '')
+	{
+		var params = "cod_cmp_dom="+cod+"&idmodel="+id+"&coddfd="+dom+"&iddecree="+valeur+"&etp="+etp;
+		//alert(params);
+	}
+	else
+	{
+		var params = "cod_cmp_dom="+cod+"&idmodel="+id+"&coddfd="+dom+"&etp="+etp;
+		//alert(params);
+	}
+	//alert("cod_cmp_dom="+cod+"&idmodel="+id+"&coddfd="+dom);
+	xhr.open("POST", "xml_ajax_composante.php", true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0))
+		{
+			readListMentions2(xhr.responseXML);
+		}
+	}
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.send(params);
+}
+
+
+/* Recupere et cree la liste des mentions liees a la composante et au domaine a partir de la reponse xml */
+function readListMentions2(data)
+{
+	var mentions = data.getElementsByTagName("item");
+	var listementions = document.getElementById("mention21");
+	var mention_div = document.getElementById("mention2_div");
+	mention_div.setAttribute("style", "display:block;");
+	listementions.innerHTML = "";
+	if (mentions.length > 0)
+	{
+		if (mentions.length == 1)
+		{
+			var listeRes = ajouteLigneSelect (listementions, "", "");
+		}
+		else
+		{
+			var listeRes = ajouteLigneSelect (listementions, "", "", true);
+		}
+		for (var i=0, c=mentions.length; i<c; i++)
+		{
+			if (mentions[i].getAttribute("selected") == "true")
+			{
+				selected = true;
+			}
+			else
+			{
+				selected = false;
+			}
+			//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
+			listeRes = ajouteLigneSelect (listeRes, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("id"), selected);
 		}
 	}
 }
