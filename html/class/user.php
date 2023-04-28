@@ -438,7 +438,7 @@ class user {
 			}
 			$listidgroupes .= ')';
 			$params = array_keys($listGroupes);
-			$select = "SELECT DISTINCT grr.idmodel, model.iddecree_type FROM groupe_role grr INNER JOIN role ON role.idrole = grr.idrole INNER JOIN model ON model.idmodel = grr.idmodel WHERE grr.active = 'O' AND grr.idgroupe IN ".$listidgroupes;
+			$select = "SELECT DISTINCT grr.idmodel, model.iddecree_type, role.idrole FROM groupe_role grr INNER JOIN role ON role.idrole = grr.idrole INNER JOIN model ON model.idmodel = grr.idmodel WHERE grr.active = 'O' AND grr.idgroupe IN ".$listidgroupes;
 			if ($scope != NULL)
 			{
 				$select .= " AND role.scope = ?";
@@ -544,31 +544,98 @@ class user {
 							ON dt.iddecree_type = m.iddecree_type
 						LEFT JOIN user
 							ON user.iduser = d.iduser";
-		if ($this->isSuperAdmin() || $this->isDaji())
+		if ($this->isSuperAdmin() || $this->isDaji()) // Accès à tous les arrêtés
 		{
 			$select .= " WHERE d.iduser LIKE '%' ";
-		}
-		elseif ($this->isAdmin())
-		{
-			$ldap = new ldap();
-			$structure = isset($_SESSION['supannentiteaffectation']) ? $_SESSION['supannentiteaffectation'] : $ldap->getInfos($this->_uid, false)['supannentiteaffectation'];
-			$listStructuresFilles = $this->getAdminSubStructs($structure);
-			$listStructuresFilles[] = 'structures-'.$structure;
-			//print_r2($listStructuresFilles);
-			$select .= " WHERE (d.structure IN (?";
-			$params[] = $listStructuresFilles[0];
-			for($i = 1; $i < sizeof($listStructuresFilles); $i++)
+			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
 			{
-				$select .= ', ?';
-				$params[] = $listStructuresFilles[$i];
+				$select .= " AND d.idmodel = ?";
+				$params[] = $criteres['idmodel'];
 			}
-			$select .= ') OR d.iduser = ? )';
-			$params[] = $iduser;
 		}
-		else // user lambda
+		else
 		{
-			$select .= " WHERE d.iduser = ?";
+			$select .= " WHERE d.iduser = ? "; // Au minimum accès à ses propres arrêtés
 			$params[] = $iduser;
+			$groupes = $this->getGroupsZorro();
+			require_once './class/reference.php';
+			$ref = new reference($this->_dbcon);
+			$admin = false;
+			if ($this->isAdmin()) // Responsable de structure => accès à tous les arrêtés du modèle pour sa structure
+			{
+				$admin = true;
+				$ldap = new ldap();
+				$structure = isset($_SESSION['supannentiteaffectation']) ? $_SESSION['supannentiteaffectation'] : $ldap->getInfos($this->_uid, false)['supannentiteaffectation'];
+				$listStructuresFilles = $this->getAdminSubStructs($structure);
+				$listStructuresFilles[] = 'structures-'.$structure;
+				//print_r2($listStructuresFilles);
+				$select .= " OR (d.structure IN (?";
+				$params[] = $listStructuresFilles[0];
+				for($i = 1; $i < sizeof($listStructuresFilles); $i++)
+				{
+					$select .= ', ?';
+					$params[] = $listStructuresFilles[$i];
+				}
+				$select .= ') AND d.idmodel IN ( ';
+			}
+			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
+			{
+				foreach($groupes as $groupe)
+				{
+					$roles = $ref->getRoleForGroupModel($groupe['idgroupe'], $criteres['idmodel']);
+					foreach ($roles as $role)
+					{
+						if ($role['idrole'] == 1) // Admin du modèle => accès à tous les arrêtés du modèle
+						{
+							$select .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
+							$params[] = $criteres['idmodel'];
+						}
+						else
+						{
+							if ($admin) // Responsable de structure => accès à tous les arrêtés du modèle pour sa structure
+							{
+								$select .= '?, ';
+								$params[] = $criteres['idmodel'];
+							}
+							else
+							{
+								$select .= ' AND d.idmodel = ? ';
+								$params[] = $criteres['idmodel'];
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				$roles = $this->getGroupeRoles($groupes);
+				foreach ($roles as $role)
+					{
+						if ($role['idrole'] == 1) // Admin du modèle => accès à tous les arrêtés du modèle
+						{
+							$select .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
+							$params[] = $role['idmodel'];
+						}
+						else
+						{
+							if ($admin) // Responsable de structure => accès à tous les arrêtés du modèle pour sa structure
+							{
+								$select .= '?, ';
+								$params[] = $role['idmodel'];
+							}
+							else
+							{
+								$select .= ' OR (d.iduser = ? AND d.idmodel = ?) ';
+								$params[] = $iduser;
+								$params[] = $role['idmodel'];
+							}
+						}
+					}
+			}
+			if ($admin)
+			{
+				$select = substr($select, 0, -2).")) ";
+			}
 		}
 		$select .= " AND d.status != '".STATUT_REMPLACE."' ";
 		if (sizeof($criteres) == 0)
@@ -577,11 +644,6 @@ class user {
 		}
 		else
 		{
-			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
-			{
-				$select .= " AND d.idmodel = ?";
-				$params[] = $criteres['idmodel'];
-			}
 			if (array_key_exists('year', $criteres) && $criteres['year'] != null)
 			{
 				$select .= " AND d.year = ?";
@@ -689,5 +751,22 @@ class user {
 			}
 		}
 		return $listdecrees;
+	}
+
+	function getGroupsZorro()
+	{
+		require_once './class/reference.php';
+		$ref = new reference($this->_dbcon);
+		$ldap = new ldap();
+		$groupes = $ref->getAllGroupes();
+		$retour = array();
+		foreach ($groupes as $groupe)
+		{
+			if ($ldap->isMemberOf($this->_uid,$groupe['grouper']))
+			{
+				$retour[$groupe['idgroupe']] = $groupe;
+			}
+		}
+		return $retour;
 	}
 }

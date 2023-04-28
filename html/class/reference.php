@@ -7,7 +7,7 @@ class reference {
 	private $_dbcon;
 	private $_rdbApo;
 	
-	function __construct($dbcon, $rdbApo)
+	function __construct($dbcon=null, $rdbApo=null)
 	{
 		require_once (dirname(__FILE__,2)."/include/dbconnection.php");
 		$this->_dbcon = $dbcon;
@@ -489,4 +489,19 @@ class reference {
 		return $years;
 	}
 
+	function getRoleForGroupModel($idgroupe, $idmodel)
+	{
+		$sql = "SELECT idgroupe, idrole, idmodel, active FROM groupe_role WHERE idgroupe = ? AND idmodel = ?";
+		$param = array($idgroupe,$idmodel);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$listroles = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$listroles[] = $row;
+			}
+		}
+		return $listroles;
+	}
 }
