@@ -396,8 +396,14 @@ class user {
 			return true;
 		}
 		else {
+			$groupe_role = array_column($this->getGroupeRoles($_SESSION['groupes'], 'model'), 'idrole', 'idmodel');
+			// L'utilisateur fait partie d'un groupe administrateur du modèle d'arrêté
+			if (array_key_exists($decree['idmodel'], $groupe_role) && $groupe_role[$decree['idmodel']] == 1)
+			{
+				return true;
+			}
 			// L'utilisateur appartient à la structure pour laquelle le document a été créé
-			if ($this->isAdmin())
+			elseif ($this->isAdmin())
 			{
 				$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
 				$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
