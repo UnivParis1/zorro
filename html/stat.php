@@ -27,7 +27,7 @@ $liste_year = $ref->getCreationYears();
 if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 {
 	$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
-	if ($userCAS->isSuperAdmin(false) || $userCAS->isDaji())
+	if ($userCAS->isSuperAdmin(false) || $userCAS->isDaji() || $userCAS->isAdminModel())
 	{
 		$composante_selected = '';
 		if (isset($_POST['selectcomp']) && $_POST['selectcomp'] != '')

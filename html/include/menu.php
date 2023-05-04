@@ -168,7 +168,7 @@
 						<a href="manage_decree.php">Mes documents</a>
 					</li>
 					<?php } ?>
-					<?php if ($user->isSuperAdmin() || $user->isDaji()) { ?>
+					<?php if ($user->isSuperAdmin() || $user->isDaji() || $user->isAdminModel()) { ?>
 					<li id='menu_stat' <?php echo ($menuItem == 'menu_stat') ? "class='navcourant'" : '';?> >
 						<a href="stat.php">Indicateurs</a>
 					</li>

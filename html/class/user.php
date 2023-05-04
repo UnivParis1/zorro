@@ -259,6 +259,12 @@ class user {
 		return FALSE;
 	}
 
+	function isAdminModel()
+	{
+		$groupe_role = array_column($this->getGroupeRoles($_SESSION['groupes'], 'model'), 'idmodel', 'idrole');
+		return array_key_exists(1, $groupe_role) ? true : false;
+	}
+
 	function getAdminSubStructs($structure)
 	{
 		$retour = array();
