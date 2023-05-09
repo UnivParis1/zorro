@@ -1057,7 +1057,7 @@ class decree {
 							case 'RA':
 								foreach ($roles as $role)
 								{
-									if ($role['role'] == 'Responsable administratif')
+									if ($role['role'] == 'Responsable administratif' || $role['role'] == 'Responsable administrative')
 									{
 										$values .= $res['idetape'].'*'.$role['mail'].',';
 									}
