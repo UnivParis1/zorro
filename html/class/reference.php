@@ -375,7 +375,7 @@ class reference {
 		{
 			if ($row = mysqli_fetch_assoc($result))
 			{
-				return TRUE;
+				return $row['iddecree'];
 			}
 		}
 		return FALSE;

@@ -530,9 +530,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 						<th class="titresimple">Composante</th>
 						<th class="titresimple">Période</th>
 						<th class="titresimple">Statut</th>
-						<?php if ($user->isSuperAdmin()) { ?>
-						<th class="titresimple" >Info</th>
-						<?php } ?>
+						<th class="titresimple">Suivi eSignature</th>
 					</tr>
 				<?php foreach ($liste_to_do as $todo)
 				{ ?>
@@ -551,20 +549,16 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
 							<td class="<?php echo $liste_edit[$valeur][0]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][0]['statut']['title'];?>"><?php echo $liste_edit[$valeur][0]['statut']['contenu']; ?></td>
-							<?php if ($user->isSuperAdmin()) {
-								$pos = strpos($liste_edit[$valeur][0]['statut']['contenu'], "signrequests");
-								if ($pos !== FALSE) { ?>
-									<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][0]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][0]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
-								<?php } else { ?>
-									<td></td>
-							<?php }
-							} ?>
+							<?php $pos = strpos($liste_edit[$valeur][0]['statut']['contenu'], "signrequests");
+							if ($pos !== FALSE) { ?>
+								<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][0]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][0]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
+							<?php } else { ?>
+								<td></td>
+							<?php } ?>
 						<?php } else { ?>
 							<td></td>
 							<td></td>
-							<?php if ($user->isSuperAdmin()) { ?>
 							<td></td>
-							<?php } ?>
 						<?php } ?>
 					</tr>
 					<?php for($i = 1; $i < $rowspan; $i++)
@@ -574,14 +568,12 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
 							<td class="<?php echo $liste_edit[$valeur][$i]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['statut']['title'];?>"><?php echo $liste_edit[$valeur][$i]['statut']['contenu']; ?></td>
-							<?php if ($user->isSuperAdmin()) {
-								$pos = strpos($liste_edit[$valeur][$i]['statut']['contenu'], "signrequests");
-								if ($pos !== FALSE) { ?>
-									<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][$i]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
-								<?php } else { ?>
-									<td></td>
-							<?php }
-							} ?>
+							<?php $pos = strpos($liste_edit[$valeur][$i]['statut']['contenu'], "signrequests");
+							if ($pos !== FALSE) { ?>
+								<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][$i]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
+							<?php } else { ?>
+								<td></td>
+						<?php } ?>
 						</tr>
 					<?php } ?>
 				<?php } ?>

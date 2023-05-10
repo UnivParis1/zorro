@@ -58,7 +58,7 @@
     		$listModels[] = $model->getModelInfo();
     	}
     } else {
-	    $roles = $user->getGroupeRoles($_SESSION['groupes'], 'model');
+	    $roles = $user->getGroupeRoles($_SESSION['groupes'], 'model', true);
 	    $listModels = array();
 	    foreach ($roles as $role)
 	    {
@@ -165,9 +165,7 @@ $alldecrees = $user->getDecreesBy($params, 20); ?>
 				<th class="titresimple" style='cursor: pointer;'>Créateur <font></font></th>
 				<th class="titresimple" style='cursor: pointer;'>Date <font></font></th>
 				<th class="titresimple" >Statut</th>
-				<?php if ($user->isSuperAdmin()) { ?>
-				<th class="titresimple" >info</th>
-				<?php } ?>
+				<th class="titresimple" >Suivi eSignature</th>
 			</tr>
 		</thead>
 		<tbody id="post-data">
