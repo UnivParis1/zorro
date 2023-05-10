@@ -261,7 +261,7 @@ class user {
 
 	function isAdminModel()
 	{
-		$groupe_role = array_column($this->getGroupeRoles($_SESSION['groupes'], 'model'), 'idmodel', 'idrole');
+		$groupe_role = array_column($this->getGroupeRoles($_SESSION['groupes'], 'model', true), 'idmodel', 'idrole');
 		return array_key_exists(1, $groupe_role) ? true : false;
 	}
 
@@ -450,7 +450,7 @@ class user {
 			}
 			$listidgroupes .= ')';
 			$params = array_keys($listGroupes);
-			$select = "SELECT DISTINCT grr.idmodel, model.iddecree_type, role.idrole FROM groupe_role grr INNER JOIN role ON role.idrole = grr.idrole INNER JOIN model ON model.idmodel = grr.idmodel WHERE grr.active = 'O' AND grr.idgroupe IN ".$listidgroupes;
+			$select = "SELECT DISTINCT grr.idmodel, model.iddecree_type, MIN(role.idrole) as idrole FROM groupe_role grr INNER JOIN role ON role.idrole = grr.idrole INNER JOIN model ON model.idmodel = grr.idmodel WHERE grr.active = 'O' AND grr.idgroupe IN ".$listidgroupes;
 			if ($scope != NULL)
 			{
 				$select .= " AND role.scope = ?";
@@ -460,7 +460,7 @@ class user {
 			{
 				$select .= " AND model.active = 'O'";
 			}
-			$select .= " ORDER BY model.iddecree_type, grr.idmodel, role.idrole DESC";
+			$select .= " ORDER BY model.iddecree_type, grr.idmodel";
 			$result = prepared_select($this->_dbcon, $select, $params);
 			if ( !mysqli_error($this->_dbcon))
 			{
