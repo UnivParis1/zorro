@@ -377,11 +377,10 @@ class user {
 		}
 		if (sizeof($params) == 0)
 		{
-			echo $select;
 			$result = mysqli_query($this->_dbcon, $select);
 		}
-		else {
-			echo $select; var_dump($params);
+		else
+		{
 			$result = prepared_select($this->_dbcon, $select, $params);
 		}
 		if ( !mysqli_error($this->_dbcon))
@@ -401,8 +400,9 @@ class user {
 		{
 			return true;
 		}
-		else {
-			$groupe_role = array_column($this->getGroupeRoles($_SESSION['groupes'], 'model'), 'idrole', 'idmodel');
+		else
+		{
+			$groupe_role = array_column($this->getGroupeRoles($_SESSION['groupes'], 'model', true), 'idrole', 'idmodel');
 			// L'utilisateur fait partie d'un groupe administrateur du modèle d'arrêté
 			if (array_key_exists($decree['idmodel'], $groupe_role) && $groupe_role[$decree['idmodel']] == 1)
 			{
@@ -460,7 +460,7 @@ class user {
 			{
 				$select .= " AND model.active = 'O'";
 			}
-			$select .= " ORDER BY model.iddecree_type, grr.idmodel";
+			$select .= " ORDER BY model.iddecree_type, grr.idmodel, role.idrole DESC";
 			$result = prepared_select($this->_dbcon, $select, $params);
 			if ( !mysqli_error($this->_dbcon))
 			{
