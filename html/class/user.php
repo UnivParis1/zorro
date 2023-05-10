@@ -460,7 +460,7 @@ class user {
 			{
 				$select .= " AND model.active = 'O'";
 			}
-			$select .= " ORDER BY model.iddecree_type, grr.idmodel";
+			$select .= " GROUP BY grr.idmodel, model.iddecree_type ORDER BY model.iddecree_type, grr.idmodel";
 			$result = prepared_select($this->_dbcon, $select, $params);
 			if ( !mysqli_error($this->_dbcon))
 			{
