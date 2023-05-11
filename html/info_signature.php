@@ -188,7 +188,7 @@
                         }
                     }
                     echo "<br>";
-                    echo "<B>Statut de la demande </B>: " . $response["parentSignBook"]["status"] . "<br>";
+                    echo "<B>Statut de la demande </B>: " . $decree->getStatusAff()['title'] . "<br>";
                     if (!is_null($nextstep) and ($response["parentSignBook"]["status"]=='pending'))
                     {   // On affiche les infos de l'étape suivante si la demande n'est pas terminée
                         $currentstep = $response["parentSignBook"]["liveWorkflow"]["liveWorkflowSteps"][$nextstep];
