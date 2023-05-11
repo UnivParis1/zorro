@@ -60,7 +60,7 @@
         //if ($userCAS->isSuperAdmin(false))
         //{
     //echo "<br>" . print_r($_POST,true) . "<br>";
-
+    echo "<div class='recherche'>";
     echo "<form name='infosignature'  method='post' action='info_signature.php' >";
     
     //echo "<input type='text' name='esignatureid' id='esignatureid' autofocus>";
@@ -84,10 +84,10 @@
         }
     }
     echo "</select>";
-    echo "<br>";
     echo "<input type='hidden' name='userid' value='" . $userid . "'>";
     echo "<input type='submit' value='Soumettre' >";
     echo "</form>";
+    echo "</div>";
     $optionCET = null;
     $alimCET = null;
 

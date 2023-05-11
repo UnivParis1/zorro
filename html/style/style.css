@@ -82,6 +82,7 @@ form select,form input,form textarea {
 form #structure_div input {
     /*width: 17em; */
     width: 25.5em;
+    position:sticky;
 }
 
 .gauche select#annee1 {
@@ -148,6 +149,10 @@ select {
 
 select#selectarrete {
     background-color: #fdf5e2;  background-color: #f5c95c5e;
+}
+
+select#esignatureid {
+    width: 500px;
 }
 
 option.inactive {
