@@ -186,7 +186,7 @@
 					</li>
 					<?php if (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
 					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
-						<a href="admin_substitution.php">Changer d'utilisateur</a>
+						<a href="admin_substitution.php">Changer d'utilisateur (<?php echo $user->getUid();?>)</a>
 					</li>	
 					<?php } ?>
 					<?php if ($user->isSuperAdmin()) { ?>
