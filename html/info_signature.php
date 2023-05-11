@@ -192,7 +192,7 @@
                         foreach ((array)$currentstep['recipients'] as $recipient)
                         {
                             echo "&emsp;" . $recipient['user']['firstname'] . " " . $recipient['user']['name'] . "<a href='".ANNUAIRE_URL.$recipient['user']['email'] . "' target='_blank'>👤</a>" . "<br>";
-                            echo "&emsp;Nom de l'étape : " . $currentstep['workflowStep']["description"] . "<br>";
+                            //echo "&emsp;Nom de l'étape : " . $currentstep['workflowStep']["description"] . "<br>";
                         }
                     }
                     else
