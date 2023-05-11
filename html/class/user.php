@@ -558,7 +558,7 @@ class user {
 							ON user.iduser = d.iduser";
 		if ($this->isSuperAdmin() || $this->isDaji()) // Accès à tous les arrêtés
 		{
-			$select .= " WHERE d.iduser LIKE '%' ";
+			$select .= " WHERE (d.iduser LIKE '%' ";
 			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
 			{
 				$select .= " AND d.idmodel = ?";
