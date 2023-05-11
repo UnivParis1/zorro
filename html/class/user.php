@@ -17,6 +17,10 @@ class user {
 		$this->save();
 	}
 	
+	function getUid()
+	{
+		return $this->_uid;
+	}
 	function getid()
 	{
 		$select = "SELECT iduser FROM user WHERE uid = ?";
@@ -703,6 +707,10 @@ class user {
 			{
 				$select .= " AND d.structure = ? ";
 				$params[] = $criteres['composante'];
+			}
+			if (array_key_exists('esign', $criteres) && $criteres['esign'] != '')
+			{
+				$select .= " AND d.idesignature IS NOT NULL ";
 			}
 		}
 		$select .= ' ORDER BY ';

@@ -53,14 +53,36 @@
     if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
     {
         $userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
+        $decreesSign = $userCAS->getDecreesBy(array('esign' => 1), -1);
+        //var_dump($decreesSign);
         //if ($userCAS->isSuperAdmin(false))
         //{
     //echo "<br>" . print_r($_POST,true) . "<br>";
 
     echo "<form name='infosignature'  method='post' action='info_signature.php' >";
     
-    echo "Numéro eSignature à afficher : <br>";    
-    echo "<input type='text' name='esignatureid' id='esignatureid' autofocus>";
+    echo "Afficher le suivi eSignature du document : <br>";
+    //echo "<input type='text' name='esignatureid' id='esignatureid' autofocus>";
+    echo "<select name='esignatureid' id='esignatureid'>";
+    if ($esignatureid == NULL)
+    {
+        echo "<option value='' selected='selected'>Arrêté</option>";
+    }
+    else
+    {
+        echo "<option value=''>Arrêté</option>";
+    }
+    foreach ($decreesSign as $decree) {
+        if ($esignatureid != NULL && $esignatureid == $decree['idesignature'])
+        {
+            echo "<option value='".$decree['idesignature']."' selected='selected'>".$decree['filename']."</option>";
+        }
+        else
+        {
+            echo "<option value='".$decree['idesignature']."'>".$decree['filename']."</option>";
+        }
+    }
+    echo "</select>";
     echo "<br>";
     echo "<input type='hidden' name='userid' value='" . $userid . "'>";
     echo "<input type='submit' value='Soumettre' >";
@@ -70,7 +92,7 @@
 
     if (!is_null($esignatureid))
     {
-        echo "Le numéro eSignatureid = $esignatureid <br>";
+        echo "L'identifiant eSignature du document est $esignatureid <br>";
         // Vérifier l'existence de l'identifiant en base
         $iddecree = $ref->idEsignatureExists($esignatureid);
         if (!$iddecree)
@@ -82,6 +104,7 @@
             $decree = new decree($dbcon, null, null, $iddecree);
             if ($userCAS->hasAccessDecree($decree->getDecree()))
             {
+                echo "<a href='".$decree->getEsignUrl()."' target='_blank'>Lien vers la demande sur eSignature</a> <br>";
                 $error = '';
                 $curl = curl_init();
                 $params_string = "";
@@ -99,7 +122,7 @@
                 if ($error != "")
                 {
                     elog(" Erreur Curl =>  " . $error);
-                    echo "Erreur CURL (récup data) => $error <br>";
+                    echo "Anomalie lors de la récupération de la demande de signature.<br>";
                 }
                 $response = json_decode($json, true);
         /*
@@ -109,38 +132,38 @@
         */
                 if (is_null($response))
                 {
-                    $erreur = "La réponse json est null => Demande introuvable ??";
+                    $erreur = "La demande de signature est introuvable. <br>";
                     elog(" $erreur");
                     echo "<br>$erreur <br>";
                 }
                 elseif (isset($response['error']))
                 {
-                    $erreur = "La réponse json est une erreur : " . $response['error'];
+                    $erreur = "La demande de signature est en erreur. <br>";
                     elog(" $erreur");
                     echo "<br>$erreur <br>";
                 }
                 else // Tout est ok => on va récupérer les données du workflow
                 {
-                    echo "<br><br>Créateur : " . $response["parentSignBook"]["createBy"]["firstname"] . " " . $response["parentSignBook"]["createBy"]["name"] . "<br>";
+                    echo "<br>Créateur : " . $response["parentSignBook"]["createBy"]["firstname"] . " " . $response["parentSignBook"]["createBy"]["name"] . "<br>";
                     //echo "Date de création : " . date("d/m/Y H:i:s", substr($response["parentSignBook"]["createDate"],0,strlen($response["parentSignBook"]["createDate"])-3)) . " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
                     if (!is_int($response['parentSignBook']['createDate']))
                     {
                         $date = new DateTime($response['parentSignBook']['createDate']);
-                        $displaydate = $date->format("Y-m-d H:i:s");
+                        $displaydate = $date->format("d/m/Y H:i:s");
                     }
                     else
                     {
                         // FORMAT /1000 pour ôter les millisecondes
-                        $displaydate = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['createDate'], 1000));
+                        $displaydate = date("d/m/Y H:i:s", intdiv($response['parentSignBook']['createDate'], 1000));
                     }
-                    echo "Date de création : " . $displaydate . " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
-                    echo "Statut de la demande : " . $response["parentSignBook"]["status"] . "<br>";
+                    echo "Date de création : " . $displaydate . "<br>";//. " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
                     echo "<br>";
+                    echo "<B>Circuit de signature</B> <br>";
                     $nextstep = null;
                     foreach ($response["parentSignBook"]["liveWorkflow"]["liveWorkflowSteps"] as $numstep => $step)
                     {
                         $signedstep = false;
-                        echo "<B>Etape " . ($numstep+1) . " : </B><br>";
+                        echo "<B>Etape " . ($numstep+1) . " : ".($numstep == 0 ? "Visa de la composante" : "Validation de la présidence")."</B><br>";
                         foreach ($step["recipients"] as $esignatureuser)
                         {
                             if ($esignatureuser["signed"])
@@ -160,7 +183,7 @@
                         }
                     }
                     echo "<br>";
-
+                    echo "<B>Statut de la demande </B>: " . $response["parentSignBook"]["status"] . "<br>";
                     if (!is_null($nextstep) and ($response["parentSignBook"]["status"]=='pending'))
                     {   // On affiche les infos de l'étape suivante si la demande n'est pas terminée
                         $currentstep = $response["parentSignBook"]["liveWorkflow"]["liveWorkflowSteps"][$nextstep];
@@ -174,19 +197,24 @@
                     else
                     {
                         echo "<B>En attente de l'étape : Pas d'étape en attente (circuit terminé)</B><br>";
+                        if ($response["parentSignBook"]["status"]=='exported')
+                        {
+                            // Afficher un lien vers l'export nuxeo
+                            //echo "<a href='".NUXEO_PREFIX.substr($decree->getExportPath(), 7)."/".$decree->getFileName()."' target='_blank'>Lien vers l'export Nuxeo</a> <br>";
+                        }
                         if(isset($response["parentSignBook"]["endDate"]))
                         {
                             if (!is_int($response['parentSignBook']['endDate']))
                             {
                                 $date = new DateTime($response['parentSignBook']['endDate']);
-                                $displaydatefin = $date->format("Y-m-d H:i:s");
+                                $displaydatefin = $date->format("d/m/Y H:i:s");
                             }
                             else
                             {
                                 // FORMAT /1000 pour ôter les millisecondes
-                                $displaydatefin = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
+                                $displaydatefin = date("d/m/Y H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
                             }
-                            echo "Date de fin : " . $displaydatefin . " (Valeur brute : " . $response["parentSignBook"]["endDate"] . ")<br>";
+                            echo "Date de fin : " . $displaydatefin ."<br>";// . " (Valeur brute : " . $response["parentSignBook"]["endDate"] . ")<br>";
                         }
                         else
                         {
@@ -217,21 +245,21 @@
                 {
                     $error = "Erreur Curl (récup PDF) =>  " . $error;
                     elog(" $error");
-                    echo $error . '<br><br>';
+                    echo "Le document PDF n'a pas pu être récupéré. <br><br>";
                 }
                 if (stristr(substr($pdf,0,10),'PDF') === false)
                 {
                     $error = "Le WS n'a pas retourné un fichier PDF";
                     $error = "Erreur Curl (récup PDF) =>  " . $error;
                     elog(" $error");
-                    echo $error . '<br><br>';
+                    echo "Le document PDF n'a pas pu être récupéré. <br><br>";
                 }
 
                 if ($error == '')
                 {
                     $encodage = base64_encode($pdf);
 
-                    echo "On affiche dans l'iFrame le document de la demande eSignature : $esignatureid <br><br>";
+                   //echo "On affiche dans l'iFrame le document de la demande eSignature : $esignatureid <br><br>";
                     echo '<iframe src=data:application/pdf;base64,' . $encodage . ' width="100%" height="500px">';
                     echo "</iframe>";
 

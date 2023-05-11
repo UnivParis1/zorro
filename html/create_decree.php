@@ -1245,7 +1245,7 @@
 										<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature">
 										<?php } break;
 									case STATUT_EN_COURS : ?>
-										<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/clock-solid.svg" alt="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" title="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" width="40px"></a>
+										<a href='<?php echo $mod_decree->getEsignUrl();?>' target='_blank'><img src="img/clock-solid.svg" alt="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" title="En cours de signature : <?php echo $mod_decree->getSignStep(); ?>" width="40px"></a>
 									</div>
 									<?php if ($mod_decree_active) { ?>
 										<input type='submit' name='duplique' value='Dupliquer'>
@@ -1254,7 +1254,7 @@
 										<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 										<?php } break;
 									case STATUT_VALIDE : ?>
-										<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/valide_OK.svg" alt="Validé" title="Validé" width="40px"></a>
+										<a href='<?php echo $mod_decree->getEsignUrl();?>' target='_blank'><img src="img/valide_OK.svg" alt="Validé" title="Validé" width="40px"></a>
 									</div>
 									<?php if ($mod_decree_active) { ?>
 										<input type='submit' name='duplique' value='Dupliquer'>
@@ -1267,7 +1267,7 @@
 										<?php } ?>
 										<?php } break;
 									case STATUT_REFUSE : $motif = $mod_decree->getRefuseComment();?>
-										<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/non_refuse.svg" alt="Refusé" title="Refusé : <?php echo $motif;?>" width="40px"></a>
+										<a href='<?php echo $mod_decree->getEsignUrl();?>' target='_blank'><img src="img/non_refuse.svg" alt="Refusé" title="Refusé : <?php echo $motif;?>" width="40px"></a>
 									</div>
 									<?php if ($mod_decree_active) { ?>
 										<input type='submit' name='duplique' value='Dupliquer' disabled>
@@ -1308,7 +1308,7 @@
 										<input type="submit" name='sign' onclick="return confirm('Envoyer à la signature ?')" value="Envoyer à la signature" disabled>
 										<?php } break;
 									case STATUT_CORBEILLE : ?>
-										<a href='<?php echo ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$mod_decree->getIdEsignature();?>' target='_blank'><img src="img/trash-alt-solid.svg" alt="Document dans la corbeille d'eSignature" title="Document dans la corbeille d'eSignature" width="40px"></a>
+										<a href='<?php echo $mod_decree->getEsignUrl();?>' target='_blank'><img src="img/trash-alt-solid.svg" alt="Document dans la corbeille d'eSignature" title="Document dans la corbeille d'eSignature" width="40px"></a>
 									</div>
 									<?php if ($mod_decree_active) { ?>
 										<input type='submit' name='duplique' value='Dupliquer'>

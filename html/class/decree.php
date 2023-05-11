@@ -1171,7 +1171,7 @@ class decree {
                 break;
             case STATUT_REFUSE :
                 $comment = $this->getRefuseComment();
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature()."' target='_blank'>".date('d/m/Y', strtotime($this->getMajDate()))."</a>";
+                $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'>".date('d/m/Y', strtotime($this->getMajDate()))."</a>";
                 $title = 'Refusé : '.$comment;
                 $class = "red";
                 break;
@@ -1186,7 +1186,7 @@ class decree {
                 $class = "img";
                 break;
             case STATUT_VALIDE :
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature()."' target='_blank'>".date('d/m/Y', strtotime($this->getMajDate()))."</a>";
+                $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'>".date('d/m/Y', strtotime($this->getMajDate()))."</a>";
                 $title = 'Validé';
                 $class = "green";
                 break;
@@ -1207,7 +1207,7 @@ class decree {
 					$img = "<img src='img/enattenteC.svg' alt='validation présidence en attente' width='".$width."px'>";
 					$title = 'En cours de signature : '.$step;
 				}
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature()."' target='_blank'>$img</a>";
+                $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'>$img</a>";
                 $class = "img";
                 break;
             case STATUT_ERREUR :
@@ -1221,7 +1221,7 @@ class decree {
                 $class = "img";
                 break;
             case STATUT_CORBEILLE :
-                $contenu = "<a href='".ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature()."' target='_blank'><img src='img/supprimer.svg' alt='Document dans la corbeille d\'eSignature' width='".$width."px'></a>";
+                $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'><img src='img/supprimer.svg' alt='Document dans la corbeille d\'eSignature' width='".$width."px'></a>";
                 $title = 'Document dans la corbeille d\'eSignature';
                 $class = "img";
                 break;
@@ -1232,5 +1232,10 @@ class decree {
                 break;
         }
 		return array('contenu' => $contenu, 'title' => $title, 'class' => $class);
+	}
+
+	function getEsignUrl()
+	{
+		return /*ESIGNATURE_BASE_URL.ESIGNATURE_REDIRECT_CAS.*/ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature();
 	}
 }
