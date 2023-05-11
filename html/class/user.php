@@ -567,7 +567,7 @@ class user {
 		}
 		else
 		{
-			$select .= " WHERE d.iduser = ? "; // Au minimum accès à ses propres arrêtés
+			$select .= " WHERE (d.iduser = ? "; // Au minimum accès à ses propres arrêtés
 			$params[] = $iduser;
 			$groupes = $this->getGroupsZorro();
 			require_once './class/reference.php';
@@ -649,7 +649,7 @@ class user {
 				$select = substr($select, 0, -2).")) ";
 			}
 		}
-		$select .= " AND d.status != '".STATUT_REMPLACE."' ";
+		$select .= ") AND d.status != '".STATUT_REMPLACE."' ";
 		if (sizeof($criteres) == 0)
 		{
 			$select .= " AND d.status NOT IN ('".STATUT_ANNULE."', '".STATUT_CORBEILLE."', '".STATUT_SUPPR_ESIGN."') ";
