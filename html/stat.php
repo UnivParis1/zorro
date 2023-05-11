@@ -523,7 +523,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 		{ ?>
 			<div>
 				<table class="tableausimple">
-					<tr><th class="titresimple" colspan=5>Arrêtés à produire</th></tr>
+					<tr><th class="titresimple" colspan=6>Arrêtés à produire</th></tr>
 					<tr>
 						<th class="titresimple">Code</th>
 						<th class="titresimple">Libellé</th>
