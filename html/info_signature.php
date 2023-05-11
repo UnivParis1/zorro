@@ -51,8 +51,10 @@
     $menuItem = 'menu_signature';
     require ("include/menu.php");
     if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
-    {
-        $userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
+    { ?>
+        <div id="contenu1">
+        <h2> Suivi eSignature </h2>
+<?php   $userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
         $decreesSign = $userCAS->getDecreesBy(array('esign' => 1), -1);
         //var_dump($decreesSign);
         //if ($userCAS->isSuperAdmin(false))
@@ -61,7 +63,6 @@
 
     echo "<form name='infosignature'  method='post' action='info_signature.php' >";
     
-    echo "Afficher le suivi eSignature du document : <br>";
     //echo "<input type='text' name='esignatureid' id='esignatureid' autofocus>";
     echo "<select name='esignatureid' id='esignatureid'>";
     if ($esignatureid == NULL)
@@ -271,7 +272,9 @@
             <?php }
         }
     }
-} else { ?>
+    ?>
+</div>
+<?php } else { ?>
 <div id="contenu1">
 	<h2> Accès interdit </h2>
 </div>
