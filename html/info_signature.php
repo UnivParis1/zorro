@@ -163,7 +163,7 @@
                     foreach ($response["parentSignBook"]["liveWorkflow"]["liveWorkflowSteps"] as $numstep => $step)
                     {
                         $signedstep = false;
-                        echo "<B>Etape " . ($numstep+1) . " : ".($numstep == 0 ? "Visa de la composante" : "Validation de la présidence")."</B><br>";
+                        echo "<B>Etape " . ($numstep+1) . " : ".$step['workflowStep']["description"]."</B><br>";
                         foreach ($step["recipients"] as $esignatureuser)
                         {
                             if ($esignatureuser["signed"])
@@ -171,7 +171,7 @@
                                 echo " <span style='color:green'>";
                                 $signedstep = true;
                             }
-                            echo "&emsp;" . $esignatureuser["user"]["firstname"] . " " . $esignatureuser["user"]["name"] . " (" . $esignatureuser["user"]["email"] . ")<br>";
+                            echo "&emsp;". $esignatureuser['user']['firstname'] . " " . $esignatureuser['user']['name'] . "<a href='".ANNUAIRE_URL.$esignatureuser['user']['email'] ."' target='_blank'>👤</a>" ."<br>";
                             if ($esignatureuser["signed"])
                             {
                                 echo " </span>";
@@ -190,8 +190,8 @@
                         echo "<B>En attente de l'étape : " . ($nextstep+1) . "</B><br>";
                         foreach ((array)$currentstep['recipients'] as $recipient)
                         {
-                            echo "&emsp;" . $recipient['user']['firstname'] . " " . $recipient['user']['name'] . " (" . $recipient['user']["email"] . ")<br>";
-                            //echo "&emsp;Nom de l'étape : " . $currentstep['workflowStep']["description"] . "<br>";
+                            echo "&emsp;" . $recipient['user']['firstname'] . " " . $recipient['user']['name'] . "<a href='".ANNUAIRE_URL.$recipient['user']['email'] . "' target='_blank'>👤</a>" . "<br>";
+                            echo "&emsp;Nom de l'étape : " . $currentstep['workflowStep']["description"] . "<br>";
                         }
                     }
                     else
