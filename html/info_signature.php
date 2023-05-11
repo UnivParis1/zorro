@@ -60,34 +60,37 @@
         //if ($userCAS->isSuperAdmin(false))
         //{
     //echo "<br>" . print_r($_POST,true) . "<br>";
-    echo "<div class='recherche'>";
-    echo "<form name='infosignature'  method='post' action='info_signature.php' >";
-    
-    //echo "<input type='text' name='esignatureid' id='esignatureid' autofocus>";
-    echo "<select name='esignatureid' id='esignatureid'>";
-    if ($esignatureid == NULL)
+    if ($userCAS->isSuperAdmin())
     {
-        echo "<option value='' selected='selected'>Arrêté</option>";
-    }
-    else
-    {
-        echo "<option value=''>Arrêté</option>";
-    }
-    foreach ($decreesSign as $decree) {
-        if ($esignatureid != NULL && $esignatureid == $decree['idesignature'])
+        echo "<div class='recherche'>";
+        echo "<form name='infosignature'  method='post' action='info_signature.php' >";
+
+        //echo "<input type='text' name='esignatureid' id='esignatureid' autofocus>";
+        echo "<select name='esignatureid' id='esignatureid'>";
+        if ($esignatureid == NULL)
         {
-            echo "<option value='".$decree['idesignature']."' selected='selected'>".$decree['filename']."</option>";
+            echo "<option value='' selected='selected'>Arrêté</option>";
         }
         else
         {
-            echo "<option value='".$decree['idesignature']."'>".$decree['filename']."</option>";
+            echo "<option value=''>Arrêté</option>";
         }
+        foreach ($decreesSign as $decree) {
+            if ($esignatureid != NULL && $esignatureid == $decree['idesignature'])
+            {
+                echo "<option value='".$decree['idesignature']."' selected='selected'>".$decree['filename']."</option>";
+            }
+            else
+            {
+                echo "<option value='".$decree['idesignature']."'>".$decree['filename']."</option>";
+            }
+        }
+        echo "</select>";
+        echo "<input type='hidden' name='userid' value='" . $userid . "'>";
+        echo "<input type='submit' value='Soumettre' >";
+        echo "</form>";
+        echo "</div>";
     }
-    echo "</select>";
-    echo "<input type='hidden' name='userid' value='" . $userid . "'>";
-    echo "<input type='submit' value='Soumettre' >";
-    echo "</form>";
-    echo "</div>";
     $optionCET = null;
     $alimCET = null;
 
@@ -105,6 +108,7 @@
             $decree = new decree($dbcon, null, null, $iddecree);
             if ($userCAS->hasAccessDecree($decree->getDecree()))
             {
+                echo "Document Zorro : <a href='create_decree.php?id=" . $decree->getid() . "' target='_blank'>" . $decree->getFileNameAff() . "</a><br>";
                 echo "<a href='".$decree->getEsignUrl()."' target='_blank'>Lien vers la demande sur eSignature</a> <br>";
                 $error = '';
                 $curl = curl_init();
@@ -197,7 +201,7 @@
                     }
                     else
                     {
-                        echo "<B>En attente de l'étape : Pas d'étape en attente (circuit terminé)</B><br>";
+                        echo "<B>Circuit terminé</B><br>";
                         if ($response["parentSignBook"]["status"]=='exported')
                         {
                             // Afficher un lien vers l'export nuxeo

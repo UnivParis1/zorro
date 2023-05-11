@@ -180,10 +180,12 @@
 					<li id='menu_model' <?php echo ($menuItem == 'menu_model') ? "class='navcourant'" : '';?> >
 						<a href="manage_model.php">Modèles</a>
 					</li>
-					<?php } ?>
+					<?php }
+					if ($user->isSuperAdmin() || $menuItem == 'menu_signature') { ?>
 					<li id='menu_signature' <?php echo ($menuItem == 'menu_signature') ? "class='navcourant'" : '';?> >
 						<a href="info_signature.php">Suivi eSignature</a>
 					</li>
+					<?php } ?>
 					<?php if (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
 					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
 						<a href="admin_substitution.php">Changer d'utilisateur (<?php echo $user->getUid();?>)</a>
