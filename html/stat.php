@@ -550,8 +550,9 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
 							<td class="<?php echo $liste_edit[$valeur][0]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][0]['statut']['title'];?>"><?php echo $liste_edit[$valeur][0]['statut']['contenu']; ?></td>
 							<?php $pos = strpos($liste_edit[$valeur][0]['statut']['contenu'], "signrequests");
-							if ($pos !== FALSE) { ?>
-								<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][0]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][0]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
+							if ($pos !== FALSE) {
+								$esignatureid = substr($liste_edit[$valeur][0]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][0]['statut']['contenu'], "target") -2 - $pos - 13); ?>
+								<td><a href="<?php echo 'info_signature.php?esignatureid='.$esignatureid; ?>"><?php echo $esignatureid;?></a></td>
 							<?php } else { ?>
 								<td></td>
 							<?php } ?>
@@ -569,8 +570,9 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
 							<td class="<?php echo $liste_edit[$valeur][$i]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['statut']['title'];?>"><?php echo $liste_edit[$valeur][$i]['statut']['contenu']; ?></td>
 							<?php $pos = strpos($liste_edit[$valeur][$i]['statut']['contenu'], "signrequests");
-							if ($pos !== FALSE) { ?>
-								<td><a href="<?php echo 'info_signature.php?esignatureid='.substr($liste_edit[$valeur][$i]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>">=></a></td>
+							if ($pos !== FALSE) {
+								$esignatureid = substr($liste_edit[$valeur][$i]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>
+								<td><a href="<?php echo 'info_signature.php?esignatureid='.$esignatureid; ?>"><?php echo $esignatureid;?></a></td>
 							<?php } else { ?>
 								<td></td>
 						<?php } ?>
