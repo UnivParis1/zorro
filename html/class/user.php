@@ -592,10 +592,12 @@ class user {
 					$select .= ', ?';
 					$params[] = $listStructuresFilles[$i];
 				}
-				$select .= ') AND d.idmodel IN ( ';
+				$select .= ') ';
 			}
 			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
 			{
+				$select2 = '';
+				$hasidmodel = false;
 				foreach($groupes as $groupe)
 				{
 					$roles = $ref->getRoleForGroupModel($groupe['idgroupe'], $criteres['idmodel']);
@@ -603,13 +605,18 @@ class user {
 					{
 						if ($role['idrole'] == 1) // Admin du modèle => accès à tous les arrêtés du modèle
 						{
-							$select .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
+							$select2 .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
 							$params[] = $criteres['idmodel'];
 						}
 						else
 						{
 							if ($admin) // Responsable de structure => accès à tous les arrêtés du modèle pour sa structure
 							{
+								if (!$hasidmodel)
+								{
+									$hasidmodel = true;
+									$select .= 'AND d.idmodel IN ( ';
+								}
 								$select .= '?, ';
 								$params[] = $criteres['idmodel'];
 							}
@@ -621,21 +628,43 @@ class user {
 						}
 					}
 				}
+				if ($admin)
+				{
+					if ($hasidmodel)
+					{
+						$select = substr($select, 0, -2).") ".$select2.")";
+					}
+					else
+					{
+						$select .= $select2.")";
+					}
+				}
+				else
+				{
+					$select .= $select2;
+				}
 			}
 			else
 			{
 				$roles = $this->getGroupeRoles($groupes);
+				$select2 = '';
+				$hasidmodel = false;
 				foreach ($roles as $role)
 					{
 						if ($role['idrole'] == 1) // Admin du modèle => accès à tous les arrêtés du modèle
 						{
-							$select .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
+							$select2 .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
 							$params[] = $role['idmodel'];
 						}
 						else
 						{
 							if ($admin) // Responsable de structure => accès à tous les arrêtés du modèle pour sa structure
 							{
+								if (!$hasidmodel)
+								{
+									$hasidmodel = true;
+									$select .= 'AND d.idmodel IN ( ';
+								}
 								$select .= '?, ';
 								$params[] = $role['idmodel'];
 							}
@@ -647,10 +676,21 @@ class user {
 							}
 						}
 					}
-			}
-			if ($admin)
-			{
-				$select = substr($select, 0, -2).")) ";
+				if ($admin)
+				{
+					if ($hasidmodel)
+					{
+						$select = substr($select, 0, -2).") ".$select2.")";
+					}
+					else
+					{
+						$select .= $select2.")";
+					}
+				}
+				else
+				{
+					$select .= $select2;
+				}
 			}
 		}
 		$select .= ") AND d.status != '".STATUT_REMPLACE."' ";
@@ -789,4 +829,5 @@ class user {
 		}
 		return $retour;
 	}
+
 }
