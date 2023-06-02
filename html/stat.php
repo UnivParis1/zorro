@@ -18,7 +18,7 @@ if (is_null($userid) or ($userid == ""))
 	header('Location: index.php');
 	exit();
 }
-		
+
 // Récupération des modeles auxquels à accès l'utilisateur
 $menuItem = 'menu_stat';
 require ("include/menu.php");
@@ -27,7 +27,7 @@ $liste_year = $ref->getCreationYears();
 if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 {
 	$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
-	if ($userCAS->isSuperAdmin(false) || $userCAS->isDaji() || $userCAS->isAdminModel())
+	if ($userCAS->isSuperAdmin(false) || $userCAS->isDaji() || $userCAS->isAdminModel() || $user->isAdminModel())
 	{
 		$composante_selected = '';
 		if (isset($_POST['selectcomp']) && $_POST['selectcomp'] != '')
@@ -48,7 +48,14 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 			$list_fields = $model_selected->getModelFields();
 			$export_path = $model_selected->getExportPath();
 			$modelworkflow = $model_selected->getModelWorkflow();
-			$model_decrees = $userCAS->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1);
+			if ($userCAS->getUid() == $user->getUid())
+			{
+				$model_decrees = $userCAS->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1);
+			}
+			else
+			{
+				$model_decrees = $user->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1);
+			}
 			if (isset($post_selectcomp) && $post_selectcomp != '')
 			{
 				$liste_to_do = $model_selected->getListDecreesToEditForComp($post_selectcomp);
