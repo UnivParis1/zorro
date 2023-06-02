@@ -491,7 +491,7 @@ class reference {
 
 	function getRoleForGroupModel($idgroupe, $idmodel)
 	{
-		$sql = "SELECT idgroupe, idrole, idmodel, active FROM groupe_role WHERE idgroupe = ? AND idmodel = ?";
+		$sql = "SELECT idgroupe, idrole, idmodel, active FROM groupe_role WHERE idgroupe = ? AND idmodel = ? AND active = 'O'";
 		$param = array($idgroupe,$idmodel);
 		$result = prepared_select($this->_dbcon, $sql, $param);
 		$listroles = array();

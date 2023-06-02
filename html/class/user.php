@@ -571,8 +571,17 @@ class user {
 		}
 		else
 		{
-			$select .= " WHERE (d.iduser = ? "; // Au minimum accès à ses propres arrêtés
-			$params[] = $iduser;
+			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
+			{
+				$select .= " WHERE ((d.iduser = ? AND d.idmodel = ?) ";
+				$params[] = $iduser;
+				$params[] = $criteres['idmodel'];
+			}
+			else
+			{
+				$select .= " WHERE (d.iduser = ? "; // Au minimum accès à ses propres arrêtés
+				$params[] = $iduser;
+			}
 			$groupes = $this->getGroupsZorro();
 			require_once './class/reference.php';
 			$ref = new reference($this->_dbcon);
@@ -597,6 +606,7 @@ class user {
 			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
 			{
 				$select2 = '';
+				$params2 = array();
 				$hasidmodel = false;
 				foreach($groupes as $groupe)
 				{
@@ -606,7 +616,7 @@ class user {
 						if ($role['idrole'] == 1) // Admin du modèle => accès à tous les arrêtés du modèle
 						{
 							$select2 .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
-							$params[] = $criteres['idmodel'];
+							$params2[] = $criteres['idmodel'];
 						}
 						else
 						{
@@ -643,18 +653,20 @@ class user {
 				{
 					$select .= $select2;
 				}
+				$params = array_merge($params, $params2);
 			}
 			else
 			{
-				$roles = $this->getGroupeRoles($groupes);
+				$roles = $this->getGroupeRoles($groupes,null,true);
 				$select2 = '';
+				$params2 = array();
 				$hasidmodel = false;
 				foreach ($roles as $role)
 					{
 						if ($role['idrole'] == 1) // Admin du modèle => accès à tous les arrêtés du modèle
 						{
 							$select2 .= " OR (d.iduser LIKE '%' AND d.idmodel = ?) ";
-							$params[] = $role['idmodel'];
+							$params2[] = $role['idmodel'];
 						}
 						else
 						{
@@ -691,6 +703,7 @@ class user {
 				{
 					$select .= $select2;
 				}
+				$params = array_merge($params, $params2);
 			}
 		}
 		$select .= ") AND d.status != '".STATUT_REMPLACE."' ";
