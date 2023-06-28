@@ -504,4 +504,161 @@ class reference {
 		}
 		return $listroles;
 	}
+
+	function getObjectsList()
+	{
+		$sql = "SELECT idobject_type, name FROM object_type WHERE active = 'O'";
+		$result = mysqli_query($this->_dbcon, $sql);
+		$listobjects = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$listobjects[$row['idobject_type']] = $row;
+			}
+		}
+		return $listobjects;
+	}
+
+	function getObjectTypePrices($idobject_type)
+	{
+		$sql = "SELECT idobject, new_tarif_public, new_tarif_etu_pers FROM object WHERE idobject_type = ? AND active = 'O'";
+		$param = array($idobject_type);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$price = array('idobject' =>'0', 'new_tarif_public' => '', 'new_tarif_etu_pers' => '');
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				$price = $row;
+			}
+		}
+		return $price;
+	}
+
+	function getObjectPricesById($idobject)
+	{
+		$sql = "SELECT idobject_type, old_tarif_public, new_tarif_public, old_tarif_etu_pers, new_tarif_etu_pers FROM object WHERE idobject = ? ";
+		$param = array($idobject);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$price = array('idobject_type' =>'0', 'old_tarif_public' => '', 'new_tarif_public' => '', 'old_tarif_etu_pers' => '', 'new_tarif_etu_pers' => '');
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				$price = $row;
+			}
+		}
+		return $price;
+	}
+
+	function setObjectPrices($idobject_type, $oldtarifpub, $newtarifpub, $oldtarifep, $newtarifep, $iddecree='')
+	{
+		if ($iddecree == '')
+		{
+			$sql = "INSERT INTO object (idobject_type, old_tarif_public, new_tarif_public, old_tarif_etu_pers, new_tarif_etu_pers) VALUES (?, ?, ?, ?, ?)";
+			$param = array($idobject_type, $oldtarifpub, $newtarifpub, $oldtarifep, $newtarifep);
+			$result = prepared_query($this->_dbcon, $sql, $param);
+			if ( !mysqli_error($this->_dbcon))
+			{
+				elog("Tarif objet promotionnel insere ".var_export($param, true));
+				return mysqli_insert_id($this->_dbcon);
+			}
+			else
+			{
+				elog("Erreur insert tarif objet promotionnel ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+			}
+		}
+		else
+		{
+			// vérifier si un tarif est fixé pour l'objet et l'arrêté
+			$idobject = $this->getIdObjectPricesForDecree($idobject_type, $iddecree);
+			// si oui update
+			if ($idobject != 0)
+			{
+				$sql = "UPDATE object SET old_tarif_public = ?, new_tarif_public = ?, old_tarif_etu_pers = ?, new_tarif_etu_pers = ? WHERE idobject = ?";
+				$param = array($oldtarifpub, $newtarifpub, $oldtarifep, $newtarifep, $idobject);
+				$result = prepared_query($this->_dbcon, $sql, $param);
+				if ( !mysqli_error($this->_dbcon))
+				{
+					elog("Tarif objet promotionnel mis à jour ".var_export($param, true));
+					return $idobject;
+				}
+				else
+				{
+					elog("Erreur insert tarif objet promotionnel ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+				}
+			}
+			// sinon insert
+			else
+			{
+				$sql = "INSERT INTO object (idobject_type, old_tarif_public, new_tarif_public, old_tarif_etu_pers, new_tarif_etu_pers) VALUES (?, ?, ?, ?, ?)";
+				$param = array($idobject_type, $oldtarifpub, $newtarifpub, $oldtarifep, $newtarifep);
+				$result = prepared_query($this->_dbcon, $sql, $param);
+				if ( !mysqli_error($this->_dbcon))
+				{
+					elog("Tarif objet promotionnel insere ".var_export($param, true));
+					return mysqli_insert_id($this->_dbcon);
+				}
+				else
+				{
+					elog("Erreur insert tarif objet promotionnel ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+				}
+			}
+		}
+		return 0;
+	}
+
+	function getIdObjectActiveForIdOjectInactive($idobject)
+	{
+		$sql = "SELECT act.idobject FROM object act INNER JOIN object inact ON inact.idobject_type = act.idobject_type
+				WHERE inact.idobject = ? AND act.active = 'O'";
+		$param = array($idobject);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$idobject_active = '';
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				$idobject_active = $row['idobject'];
+			}
+		}
+		return $idobject_active;
+	}
+	function activateObjectPrices($idobject, $active = 'O')
+	{
+		$sql = "UPDATE object SET active = ? WHERE idobject = ?";
+		$param = array($active, $idobject);
+		$result = prepared_query($this->_dbcon, $sql, $param);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("Activation Tarif objet promotionnel ".var_export($param, true));
+		}
+		else
+		{
+			elog("Erreur activation tarif objet promotionnel ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+		}
+	}
+
+	function getIdObjectPricesForDecree($idobject_type, $iddecree)
+	{
+		$sql = "SELECT DISTINCT obj.idobject FROM object obj INNER JOIN decree_field df ON df.value = obj.idobject
+				INNER JOIN model_field mf ON mf.idmodel_field = df.idmodel_field
+				INNER JOIN field_type ft ON ft.idfield_type = mf.idfield_type AND ft.datatype = 'object'
+				WHERE df.iddecree = ? AND obj.idobject_type = ?";
+		$param = array($iddecree, $idobject_type);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				return $row['idobject'];
+			}
+		}
+		else
+		{
+			elog("Erreur recherche id objet pour l'arrete. ".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
 }

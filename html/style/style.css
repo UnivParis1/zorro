@@ -343,6 +343,27 @@ td.img[title="En cours de signature"]:hover {
    width: 79px;
 }
 
+.tableauobjet {
+    border: 1px #ccc solid;
+    border-collapse: collapse;
+    font-size: 0.85em;
+    min-width: 700px;
+    /*margin-left: auto;
+    margin-right: auto;*/
+}
+
+.tableauobjet input { line-height: 21px; width: 10.5em; padding-left: 5px; text-align: center;}
+
+.tableauobjet  td {
+    padding: 2px 6px;
+    height: 28px;
+    border:1px #444 dotted;
+    max-width: 400px;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
 .warning_doublon {
     color: #CF4A02;
 }

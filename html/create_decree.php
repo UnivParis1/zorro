@@ -178,7 +178,7 @@
 							$params = array	(
 										'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
 										'targetEmails' => $mail_user,
-										'recipientEmails' => "1*".$mail_user.",2*".$mail_user
+										'recipientEmails' => "1*elodie.briere@etu.univ-paris1.fr,1*".$mail_user.",2*elodie.briere@etu.univ-paris1.fr,2*".$mail_user
 									);
 							if ($export_path != NULL)
 							{
@@ -199,6 +199,7 @@
 						}
 						//$params['signRequestParamsJsonString'] = "[{ \"xPos\": 100, \"yPos\": 100, \"signPageNumber\": 1 },{ \"xPos\": 388, \"yPos\": 636, \"signPageNumber\": 1 }]";
 						$params['multipartFiles'] = curl_file_create(realpath(APPLI_PATH.PDF_PATH.$filename), "application/pdf", $filename);
+						//var_dump($params['multipartFiles'] );
 						//$params['attachementMultipartFiles'] = $params['multipartFiles']; //curl_file_create(realpath(APPLI_PATH.PDF_PATH.'Nomination_jury_validation_delivrance_DEUG2022_47.pdf'), "application/pdf", 'Nomination_jury_validation_delivrance_DEUG2022_47.pdf');
 						$params['title'] = $filename;
 						$idworkflow = $mod_decree->getWorkflow();
@@ -378,27 +379,28 @@
 						{
 							if ($modelfield['auto'] == 'N')
 							{
-								if ($modelfield['number'] == '+')
+								if ($modelfield['datatype'] != 'object')
 								{
-									//print_r2($_POST);
-									$valeurs = isset($_POST[$modelfield['name']]) ? $_POST[$modelfield['name']] : array();
-									foreach($valeurs as $valeur)
+									if ($modelfield['number'] == '+')
 									{
-										$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($valeur));
-									}
-									if (isset($_POST[$modelfield['name']."1"]) && $_POST[$modelfield['name']."1"] != '')
-									{
-										$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
-									}
-								}
-								else
-								{
-									for($i = 1; $i <= $modelfield['number']; $i++)
-									{
-										//echo $modelfield['name'].$i." : ".$_POST[$modelfield['name'].$i]."<br>";
-										if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+										$valeurs = isset($_POST[$modelfield['name']]) ? $_POST[$modelfield['name']] : array();
+										foreach($valeurs as $valeur)
 										{
-											$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name'].$i]));
+											$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($valeur));
+										}
+										if (isset($_POST[$modelfield['name']."1"]) && $_POST[$modelfield['name']."1"] != '')
+										{
+											$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name']."1"]));
+										}
+									}
+									else
+									{
+										for($i = 1; $i <= $modelfield['number']; $i++)
+										{
+											if (isset($_POST[$modelfield['name'].$i]) && $_POST[$modelfield['name'].$i] != '')
+											{
+												$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => htmlspecialchars($_POST[$modelfield['name'].$i]));
+											}
 										}
 									}
 								}
@@ -428,6 +430,18 @@
 						$numero_dispo = $decree->getNumber();
 						elog("numero dispo remplace par numero du decree en modif : ".$numero_dispo);
 						$decree->save($user->getid(), $idmodel, $structure, true);
+						if ($modelfield['datatype'] == 'object')
+						{
+							$listobjects = $ref->getObjectsList();
+							foreach($listobjects as $idobj => $object)
+							{
+								if (isset($_POST['newtarifpub'.$idobj]) && $_POST['newtarifpub'.$idobj] != '')
+								{
+									$idobjectBD = $ref->setObjectPrices($idobj, $_POST['anctarifpub'.$idobj], $_POST['newtarifpub'.$idobj], $_POST['anctarifep'.$idobj], $_POST['newtarifep'.$idobj], $mod_decree_id);
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $idobjectBD);
+								}
+							}
+						}
 						$decree->setFields($decreefields, true);
 					}
 					else
@@ -435,6 +449,18 @@
 						$decree = new decree($dbcon, $year, $numero_dispo);
 						elog('decree cree avec numero : '.$numero_dispo);
 						$decree->save($user->getid(), $idmodel, $structure);
+						if ($modelfield['datatype'] == 'object')
+						{
+							$listobjects = $ref->getObjectsList();
+							foreach($listobjects as $idobj => $object)
+							{
+								if (isset($_POST['newtarifpub'.$idobj]) && $_POST['newtarifpub'.$idobj] != '')
+								{
+									$idobjectBD = $ref->setObjectPrices($idobj, $_POST['anctarifpub'.$idobj], $_POST['newtarifpub'.$idobj], $_POST['anctarifep'.$idobj], $_POST['newtarifep'.$idobj]);
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $idobjectBD);
+								}
+							}
+						}
 						$decree->setFields($decreefields);
 						if (isset($mod_status) && $mod_status == STATUT_REFUSE)
 						{
@@ -503,56 +529,139 @@
 							if ($nbChamps > 1)
 							{
 								$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
-								// echo "Champs à multiplier : ";print_r2($field);
-								// trouver le champs dans le xml
-								$noeudcourant = $body; // le dernier noeud contenant le champ
-								$noeudpere = $body; // le noeud où raccrocher le clone du champ
-								$noeudadupliquer = $body; // le noeud à cloner
-								$positiondunoeudadupliquer = 0; // la position où raccrocher le clone du champ sous le noeud père
-								while (strpos($noeudcourant->textContent, '$$$'.$champ.'$$$') !== false)
+								if ($champ == 'objetpromo')
 								{
-									if ($noeudcourant->hasChildNodes())
+									// echo "Champs à multiplier : ";print_r2($field);
+									// trouver le champs dans le xml
+									$noeudcourant = $body; // le dernier noeud contenant le champ
+									$noeudpere = $body; // le noeud où raccrocher le clone du champ
+									$noeudadupliquer = $body; // le noeud à cloner
+									$positiondunoeudadupliquer = 0; // la position où raccrocher le clone du champ sous le noeud père
+									while (strpos($noeudcourant->textContent, '$$$'.$champ.'$$$') !== false)
 									{
-										if ($noeudcourant->nextSibling != null || $noeudcourant->previousSibling != null)
+										if ($noeudcourant->nodeName != 'table:table-cell')
 										{
-											$noeudadupliquer = $noeudcourant;
-										}
-										if ($noeudcourant->childNodes->count() > 1)
-										{
-											$noeudpere = $noeudcourant;
-											$positiondunoeudadupliquer = 0;
-										}
-										foreach($noeudcourant->childNodes as $node)
-										{
-											if (strpos($node->textContent, '$$$'.$champ.'$$$') !== false)
+											if ($noeudcourant->nextSibling != null || $noeudcourant->previousSibling != null)
 											{
-												$noeudcourant = $node;
-												// echo "Noeud contenant le champ : <br>"; print_r2($node);
-												break;
+												$noeudadupliquer = $noeudcourant;
 											}
-											if ($noeudpere == $noeudcourant)
+											if ($noeudcourant->nodeName == 'table:table')
 											{
-												$positiondunoeudadupliquer++;
+												$noeudpere = $noeudcourant;
+												$positiondunoeudadupliquer = $noeudcourant->childNodes->count();
+											}
+											foreach($noeudcourant->childNodes as $node)
+											{
+												if (strpos($node->textContent, '$$$'.$champ.'$$$') !== false)
+												{
+													$noeudcourant = $node;
+													// echo "Noeud contenant le champ : <br>"; print_r2($node);
+													break;
+												}
+												if ($noeudpere == $noeudcourant)
+												{
+													$positiondunoeudadupliquer++;
+												}
 											}
 										}
+										else
+										{
+											// echo "Dernier noeud contenant le champ : <br>"; print_r2($node)
+											break;
+										}
+										// echo "Evolution noeud_pere <br>";print_r2($noeudpere);
 									}
-									else
+									// echo "Noeud à dupliquer  : <br>"; print_r2($noeudadupliquer);
+									// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
+									// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
+									// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
+									for ($i = 1; $i < $nbChamps; $i++)
 									{
-										// echo "Dernier noeud contenant le champ : <br>"; print_r2($node);
-										break;
+										// dupliquer le noeud
+										$clone_parfait = $noeudadupliquer->cloneNode(true);
+										$clone = $noeudadupliquer->cloneNode();
+										foreach ($clone_parfait->childNodes as $node)
+										{
+											$clone_node = $node->cloneNode(true);
+											foreach($node->attributes as $attr)
+											{
+												if ($attr->nodeName == "table:style-name")
+												{
+													// Corriger le numéro des cellules pour chaque nouvelle ligne
+													$pos_point = strpos($attr->nodeValue, '.');
+													$debut = substr($attr->nodeValue, 0, $pos_point + 1);
+													if (strlen(substr($attr->nodeValue, $pos_point + 1)) > 1)
+													{
+														$fin = substr($attr->nodeValue, $pos_point + 1, 1);
+														$fin .= substr($attr->nodeValue, $pos_point + 2)+$i;
+													}
+													else
+													{
+														$fin = substr($attr->nodeValue, $pos_point + 1)+$i;
+													}
+													$new_value = $debut.$fin;
+													$clone_node->setAttribute('value', $new_value);
+												}
+												$clone->appendChild($clone_node);
+											}
+
+										}
+										// insérer le noeud
+										$noeudpere->appendChild($clone);
 									}
 								}
-								// echo "Noeud à dupliquer  : <br>"; print_r2($noeudadupliquer);
-								// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
-								// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
-								// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
-								for ($i = 1; $i < $nbChamps; $i++)
-								{
-									// dupliquer le noeud
-									$clone = $noeudadupliquer->cloneNode(true);
-									// insérer le noeud
-									$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
-									// echo "Noeud père après $i ème insert : <br>"; print_r2($noeudpere);
+								else {
+									// echo "Champs à multiplier : ";print_r2($field);
+									// trouver le champs dans le xml
+									$noeudcourant = $body; // le dernier noeud contenant le champ
+									$noeudpere = $body; // le noeud où raccrocher le clone du champ
+									$noeudadupliquer = $body; // le noeud à cloner
+									$positiondunoeudadupliquer = 0; // la position où raccrocher le clone du champ sous le noeud père
+									while (strpos($noeudcourant->textContent, '$$$'.$champ.'$$$') !== false)
+									{
+										if ($noeudcourant->hasChildNodes())
+										{
+											if ($noeudcourant->nextSibling != null || $noeudcourant->previousSibling != null)
+											{
+												$noeudadupliquer = $noeudcourant;
+											}
+											if ($noeudcourant->childNodes->count() > 1)
+											{
+												$noeudpere = $noeudcourant;
+												$positiondunoeudadupliquer = 0;
+											}
+											foreach($noeudcourant->childNodes as $node)
+											{
+												if (strpos($node->textContent, '$$$'.$champ.'$$$') !== false)
+												{
+													$noeudcourant = $node;
+													// echo "Noeud contenant le champ : <br>"; print_r2($node);
+													break;
+												}
+												if ($noeudpere == $noeudcourant)
+												{
+													$positiondunoeudadupliquer++;
+												}
+											}
+										}
+										else
+										{
+											// echo "Dernier noeud contenant le champ : <br>"; print_r2($node);
+											break;
+										}
+									}
+									// echo "Noeud à dupliquer  : <br>"; print_r2($noeudadupliquer);
+									// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
+									// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
+									// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
+									for ($i = 1; $i < $nbChamps; $i++)
+									{
+										// dupliquer le noeud
+										$clone = $noeudadupliquer->cloneNode(true);
+										// insérer le noeud
+										$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
+										// echo "Noeud père après $i ème insert : <br>"; print_r2($noeudpere);
+									}
 								}
 							}
 						}
@@ -619,6 +728,17 @@
 									$nom_struct = $ldap->getStructureName($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
 									$champsamodif[] = array("valeur" => $comp_before.$nom_struct.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
+								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'object')
+								{
+									$listobjects = $ref->getObjectsList();
+									$prixobj = $ref->getObjectPricesById($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
+									$nom_obj = $listobjects[$prixobj['idobject_type']]['name'];
+									$ancprixpub = $prixobj['old_tarif_public'] == '' ? $prixobj['old_tarif_public'] : $prixobj['old_tarif_public']." €";
+									$newprixpub = $prixobj['new_tarif_public']." €";
+									$ancprixep = $prixobj['old_tarif_etu_pers'] == '' ? $prixobj['old_tarif_etu_pers'] : $prixobj['old_tarif_etu_pers']." €";
+									$newprixep = $prixobj['new_tarif_etu_pers']." €";
+									$champsamodif[] = array("valeur" => $comp_before.$nom_obj.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
 								else
 								{
 									$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
@@ -638,6 +758,22 @@
 								elseif ($field == "anneeuniplusdeux")
 								{
 									$champsamodif[] = array("valeur" => $anneeunivplusdeux, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "anctarifpub")
+								{
+									$champsamodif[] = array("valeur" => $ancprixpub, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "newtarifpub")
+								{
+									$champsamodif[] = array("valeur" => $newprixpub, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "anctarifetupers")
+								{
+									$champsamodif[] = array("valeur" => $ancprixep, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "newtarifetupers")
+								{
+									$champsamodif[] = array("valeur" => $newprixep, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
 								elseif ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
 										|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))) // Pour supprimer les lignes des sections inutilisées
@@ -821,6 +957,24 @@
 		var rowindex = row.rowIndex;
 		var table = row.parentNode;
 		table.deleteRow(rowindex);
+		return false;
+	}
+
+	function ajouterObjet(divname)
+	{
+		var ligne = document.getElementById("objet"+document.getElementById(divname+"1").value);
+		ligne.removeAttribute("hidden");
+		return false;
+	}
+
+	function supprimerObjet(cellid)
+	{
+		var ligne = document.getElementById("objet"+cellid);
+		var newtarifpub = document.getElementById("newtarifpub"+cellid);
+		var newtarifep = document.getElementById("newtarifep"+cellid);
+		ligne.setAttribute("hidden", "");
+		newtarifpub.value = '';
+		newtarifep.value = '';
 		return false;
 	}
 
@@ -1115,8 +1269,8 @@
 									</select>
 								<?php }
 								break;
-								case 'checkbox':
-								case 'checkbox2':
+							case 'checkbox':
+							case 'checkbox2':
 								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 								{
 									$selected = 'checked';
@@ -1148,6 +1302,25 @@
 								$value = (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields)) ? $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] : '';?>
 								<textarea rows=1 cols=50 id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' value="<?php echo $value;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');"><?php echo $value;?></textarea>
 								<?php break;
+							case 'object':
+								// Afficher liste déroulante objets promo
+								$listobjects = $ref->getObjectsList();
+								if (sizeof($listobjects) > 0)
+								{ ?>
+									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+										<option value="">&nbsp;</option>
+									<?php foreach($listobjects as $value)
+									{
+										if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['idobject_type'])
+										{?>
+											<option value="<?php echo $value['idobject_type'];?>" selected="selected" id="<?php echo $value['name'];?>"><?php echo $value['name'];?></option>
+										<?php } else { ?>
+											<option value="<?php echo $value['idobject_type'];?>" id="<?php echo $value['name'];?>"><?php echo $value['name'];?></option>
+										<?php }
+									} ?>
+									</select>
+								<?php }
+								break;
 							default:
 								if ($modelfield['idfield_type'] == 10) {
 									if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && array_key_exists($i-1, $mod_decree_fields[$modelfield['idmodel_field']])) {
@@ -1182,7 +1355,76 @@
 					}
 				}
 				if ($modelfield['number'] == '+')
-				{ ?>
+				{
+					if ($modelfield['datatype'] == 'object')
+					{?>
+						<button onclick="return ajouterObjet('<?php echo $modelfield['name'];?>');">+</button>
+						<br>
+						<?php
+							$obj_decree = array();
+							if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields) && sizeof($mod_decree_fields[$modelfield['idmodel_field']]) > 0)
+							{
+								$obj_decree_id = array_column($mod_decree_fields[$modelfield['idmodel_field']], 'value', 'value');
+								foreach ($obj_decree_id as $id => $o)
+								{
+									$obj_decree[] = $ref->getObjectPricesById($id);
+								}
+								$obj_decree = array_column($obj_decree, null, 'idobject_type');
+							}
+							if (sizeof($listobjects) > 0)
+							{ ?>
+								<table class="tableauobjet">
+									<tr>
+										<th class="enteteobjet" rowspan="2" colspan="2">Objet Promotionnel</th>
+										<th class="enteteobjet" colspan="2">Prix Public</th>
+										<th class="enteteobjet" colspan="2">Prix Étudiant / Personnel</th>
+									</tr>
+									<tr>
+										<th>Ancien</th>
+										<th>Nouveau</th>
+										<th>Ancien</th>
+										<th>Nouveau</th>
+									</tr>
+								<?php foreach($listobjects as $value)
+								{
+									$prix = $ref->getObjectTypePrices($value['idobject_type']);
+									if (array_key_exists($value['idobject_type'], $obj_decree))
+									{
+										if ($obj_decree[$value['idobject_type']]['old_tarif_public'] != $prix['new_tarif_public'] || $obj_decree[$value['idobject_type']]['old_tarif_etu_pers'] != $prix['new_tarif_etu_pers'])
+										{
+											$message .= "<p class='alerte alerte-danger'>Attention, les anciens tarifs de l'objet : \"".$value['name']."\" enregistrés pour cet arrêté diffèrent du nouveau tarif en cours de validité. Veuillez enregistrer le document avant d'envoyer l'arrêté à la signature.</p>";
+											$obj_decree[$value['idobject_type']]['old_tarif_public'] = $prix['new_tarif_public'];
+											$obj_decree[$value['idobject_type']]['old_tarif_etu_pers'] = $prix['new_tarif_etu_pers'];
+										}?>
+										<tr id="<?php echo 'objet'.$value['idobject_type'];?>">
+											<td><button onclick="return supprimerObjet('<?php echo $value['idobject_type'];?>');">-</button></td>
+											<td><?php echo $value['name'];?></td>
+											<td><input type="text" id="<?php echo 'anctarifpub'.$value['idobject_type'];?>" name="<?php echo 'anctarifpub'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['old_tarif_public'];?>" readonly></td>
+											<td><input type="text" id="<?php echo 'newtarifpub'.$value['idobject_type'];?>" name="<?php echo 'newtarifpub'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['new_tarif_public'];?>" oninput="document.getElementById('<?php echo 'newtarifep'.$value['idobject_type'];?>').value = this.value * 0.9; return false;"></td>
+											<td><input type="text" id="<?php echo 'anctarifep'.$value['idobject_type'];?>" name="<?php echo 'anctarifep'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['old_tarif_etu_pers'];?>" readonly></td>
+											<td><input type="text" id="<?php echo 'newtarifep'.$value['idobject_type'];?>" name="<?php echo 'newtarifep'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['new_tarif_etu_pers'];?>"></td>
+										</tr>
+									<?php
+									}
+									else
+									{
+									?>
+										<tr id="<?php echo 'objet'.$value['idobject_type'];?>" hidden>
+											<td><button onclick="return supprimerObjet('<?php echo $value['idobject_type'];?>');">-</button></td>
+											<td><?php echo $value['name'];?></td>
+											<td><input type="text" id="<?php echo 'anctarifpub'.$value['idobject_type'];?>" name="<?php echo 'anctarifpub'.$value['idobject_type'];?>" value="<?php echo $prix['new_tarif_public'];?>" readonly></td>
+											<td><input type="text" id="<?php echo 'newtarifpub'.$value['idobject_type'];?>" name="<?php echo 'newtarifpub'.$value['idobject_type'];?>" value="" oninput="document.getElementById('<?php echo 'newtarifep'.$value['idobject_type'];?>').value = this.value * 0.9; return false;"></td>
+											<td><input type="text" id="<?php echo 'anctarifep'.$value['idobject_type'];?>" name="<?php echo 'anctarifep'.$value['idobject_type'];?>" value="<?php echo $prix['new_tarif_etu_pers'];?>" readonly></td>
+											<td><input type="text" id="<?php echo 'newtarifep'.$value['idobject_type'];?>" name="<?php echo 'newtarifep'.$value['idobject_type'];?>" value=""></td>
+										</tr>
+								<?php }
+								} ?>
+								</table>
+							<?php }
+
+					}
+					else
+					{ ?>
 					<button onclick="return ajouterValeur('<?php echo $modelfield['name'];?>');">+</button>
 					<table id='<?php echo "table_".$modelfield['name'];?>' class="marge_table"></table>
 					<br>
@@ -1196,6 +1438,7 @@
 							}
 						}
 					}
+				}
 
 				?>
 				</div>

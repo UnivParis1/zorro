@@ -622,6 +622,8 @@ class decree {
 										$date = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
 									}
 								}
+								// Activer le prix des objets
+								$this->activateObjects();
 								break;
 							case 'refused':
 								$new_status = STATUT_REFUSE; // refused
@@ -1237,5 +1239,45 @@ class decree {
 	function getEsignUrl()
 	{
 		return /*ESIGNATURE_BASE_URL.ESIGNATURE_REDIRECT_CAS.*/ESIGNATURE_BASE_URL.ESIGNATURE_URL_DOC.$this->getIdEsignature();
+	}
+
+	function getIdObjects()
+	{
+		$sql = "SELECT df.value FROM decree_field df
+				INNER JOIN model_field mf ON mf.idmodel_field = df.idmodel_field
+				INNER JOIN field_type ft ON ft.idfield_type = mf.idfield_type AND ft.datatype = 'object'
+				WHERE df.iddecree = ?";
+		$param = array($this->getid());
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$listId = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$listId[] = $row['value'];
+			}
+		}
+		else
+		{
+			elog("Erreur recherche id objet pour l'arrete. ".mysqli_error($this->_dbcon));
+		}
+		return $listId;
+	}
+
+	function activateObjects()
+	{
+		$ref = new reference($this->_dbcon);
+		$listIdObjects = $this->getIdObjects();
+		foreach ($listIdObjects as $id)
+		{
+			// désactiver l'ancien tarif
+			$anc_id = $ref->getIdObjectActiveForIdOjectInactive($id);
+			if ($anc_id != '')
+			{
+				$ref->activateObjectPrices($anc_id, 'N');
+			}
+			// activer le nouveau tarif
+			$ref->activateObjectPrices($id);
+		}
 	}
 }
