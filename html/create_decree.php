@@ -962,8 +962,11 @@
 
 	function ajouterObjet(divname)
 	{
-		var ligne = document.getElementById("objet"+document.getElementById(divname+"1").value);
+		var idobj = document.getElementById(divname+"1").value;
+		var ligne = document.getElementById("objet"+idobj);
 		ligne.removeAttribute("hidden");
+		var opt = document.getElementById("option"+idobj);
+		opt.setAttribute("hidden", "");
 		return false;
 	}
 
@@ -972,6 +975,8 @@
 		var ligne = document.getElementById("objet"+cellid);
 		var newtarifpub = document.getElementById("newtarifpub"+cellid);
 		var newtarifep = document.getElementById("newtarifep"+cellid);
+		var opt = document.getElementById("option"+cellid);
+		opt.removeAttribute("hidden");
 		ligne.setAttribute("hidden", "");
 		newtarifpub.value = '';
 		newtarifep.value = '';
@@ -1304,6 +1309,16 @@
 								<?php break;
 							case 'object':
 								// Afficher liste déroulante objets promo
+								$obj_decree = array();
+								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields) && sizeof($mod_decree_fields[$modelfield['idmodel_field']]) > 0)
+								{
+									$obj_decree_id = array_column($mod_decree_fields[$modelfield['idmodel_field']], 'value', 'value');
+									foreach ($obj_decree_id as $id => $o)
+									{
+										$obj_decree[] = $ref->getObjectPricesById($id);
+									}
+									$obj_decree = array_column($obj_decree, null, 'idobject_type');
+								}
 								$listobjects = $ref->getObjectsList();
 								if (sizeof($listobjects) > 0)
 								{ ?>
@@ -1311,11 +1326,11 @@
 										<option value="">&nbsp;</option>
 									<?php foreach($listobjects as $value)
 									{
-										if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['idobject_type'])
+										if (array_key_exists($value['idobject_type'], $obj_decree))
 										{?>
-											<option value="<?php echo $value['idobject_type'];?>" selected="selected" id="<?php echo $value['name'];?>"><?php echo $value['name'];?></option>
+											<option value="<?php echo $value['idobject_type'];?>" id="<?php echo "option".$value['idobject_type'];?>" hidden><?php echo $value['name'];?></option>
 										<?php } else { ?>
-											<option value="<?php echo $value['idobject_type'];?>" id="<?php echo $value['name'];?>"><?php echo $value['name'];?></option>
+											<option value="<?php echo $value['idobject_type'];?>" id="<?php echo "option".$value['idobject_type'];?>"><?php echo $value['name'];?></option>
 										<?php }
 									} ?>
 									</select>
@@ -1361,16 +1376,6 @@
 						<button onclick="return ajouterObjet('<?php echo $modelfield['name'];?>');">+</button>
 						<br>
 						<?php
-							$obj_decree = array();
-							if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields) && sizeof($mod_decree_fields[$modelfield['idmodel_field']]) > 0)
-							{
-								$obj_decree_id = array_column($mod_decree_fields[$modelfield['idmodel_field']], 'value', 'value');
-								foreach ($obj_decree_id as $id => $o)
-								{
-									$obj_decree[] = $ref->getObjectPricesById($id);
-								}
-								$obj_decree = array_column($obj_decree, null, 'idobject_type');
-							}
 							if (sizeof($listobjects) > 0)
 							{ ?>
 								<table class="tableauobjet">
