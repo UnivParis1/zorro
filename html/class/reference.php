@@ -557,7 +557,7 @@ class reference {
 		if ($iddecree == '')
 		{
 			$sql = "INSERT INTO object (idobject_type, old_tarif_public, new_tarif_public, old_tarif_etu_pers, new_tarif_etu_pers) VALUES (?, ?, ?, ?, ?)";
-			$param = array($idobject_type, $oldtarifpub, $newtarifpub, $oldtarifep, $newtarifep);
+			$param = array($idobject_type, $this->format_price($oldtarifpub), $this->format_price($newtarifpub), $this->format_price($oldtarifep), $this->format_price($newtarifep));
 			$result = prepared_query($this->_dbcon, $sql, $param);
 			if ( !mysqli_error($this->_dbcon))
 			{
@@ -577,7 +577,7 @@ class reference {
 			if ($idobject != 0)
 			{
 				$sql = "UPDATE object SET old_tarif_public = ?, new_tarif_public = ?, old_tarif_etu_pers = ?, new_tarif_etu_pers = ? WHERE idobject = ?";
-				$param = array($oldtarifpub, $newtarifpub, $oldtarifep, $newtarifep, $idobject);
+				$param = array($this->format_price($oldtarifpub), $this->format_price($newtarifpub), $this->format_price($oldtarifep), $this->format_price($newtarifep), $idobject);
 				$result = prepared_query($this->_dbcon, $sql, $param);
 				if ( !mysqli_error($this->_dbcon))
 				{
@@ -593,7 +593,7 @@ class reference {
 			else
 			{
 				$sql = "INSERT INTO object (idobject_type, old_tarif_public, new_tarif_public, old_tarif_etu_pers, new_tarif_etu_pers) VALUES (?, ?, ?, ?, ?)";
-				$param = array($idobject_type, $oldtarifpub, $newtarifpub, $oldtarifep, $newtarifep);
+				$param = array($idobject_type, $this->format_price($oldtarifpub), $this->format_price($newtarifpub), $this->format_price($oldtarifep), $this->format_price($newtarifep));
 				$result = prepared_query($this->_dbcon, $sql, $param);
 				if ( !mysqli_error($this->_dbcon))
 				{
@@ -660,5 +660,10 @@ class reference {
 			elog("Erreur recherche id objet pour l'arrete. ".mysqli_error($this->_dbcon));
 		}
 		return 0;
+	}
+
+	function format_price($price)
+	{
+		return $price != '' ? number_format($price, 2) : '';
 	}
 }
