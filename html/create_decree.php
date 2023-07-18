@@ -379,7 +379,7 @@
 						{
 							if ($modelfield['auto'] == 'N')
 							{
-								if ($modelfield['datatype'] != 'object')
+								if ($modelfield['datatype'] != 'object' && $modelfield['datatype'] != 'room')
 								{
 									if ($modelfield['number'] == '+')
 									{
@@ -442,6 +442,18 @@
 								}
 							}
 						}
+						elseif ($modelfield['datatype'] == 'room')
+						{
+							$listsalles = $ref->getRoomsList();
+							foreach($listsalles as $idsalle => $salle)
+							{
+								if (isset($_POST['newtarifheure'.$idsalle]) && $_POST['newtarifheure'.$idsalle] != '')
+								{
+									$idsalleBD = $ref->setRoomPrices($idsalle, $_POST['anctarifheure'.$idsalle], $_POST['newtarifheure'.$idsalle], $_POST['anctarifdemi'.$idsalle], $_POST['newtarifdemi'.$idsalle], $_POST['anctarifjour'.$idsalle], $_POST['newtarifjour'.$idsalle], $mod_decree_id);
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $idsalleBD);
+								}
+							}
+						}
 						$decree->setFields($decreefields, true);
 					}
 					else
@@ -458,6 +470,18 @@
 								{
 									$idobjectBD = $ref->setObjectPrices($idobj, $_POST['anctarifpub'.$idobj], $_POST['newtarifpub'.$idobj], $_POST['anctarifep'.$idobj], $_POST['newtarifep'.$idobj]);
 									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $idobjectBD);
+								}
+							}
+						}
+						elseif ($modelfield['datatype'] == 'room')
+						{
+							$listsalles = $ref->getRoomsList();
+							foreach($listsalles as $idsalle => $salle)
+							{
+								if (isset($_POST['newtarifheure'.$idsalle]) && $_POST['newtarifheure'.$idsalle] != '')
+								{
+									$idsalleBD = $ref->setRoomPrices($idsalle, $_POST['anctarifheure'.$idsalle], $_POST['newtarifheure'.$idsalle], $_POST['anctarifdemi'.$idsalle], $_POST['newtarifdemi'.$idsalle], $_POST['anctarifjour'.$idsalle], $_POST['newtarifjour'.$idsalle]);
+									$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $idsalleBD);
 								}
 							}
 						}
@@ -529,7 +553,7 @@
 							if ($nbChamps > 1)
 							{
 								$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
-								if ($champ == 'objetpromo')
+								if ($champ == 'objetpromo' || $champ == 'espaceloc')
 								{
 									// echo "Champs à multiplier : ";print_r2($field);
 									// trouver le champs dans le xml
@@ -739,6 +763,19 @@
 									$newprixep = $prixobj['new_tarif_etu_pers']." €";
 									$champsamodif[] = array("valeur" => $comp_before.$nom_obj.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
+								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'room')
+								{
+									$listrooms = $ref->getRoomsList();
+									$prixsalle = $ref->getRoomPricesById($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
+									$nom_salle = $listrooms[$prixsalle['idroom_type']]['name'];
+									$ancprixheure = $prixsalle['old_tarif_heure'] == '' ? $prixsalle['old_tarif_heure'] : $prixsalle['old_tarif_heure']." €";
+									$newprixheure = $prixsalle['new_tarif_heure']." €";
+									$ancprixdemi = $prixsalle['old_tarif_demi'] == '' ? $prixsalle['old_tarif_demi'] : $prixsalle['old_tarif_demi']." €";
+									$newprixdemi = $prixsalle['new_tarif_demi']." €";
+									$ancprixjour = $prixsalle['old_tarif_jour'] == '' ? $prixsalle['old_tarif_jour'] : $prixsalle['old_tarif_jour']." €";
+									$newprixjour = $prixsalle['new_tarif_jour']." €";
+									$champsamodif[] = array("valeur" => $comp_before.$nom_salle.$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
 								else
 								{
 									$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
@@ -774,6 +811,30 @@
 								elseif ($field == "newtarifetupers")
 								{
 									$champsamodif[] = array("valeur" => $newprixep, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "newtarifheure")
+								{
+									$champsamodif[] = array("valeur" => $newprixheure, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "anctarifheure")
+								{
+									$champsamodif[] = array("valeur" => $ancprixheure, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "newtarifdemi")
+								{
+									$champsamodif[] = array("valeur" => $newprixdemi, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "anctarifdemi")
+								{
+									$champsamodif[] = array("valeur" => $ancprixdemi, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "newtarifjour")
+								{
+									$champsamodif[] = array("valeur" => $newprixjour, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif ($field == "anctarifjour")
+								{
+									$champsamodif[] = array("valeur" => $ancprixjour, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
 								elseif ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
 										|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))) // Pour supprimer les lignes des sections inutilisées
@@ -980,6 +1041,31 @@
 		ligne.setAttribute("hidden", "");
 		newtarifpub.value = '';
 		newtarifep.value = '';
+		return false;
+	}
+
+	function ajouterSalle(divname)
+	{
+		var idsalle = document.getElementById(divname+"1").value;
+		var ligne = document.getElementById("salle"+idsalle);
+		ligne.removeAttribute("hidden");
+		var opt = document.getElementById("option"+idsalle);
+		opt.setAttribute("hidden", "");
+		return false;
+	}
+
+	function supprimerSalle(cellid)
+	{
+		var ligne = document.getElementById("salle"+cellid);
+		var newtarifheure = document.getElementById("newtarifheure"+cellid);
+		var newtarifdemi = document.getElementById("newtarifdemi"+cellid);
+		var newtarifjour = document.getElementById("newtarifjour"+cellid);
+		var opt = document.getElementById("option"+cellid);
+		opt.removeAttribute("hidden");
+		ligne.setAttribute("hidden", "");
+		newtarifheure.value = '';
+		newtarifdemi.value = '';
+		newtarifjour.value = '';
 		return false;
 	}
 
@@ -1336,6 +1422,35 @@
 									</select>
 								<?php }
 								break;
+							case 'room':
+								// Afficher liste déroulante salles
+								$salle_decree = array();
+								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields) && sizeof($mod_decree_fields[$modelfield['idmodel_field']]) > 0)
+								{
+									$salle_decree_id = array_column($mod_decree_fields[$modelfield['idmodel_field']], 'value', 'value');
+									foreach ($salle_decree_id as $id => $s)
+									{
+										$salle_decree[] = $ref->getRoomPricesById($id);
+									}
+									$salle_decree = array_column($salle_decree, null, 'idroom_type');
+								}
+								$listsalles = $ref->getRoomsList();
+								if (sizeof($listsalles) > 0)
+								{ ?>
+									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+										<option value="">&nbsp;</option>
+									<?php foreach($listsalles as $value)
+									{
+										if (array_key_exists($value['idroom_type'], $salle_decree))
+										{?>
+											<option value="<?php echo $value['idroom_type'];?>" id="<?php echo "option".$value['idroom_type'];?>" hidden><?php echo $value['centre'].' - '.$value['name'];?></option>
+										<?php } else { ?>
+											<option value="<?php echo $value['idroom_type'];?>" id="<?php echo "option".$value['idroom_type'];?>"><?php echo $value['centre'].' - '.$value['name'];?></option>
+										<?php }
+									} ?>
+									</select>
+								<?php }
+								break;
 							default:
 								if ($modelfield['idfield_type'] == 10) {
 									if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && array_key_exists($i-1, $mod_decree_fields[$modelfield['idmodel_field']])) {
@@ -1374,7 +1489,7 @@
 					if ($modelfield['datatype'] == 'object')
 					{?>
 						<button onclick="return ajouterObjet('<?php echo $modelfield['name'];?>');">+</button>
-						<br>
+						<br><br>
 						<?php
 							if (sizeof($listobjects) > 0)
 							{ ?>
@@ -1402,12 +1517,12 @@
 											$obj_decree[$value['idobject_type']]['old_tarif_etu_pers'] = $prix['new_tarif_etu_pers'];
 										}?>
 										<tr id="<?php echo 'objet'.$value['idobject_type'];?>">
-											<td><button onclick="return supprimerObjet('<?php echo $value['idobject_type'];?>');">-</button></td>
-											<td><?php echo $value['name'];?></td>
-											<td><input type="text" id="<?php echo 'anctarifpub'.$value['idobject_type'];?>" name="<?php echo 'anctarifpub'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['old_tarif_public'];?>" readonly></td>
-											<td><input type="text" id="<?php echo 'newtarifpub'.$value['idobject_type'];?>" name="<?php echo 'newtarifpub'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['new_tarif_public'];?>" oninput="document.getElementById('<?php echo 'newtarifep'.$value['idobject_type'];?>').value = this.value * 0.9; return false;"></td>
-											<td><input type="text" id="<?php echo 'anctarifep'.$value['idobject_type'];?>" name="<?php echo 'anctarifep'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['old_tarif_etu_pers'];?>" readonly></td>
-											<td><input type="text" id="<?php echo 'newtarifep'.$value['idobject_type'];?>" name="<?php echo 'newtarifep'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['new_tarif_etu_pers'];?>"></td>
+											<td class='buttonsuppr'><button onclick="return supprimerObjet('<?php echo $value['idobject_type'];?>');">-</button></td>
+											<td class='intitule'><?php echo $value['name'];?></td>
+											<td class='tarif'><input type="text" id="<?php echo 'anctarifpub'.$value['idobject_type'];?>" name="<?php echo 'anctarifpub'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['old_tarif_public'];?>" readonly></td>
+											<td class='tarif'><input type="text" id="<?php echo 'newtarifpub'.$value['idobject_type'];?>" name="<?php echo 'newtarifpub'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['new_tarif_public'];?>" oninput="document.getElementById('<?php echo 'newtarifep'.$value['idobject_type'];?>').value = this.value * 0.9; return false;"></td>
+											<td class='tarif'><input type="text" id="<?php echo 'anctarifep'.$value['idobject_type'];?>" name="<?php echo 'anctarifep'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['old_tarif_etu_pers'];?>" readonly></td>
+											<td class='tarif'><input type="text" id="<?php echo 'newtarifep'.$value['idobject_type'];?>" name="<?php echo 'newtarifep'.$value['idobject_type'];?>" value="<?php echo $obj_decree[$value['idobject_type']]['new_tarif_etu_pers'];?>"></td>
 										</tr>
 									<?php
 									}
@@ -1415,18 +1530,82 @@
 									{
 									?>
 										<tr id="<?php echo 'objet'.$value['idobject_type'];?>" hidden>
-											<td><button onclick="return supprimerObjet('<?php echo $value['idobject_type'];?>');">-</button></td>
-											<td><?php echo $value['name'];?></td>
-											<td><input type="text" id="<?php echo 'anctarifpub'.$value['idobject_type'];?>" name="<?php echo 'anctarifpub'.$value['idobject_type'];?>" value="<?php echo $prix['new_tarif_public'];?>" readonly></td>
-											<td><input type="text" id="<?php echo 'newtarifpub'.$value['idobject_type'];?>" name="<?php echo 'newtarifpub'.$value['idobject_type'];?>" value="" oninput="document.getElementById('<?php echo 'newtarifep'.$value['idobject_type'];?>').value = this.value * 0.9; return false;"></td>
-											<td><input type="text" id="<?php echo 'anctarifep'.$value['idobject_type'];?>" name="<?php echo 'anctarifep'.$value['idobject_type'];?>" value="<?php echo $prix['new_tarif_etu_pers'];?>" readonly></td>
-											<td><input type="text" id="<?php echo 'newtarifep'.$value['idobject_type'];?>" name="<?php echo 'newtarifep'.$value['idobject_type'];?>" value=""></td>
+											<td class='buttonsuppr'><button onclick="return supprimerObjet('<?php echo $value['idobject_type'];?>');">-</button></td>
+											<td class='intitule'><?php echo $value['name'];?></td>
+											<td class='tarif'><input type="text" id="<?php echo 'anctarifpub'.$value['idobject_type'];?>" name="<?php echo 'anctarifpub'.$value['idobject_type'];?>" value="<?php echo $prix['new_tarif_public'];?>" readonly></td>
+											<td class='tarif'><input type="text" id="<?php echo 'newtarifpub'.$value['idobject_type'];?>" name="<?php echo 'newtarifpub'.$value['idobject_type'];?>" value="" oninput="document.getElementById('<?php echo 'newtarifep'.$value['idobject_type'];?>').value = this.value * 0.9; return false;"></td>
+											<td class='tarif'><input type="text" id="<?php echo 'anctarifep'.$value['idobject_type'];?>" name="<?php echo 'anctarifep'.$value['idobject_type'];?>" value="<?php echo $prix['new_tarif_etu_pers'];?>" readonly></td>
+											<td class='tarif'><input type="text" id="<?php echo 'newtarifep'.$value['idobject_type'];?>" name="<?php echo 'newtarifep'.$value['idobject_type'];?>" value=""></td>
 										</tr>
 								<?php }
 								} ?>
 								</table>
 							<?php }
 
+					}
+					elseif ($modelfield['datatype'] == 'room')
+					{?>
+						<button onclick="return ajouterSalle('<?php echo $modelfield['name'];?>');">+</button>
+						<br><br>
+						<?php
+						if (sizeof($listsalles) > 0)
+						{ ?>
+							<table class="tableausalle">
+								<tr>
+									<th class="entetesalle" rowspan="2" colspan="2">Salle</th>
+									<th class="entetesalle" colspan="2">Tarif horaire</th>
+									<th class="entetesalle" colspan="2">Tarif 1/2 journée</th>
+									<th class="entetesalle" colspan="2">Tarif journée</th>
+								</tr>
+								<tr>
+									<th>Ancien</th>
+									<th>Nouveau</th>
+									<th>Ancien</th>
+									<th>Nouveau</th>
+									<th>Ancien</th>
+									<th>Nouveau</th>
+								</tr>
+							<?php foreach($listsalles as $value)
+							{
+								$prix = $ref->getRoomTypePrices($value['idroom_type']);
+								if (array_key_exists($value['idroom_type'], $salle_decree))
+								{
+									if ($salle_decree[$value['idroom_type']]['old_tarif_heure'] != $prix['new_tarif_heure'] || $salle_decree[$value['idroom_type']]['old_tarif_demi'] != $prix['new_tarif_demi'] || $salle_decree[$value['idroom_type']]['old_tarif_jour'] != $prix['new_tarif_jour'])
+									{
+										$message .= "<p class='alerte alerte-danger'>Attention, les anciens tarifs de la salle : \"".$value['name']."\" enregistrés pour cet arrêté diffèrent du nouveau tarif en cours de validité. Veuillez enregistrer le document avant d'envoyer l'arrêté à la signature.</p>";
+										$salle_decree[$value['idroom_type']]['old_tarif_heure'] = $prix['new_tarif_heure'];
+										$salle_decree[$value['idroom_type']]['old_tarif_demi'] = $prix['new_tarif_demi'];
+										$salle_decree[$value['idroom_type']]['old_tarif_jour'] = $prix['new_tarif_jour'];
+									}?>
+									<tr id="<?php echo 'salle'.$value['idroom_type'];?>">
+										<td class='buttonsuppr'><button onclick="return supprimerSalle('<?php echo $value['idroom_type'];?>');">-</button></td>
+										<td class='intitule'><?php echo $value['centre'].' - '.$value['name'];?></td>
+										<td class='tarif'><input type="text" id="<?php echo 'anctarifheure'.$value['idroom_type'];?>" name="<?php echo 'anctarifheure'.$value['idroom_type'];?>" value="<?php echo $salle_decree[$value['idroom_type']]['old_tarif_heure'];?>" readonly></td>
+										<td class='tarif'><input type="text" id="<?php echo 'newtarifheure'.$value['idroom_type'];?>" name="<?php echo 'newtarifheure'.$value['idroom_type'];?>" value="<?php echo $salle_decree[$value['idroom_type']]['new_tarif_heure'];?>"></td>
+										<td class='tarif'><input type="text" id="<?php echo 'anctarifdemi'.$value['idroom_type'];?>" name="<?php echo 'anctarifdemi'.$value['idroom_type'];?>" value="<?php echo $salle_decree[$value['idroom_type']]['old_tarif_demi'];?>" readonly></td>
+										<td class='tarif'><input type="text" id="<?php echo 'newtarifdemi'.$value['idroom_type'];?>" name="<?php echo 'newtarifdemi'.$value['idroom_type'];?>" value="<?php echo $salle_decree[$value['idroom_type']]['new_tarif_demi'];?>"></td>
+										<td class='tarif'><input type="text" id="<?php echo 'anctarifjour'.$value['idroom_type'];?>" name="<?php echo 'anctarifjour'.$value['idroom_type'];?>" value="<?php echo $salle_decree[$value['idroom_type']]['old_tarif_jour'];?>" readonly></td>
+										<td class='tarif'><input type="text" id="<?php echo 'newtarifjour'.$value['idroom_type'];?>" name="<?php echo 'newtarifjour'.$value['idroom_type'];?>" value="<?php echo $salle_decree[$value['idroom_type']]['new_tarif_jour'];?>"></td>
+									</tr>
+								<?php
+								}
+								else
+								{
+								?>
+									<tr id="<?php echo 'salle'.$value['idroom_type'];?>" hidden>
+										<td class='buttonsuppr'><button onclick="return supprimerSalle('<?php echo $value['idroom_type'];?>');">-</button></td>
+										<td class='intitule'><?php echo $value['centre'].' - '.$value['name'];?></td>
+										<td class='tarif'><input type="text" id="<?php echo 'anctarifheure'.$value['idroom_type'];?>" name="<?php echo 'anctarifheure'.$value['idroom_type'];?>" value="<?php echo $prix['new_tarif_heure'];?>" readonly></td>
+										<td class='tarif'><input type="text" id="<?php echo 'newtarifheure'.$value['idroom_type'];?>" name="<?php echo 'newtarifheure'.$value['idroom_type'];?>" value=""></td>
+										<td class='tarif'><input type="text" id="<?php echo 'anctarifdemi'.$value['idroom_type'];?>" name="<?php echo 'anctarifdemi'.$value['idroom_type'];?>" value="<?php echo $prix['new_tarif_demi'];?>" readonly></td>
+										<td class='tarif'><input type="text" id="<?php echo 'newtarifdemi'.$value['idroom_type'];?>" name="<?php echo 'newtarifdemi'.$value['idroom_type'];?>" value=""></td>
+										<td class='tarif'><input type="text" id="<?php echo 'anctarifjour'.$value['idroom_type'];?>" name="<?php echo 'anctarifjour'.$value['idroom_type'];?>" value="<?php echo $prix['new_tarif_jour'];?>" readonly></td>
+										<td class='tarif'><input type="text" id="<?php echo 'newtarifjour'.$value['idroom_type'];?>" name="<?php echo 'newtarifjour'.$value['idroom_type'];?>" value=""></td>
+									</tr>
+							<?php }
+							} ?>
+							</table>
+						<?php }
 					}
 					else
 					{ ?>

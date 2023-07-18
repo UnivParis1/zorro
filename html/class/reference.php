@@ -666,4 +666,161 @@ class reference {
 	{
 		return $price != '' ? number_format($price, 2) : '';
 	}
+
+	function getRoomsList()
+	{
+		$sql = "SELECT idroom_type, name, centre, capacite FROM room_type WHERE active = 'O'";
+		$result = mysqli_query($this->_dbcon, $sql);
+		$listrooms = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$listrooms[$row['idroom_type']] = $row;
+			}
+		}
+		return $listrooms;
+	}
+
+	function getRoomTypePrices($idroom_type)
+	{
+		$sql = "SELECT idroom, new_tarif_heure, new_tarif_demi, new_tarif_jour FROM room WHERE idroom_type = ? AND active = 'O'";
+		$param = array($idroom_type);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$price = array('idroom' =>'0', 'new_tarif_heure' => '', 'new_tarif_demi' => '', 'new_tarif_jour' => '');
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				$price = $row;
+			}
+		}
+		return $price;
+	}
+
+	function getRoomPricesById($idroom)
+	{
+		$sql = "SELECT idroom_type, old_tarif_heure, new_tarif_heure, old_tarif_demi, new_tarif_demi, old_tarif_jour, new_tarif_jour FROM room WHERE idroom = ? ";
+		$param = array($idroom);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$price = array('idroom_type' =>'0', 'old_tarif_heure' => '', 'new_tarif_heure' => '', 'old_tarif_demi' => '', 'new_tarif_demi' => '', 'old_tarif_jour' => '', 'new_tarif_jour' => '');
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				$price = $row;
+			}
+		}
+		return $price;
+	}
+
+	function setRoomPrices($idroom_type, $oldtarifheure, $newtarifheure, $oldtarifdemi, $newtarifdemi, $oldtarifjour, $newtarifjour, $iddecree='')
+	{
+		if ($iddecree == '')
+		{
+			$sql = "INSERT INTO room (idroom_type, old_tarif_heure, new_tarif_heure, old_tarif_demi, new_tarif_demi, old_tarif_jour, new_tarif_jour) VALUES (?, ?, ?, ?, ?, ? , ?)";
+			$param = array($idroom_type, $this->format_price($oldtarifheure), $this->format_price($newtarifheure), $this->format_price($oldtarifdemi), $this->format_price($newtarifdemi), $this->format_price($oldtarifjour), $this->format_price($newtarifjour));
+			$result = prepared_query($this->_dbcon, $sql, $param);
+			if ( !mysqli_error($this->_dbcon))
+			{
+				elog("Tarif salle insere ".var_export($param, true));
+				return mysqli_insert_id($this->_dbcon);
+			}
+			else
+			{
+				elog("Erreur insert tarif salle ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+			}
+		}
+		else
+		{
+			// vérifier si un tarif est fixé pour l'objet et l'arrêté
+			$idroom = $this->getIdRoomPricesForDecree($idroom_type, $iddecree);
+			// si oui update
+			if ($idroom != 0)
+			{
+				$sql = "UPDATE room SET old_tarif_heure = ?, new_tarif_heure = ?, old_tarif_demi = ?, new_tarif_demi = ?, old_tarif_jour = ?, new_tarif_jour = ? WHERE idroom = ?";
+				$param = array($this->format_price($oldtarifheure), $this->format_price($newtarifheure), $this->format_price($oldtarifdemi), $this->format_price($newtarifdemi), $this->format_price($oldtarifjour), $this->format_price($newtarifjour), $idroom);
+				$result = prepared_query($this->_dbcon, $sql, $param);
+				if ( !mysqli_error($this->_dbcon))
+				{
+					elog("Tarif salle mis à jour ".var_export($param, true));
+					return $idroom;
+				}
+				else
+				{
+					elog("Erreur insert tarif salle ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+				}
+			}
+			// sinon insert
+			else
+			{
+				$sql = "INSERT INTO room (idroom_type, old_tarif_heure, new_tarif_heure, old_tarif_demi, new_tarif_demi, old_tarif_jour, new_tarif_jour) VALUES (?, ?, ?, ?, ?, ?, ?)";
+				$param = array($idroom_type, $this->format_price($oldtarifheure), $this->format_price($newtarifheure), $this->format_price($oldtarifdemi), $this->format_price($newtarifdemi), $this->format_price($oldtarifjour), $this->format_price($newtarifjour));
+				$result = prepared_query($this->_dbcon, $sql, $param);
+				if ( !mysqli_error($this->_dbcon))
+				{
+					elog("Tarif salle insere ".var_export($param, true));
+					return mysqli_insert_id($this->_dbcon);
+				}
+				else
+				{
+					elog("Erreur insert tarif salle ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+				}
+			}
+		}
+		return 0;
+	}
+
+	function getIdRoomActiveForIdRoomInactive($idroom)
+	{
+		$sql = "SELECT act.idroom FROM room act INNER JOIN room inact ON inact.idroom_type = act.idroom_type
+				WHERE inact.idroom = ? AND act.active = 'O'";
+		$param = array($idroom);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$idroom_active = '';
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				$idroom_active = $row['idroom'];
+			}
+		}
+		return $idroom_active;
+	}
+	function activateRoomPrices($idroom, $active = 'O')
+	{
+		$sql = "UPDATE room SET active = ? WHERE idroom = ?";
+		$param = array($active, $idroom);
+		$result = prepared_query($this->_dbcon, $sql, $param);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("Activation Tarif salle ".var_export($param, true));
+		}
+		else
+		{
+			elog("Erreur activation tarif salle ".var_export($param, true)." ".mysqli_error($this->_dbcon));
+		}
+	}
+
+	function getIdRoomPricesForDecree($idroom_type, $iddecree)
+	{
+		$sql = "SELECT DISTINCT roo.idroom FROM room roo INNER JOIN decree_field df ON df.value = roo.idroom
+				INNER JOIN model_field mf ON mf.idmodel_field = df.idmodel_field
+				INNER JOIN field_type ft ON ft.idfield_type = mf.idfield_type AND ft.datatype = 'room'
+				WHERE df.iddecree = ? AND roo.idroom_type = ?";
+		$param = array($iddecree, $idroom_type);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($row = mysqli_fetch_assoc($result))
+			{
+				return $row['idroom'];
+			}
+		}
+		else
+		{
+			elog("Erreur recherche id salle pour l'arrete. ".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
 }

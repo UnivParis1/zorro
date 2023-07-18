@@ -624,6 +624,8 @@ class decree {
 								}
 								// Activer le prix des objets
 								$this->activateObjects();
+								// Activer le prix des salles
+								$this->activateRooms();
 								break;
 							case 'refused':
 								$new_status = STATUT_REFUSE; // refused
@@ -1284,6 +1286,46 @@ class decree {
 			}
 			// activer le nouveau tarif
 			$ref->activateObjectPrices($id);
+		}
+	}
+
+	function getIdRooms()
+	{
+		$sql = "SELECT df.value FROM decree_field df
+				INNER JOIN model_field mf ON mf.idmodel_field = df.idmodel_field
+				INNER JOIN field_type ft ON ft.idfield_type = mf.idfield_type AND ft.datatype = 'room'
+				WHERE df.iddecree = ?";
+		$param = array($this->getid());
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$listId = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$listId[] = $row['value'];
+			}
+		}
+		else
+		{
+			elog("Erreur recherche id room pour l'arrete. ".mysqli_error($this->_dbcon));
+		}
+		return $listId;
+	}
+
+	function activateRooms()
+	{
+		$ref = new reference($this->_dbcon);
+		$listIdRooms = $this->getIdRooms();
+		foreach ($listIdRooms as $id)
+		{
+			// désactiver l'ancien tarif
+			$anc_id = $ref->getIdRoomActiveForIdRoomInactive($id);
+			if ($anc_id != '')
+			{
+				$ref->activateRoomPrices($anc_id, 'N');
+			}
+			// activer le nouveau tarif
+			$ref->activateRoomPrices($id);
 		}
 	}
 }
