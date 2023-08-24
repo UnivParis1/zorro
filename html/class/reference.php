@@ -400,7 +400,7 @@ class reference {
 	function getAllDecreeEnCoursSign()
 	{
 		require_once dirname(__FILE__,2)."/class/decree.php";
-		$select = "SELECT iddecree FROM decree WHERE decree.status IN ('".STATUT_EN_COURS."', '".STATUT_CORBEILLE."', '".STATUT_ERREUR."', '".STATUT_REFUSE."')";
+		$select = "SELECT d.iddecree FROM decree d WHERE d.status IN ('".STATUT_EN_COURS."', '".STATUT_CORBEILLE."', '".STATUT_ERREUR."') OR (d.status = '".STATUT_REFUSE."' AND NOT EXISTS (SELECT ei.idesignature FROM esignature_info ei WHERE d.idesignature = ei.idesignature AND ei.refuse_comment IS NOT NULL))";
 		$result = mysqli_query($this->_dbcon, $select);
 		$list = array();
 		if ( !mysqli_error($this->_dbcon))
