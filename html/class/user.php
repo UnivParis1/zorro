@@ -225,7 +225,7 @@ class user {
 			$ldap = new ldap();
 			$structure = $ldap->getInfos($this->_uid, false)['supannentiteaffectation'];
 		}
-		if ($structure == 'DGC' || $structure == 'DGCB')
+		if ($structure == 'DGC' || $structure == 'DGCB' || $structure == 'DGCC')
 		{
 			return true;
 		}
