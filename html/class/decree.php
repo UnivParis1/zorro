@@ -1328,4 +1328,57 @@ class decree {
 			$ref->activateRoomPrices($id);
 		}
 	}
+
+	function getWaitingSign()
+	{
+		$idesignature = $this->getIdEsignature();
+		$waiting_sign = array();
+		if ($idesignature == 0)
+		{
+			elog("Le document ".$this->getId()." n'a pas d'identifiant eSignature.");
+		}
+		else
+		{
+			elog("Récupération de l'etape de signature... ".ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+			$curl = curl_init();
+			$opts = array(
+					CURLOPT_URL => ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_SSL_VERIFYPEER => false,
+					CURLOPT_PROXY => ''
+			);
+			curl_setopt_array($curl, $opts);
+			curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			$json = curl_exec($curl);
+			$error = curl_error ($curl);
+			curl_close($curl);
+			if ($error != "")
+			{
+				elog(" Erreur Curl =>  " . $error);
+			}
+			$response = json_decode($json, true);
+			if (stristr(substr($json,0,20),'HTML') === false)
+			{
+				if (! isset($response['error']))
+				{
+					elog ("Succès. getSignStep...");
+					if (isset($response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']))
+					{
+						elog ("Signataire en attente : ".$response['parentSignBook']['liveWorkflow']['currentStep']['workflowStep']['description']);
+						if (isset($response['parentSignBook']['liveWorkflow']['currentStep']['recipients']))
+						{
+							foreach ($response['parentSignBook']['liveWorkflow']['currentStep']['recipients'] as $recipient)
+							{
+								if (!(isset($recipient['signed']) && $recipient['signed']))
+								{
+									$waiting_sign[] = $recipient['user']['email'];
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return $waiting_sign;
+	}
 }
