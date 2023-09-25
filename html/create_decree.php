@@ -1496,8 +1496,8 @@
 								<table class="tableauobjet">
 									<tr>
 										<th class="enteteobjet" rowspan="2" colspan="2">Objet Promotionnel</th>
-										<th class="enteteobjet" colspan="2">Prix Public</th>
-										<th class="enteteobjet" colspan="2">Prix Étudiant / Personnel</th>
+										<th class="enteteobjet" colspan="2">Prix Public (HT)</th>
+										<th class="enteteobjet" colspan="2">Prix Étudiant / Personnel (HT)</th>
 									</tr>
 									<tr>
 										<th>Ancien</th>
