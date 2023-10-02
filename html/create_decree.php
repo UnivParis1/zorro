@@ -674,17 +674,47 @@
 											break;
 										}
 									}
-									// echo "Noeud à dupliquer  : <br>"; print_r2($noeudadupliquer);
-									// echo "Noeud père où raccrocher la copie : <br>"; print_r2($noeudpere);
-									// echo "Position où raccrocher sous le père : <br>"; print_r2($positiondunoeudadupliquer);
-									// echo "Noeud à la position où raccrocher sous le père : <br>"; print_r2($noeudpere->childNodes->item($positiondunoeudadupliquer));
-									for ($i = 1; $i < $nbChamps; $i++)
+									// Si le champ est de type liste on modifie le texte au lieu de dupliquer le noeud contenant le texte
+									// Pour éviter l'insertion d'un espace non souhaité
+									if ($modelfieldstype[$idmodel_field] == 'list')
 									{
-										// dupliquer le noeud
-										$clone = $noeudadupliquer->cloneNode(true);
-										// insérer le noeud
-										$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
-										// echo "Noeud père après $i ème insert : <br>"; print_r2($noeudpere);
+										$contenu_noeud_courant = $noeudcourant->textContent;
+										$position_de_la_chaine = strpos($contenu_noeud_courant, '$$$'.$champ.'$$$');
+										$prefixe = '';
+										if ($position_de_la_chaine > 0)
+										{
+											$prefixe = substr($contenu_noeud_courant, 0, $position_de_la_chaine);
+										}
+										for ($i = 1; $i < $nbChamps; $i++)
+										{
+											$contenu_noeud_courant = $prefixe."$$$".$champ."$$$".substr($contenu_noeud_courant, $position_de_la_chaine);
+										}
+										$clone_parfait = $noeudadupliquer->cloneNode(true);
+										$clone = $noeudadupliquer->cloneNode();
+										foreach ($clone_parfait->childNodes as $node)
+										{
+											$clone_node = $node->cloneNode(true);
+											if (!$node->hasAttributes())
+											{
+												if ($node->nodeName == "#text")
+												{
+													$node->textContent = $contenu_noeud_courant;
+													$noeudpere->replaceChild($clone_parfait, $noeudadupliquer);
+												}
+											}
+
+										}
+									}
+									else
+									{
+										for ($i = 1; $i < $nbChamps; $i++)
+										{
+											// dupliquer le noeud
+											$clone = $noeudadupliquer->cloneNode(true);
+											// insérer le noeud
+											$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
+											// echo "Noeud père après $i ème insert : <br>"; print_r2($noeudpere);
+										}
 									}
 								}
 							}
@@ -863,7 +893,7 @@
 								}
 							}
 							$nb_field[$field] += 1;
-							$position1 = strpos($contenu, '$$$', $position2 + 4);
+							$position1 = strpos($contenu, '$$$', $position2 + 3);
 							$position2 = strpos($contenu, '$$$', $position1 + 1);
 						}
 						fclose($content);
@@ -1617,8 +1647,8 @@
 							for($i = 1; $i < sizeof($mod_decree_fields[$modelfield['idmodel_field']]); $i++)
 							{
 								echo "<script>ajouterValeur('".$modelfield['name']."')</script>";
-								echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."';</script>";
-								echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = '".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."';</script>";
+								echo "<script>document.getElementById('".$modelfield['name']."1').value = \"".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."\";</script>";
+								echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = \"".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."\";</script>";
 							}
 						}
 					}
