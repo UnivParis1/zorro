@@ -669,7 +669,7 @@ class reference {
 
 	function getRoomsList()
 	{
-		$sql = "SELECT idroom_type, name, centre, capacite FROM room_type WHERE active = 'O'";
+		$sql = "SELECT idroom_type, name, centre, capacite FROM room_type WHERE active = 'O' ORDER BY centre, name";
 		$result = mysqli_query($this->_dbcon, $sql);
 		$listrooms = array();
 		if ( !mysqli_error($this->_dbcon))
