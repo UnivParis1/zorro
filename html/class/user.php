@@ -249,7 +249,7 @@ class user {
 		if (array_key_exists('superGroups', $infostruct) && array_key_exists($structure, $infostruct['superGroups'])
 				&& array_key_exists('roles', $infostruct['superGroups'][$structure]) && isset($this->_uid) && array_key_exists($this->_uid, $infostruct['superGroups'][$structure]['roles'])
 				&& ($infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Responsable administratif' || $infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Responsable administrative' || $infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Responsable'
-						|| $infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Directrice' || $infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'] == 'Directeur' ))
+						|| strpos($infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'], 'Directrice') !== FALSE || strpos($infostruct['superGroups'][$structure]['roles'][$this->_uid]['role'], 'Directeur') !== FALSE))
 		{
 			elog("L'utilisateur ".$this->_uid." est ".$infostruct['superGroups'][$structure]['roles'][$this->_uid]['role']." de sa structure ".$structure);
 			return TRUE;
