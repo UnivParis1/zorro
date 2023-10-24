@@ -291,8 +291,17 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									}
 									break;
 								case STATUT_EN_COURS :
-									$liste_statuts_sup = array($status, STATUT_VALIDE);
-									$liste_statuts_inf = array(STATUT_BROUILLON);
+									$signStep = $decree->getSignStep();
+									if ($signStep == "Validation de la présidence")
+									{
+										$liste_statuts_sup = array($signStep, $status, STATUT_VALIDE);
+										$liste_statuts_inf = array("Visa de la composante", STATUT_BROUILLON);
+									}
+									else // Visa de la composante
+									{
+										$liste_statuts_sup = array($signStep, "Validation de la présidence", $status, STATUT_VALIDE);
+										$liste_statuts_inf = array(STATUT_BROUILLON);
+									}
 									$liste_periodes = array($p, "Annuel");
 									foreach ($liste_statuts_sup as $st)
 									{
@@ -314,6 +323,8 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 											{
 												unset($decree_made[$st][$pe][$query_value_in_P]);
 												$nb_decree_made -= $periode_weight[$pe];
+												$decree_made[$signStep][$p][] = $query_value;
+												$nb_decree_made += $periode_weight[$p];
 												$gerer_doublon = true;
 											}
 										}
@@ -329,6 +340,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 									{
 										$decree_made[$status][$p][] = $query_value;
 										$nb_decree_made += $periode_weight[$p];
+										$decree_made[$signStep][$p][] = $query_value;
 									}
 									break;
 								case STATUT_VALIDE :
