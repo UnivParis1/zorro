@@ -65,6 +65,7 @@
 	    	$model = new model($dbcon, $role['idmodel']);
 	    	$listModels[] = $model->getModelInfo();
 	    }
+		$listModels = $ref->sortModel($listModels);
     }
 	$listYears = $ref->getYears();
     $menuItem = "menu_manage";

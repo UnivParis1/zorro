@@ -97,6 +97,7 @@
 	    	$model = new model($dbcon, $role['idmodel']);
 	    	$listModels[] = $model->getModelInfo();
 	    }
+		$listModels = $ref->sortModel($listModels);
     }
     
     $menuItem = 'menu_create';

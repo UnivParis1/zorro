@@ -823,4 +823,10 @@ class reference {
 		}
 		return 0;
 	}
+
+	function sortModel($tab)
+	{
+		array_multisort(array_column($tab, 'iddecree_type'), SORT_ASC, array_column($tab, 'name'), SORT_ASC, $tab);
+		return $tab;
+	}
 }
