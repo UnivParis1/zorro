@@ -1202,7 +1202,7 @@ class decree {
                 break;
             case STATUT_EN_COURS :
                 $step = $this->getSignStep();
-				$img = "<img src='img/enattente.svg' alt='signature en attente' width='".$width."px'>";
+				$img = "<img src='img/enattenteA.svg' alt='signature en attente' width='".$width."px'>";
 				$title = "En cours de signature";
 				if ($step == 'Visa de la composante')
 				{
