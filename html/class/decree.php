@@ -141,6 +141,29 @@ class decree {
 		return 0;
 	}
 
+	function getCreateDate()
+	{
+		$select = "SELECT createdate FROM decree WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			if ($res = mysqli_fetch_assoc($result))
+			{
+				return $res['createdate'];
+			}
+			else
+			{
+				elog("decree $this->_id absent de la table.");
+			}
+		}
+		else
+		{
+			elog("erreur select createdate from decree.".mysqli_error($this->_dbcon));
+		}
+		return 0;
+	}
+
 	function getModelId()
 	{
 		//print_r2("getModelId");

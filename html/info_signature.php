@@ -108,6 +108,8 @@
             $decree = new decree($dbcon, null, null, $iddecree);
             if ($userCAS->hasAccessDecree($decree->getDecree()))
             {
+                $create_date = new DateTime($decree->getCreateDate());
+                echo "Date de création sur Zorro : ".$create_date->format("d/m/Y H:i:s")."<br>";
                 echo "Document Zorro : <a href='create_decree.php?id=" . $decree->getid() . "' target='_blank'>" . $decree->getFileNameAff() . "</a><br>";
                 echo "<a href='".$decree->getEsignUrl()."' target='_blank'>Lien vers la demande sur eSignature</a> <br>";
                 $error = '';
@@ -161,7 +163,7 @@
                         // FORMAT /1000 pour ôter les millisecondes
                         $displaydate = date("d/m/Y H:i:s", intdiv($response['parentSignBook']['createDate'], 1000));
                     }
-                    echo "Date de création : " . $displaydate . "<br>";//. " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
+                    echo "Date de création sur eSignature : " . $displaydate . "<br>";//. " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
                     echo "<br>";
                     echo "<B>Circuit de signature</B> <br>";
                     $nextstep = null;
