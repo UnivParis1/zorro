@@ -941,13 +941,13 @@
 								1 => array("pipe", "w"),  // stdout
 								2 => array("pipe", "w"),  // stderr
 						);
-						if (isset($_SERVER['SystemRoot']) && strpos($_SERVER['SystemRoot'], 'WINDOWS') === false)
+						if (isset($_SERVER['SystemRoot']) && strpos($_SERVER['SystemRoot'], 'WINDOWS') !== false)
 						{
-							$process = proc_open("unoconv --doctype=document --format=pdf \"".PDF_PATH.$decree->getFileName("odt")."\"", $descriptorspec, $pipes);
+							$process = proc_open("python.exe \"C:\Program Files\Unoconv\unoconv-0.8.2\unoconv\" --doctype=document --format=pdf \"".PDF_PATH.$decree->getFileName("odt")."\"", $descriptorspec, $pipes);
 						}
 						else
 						{
-							$process = proc_open("python.exe \"C:\Program Files\Unoconv\unoconv-0.8.2\unoconv\" --doctype=document --format=pdf \"".PDF_PATH.$decree->getFileName("odt")."\"", $descriptorspec, $pipes);
+							$process = proc_open("unoconv --doctype=document --format=pdf \"".PDF_PATH.$decree->getFileName("odt")."\"", $descriptorspec, $pipes);
 						}
 						$stdout = stream_get_contents($pipes[1]);
 						fclose($pipes[1]);
