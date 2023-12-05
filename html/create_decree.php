@@ -1375,16 +1375,36 @@
 								break;
 							case 'list':
 								$listFields = $modelselected->getListField($modelfield['idfield_type']);
+								$listSelected = array();
+								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+								{
+									$listSelected = array_column($mod_decree_fields[$modelfield['idmodel_field']],'value');
+								}
 								if (sizeof($listFields) > 0)
-								{ ?>
+								{
+									$alerte = array(); ?>
 									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
 										<option value="">&nbsp;</option>
 									<?php foreach($listFields as $value)
 									{
 										if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
-										{?>
+										{
+											if ($value['tem_active'] == 'N')
+											{
+												$alerte[$value['value']] = true;
+											} ?>
 											<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
-										<?php } else { ?>
+										<?php }
+										elseif ($value['tem_active'] == 'N')
+												{
+													if (in_array($value['value'],$listSelected))
+													{
+														$alerte[$value['value']] = true; ?>
+														<option value="<?php echo $value['value'];?>"><?php echo $value['value']." (obsolète)";?></option>
+													<?php }
+										}
+										else
+										{ ?>
 											<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
 										<?php }
 									} ?>
@@ -1653,8 +1673,13 @@
 							}
 						}
 					}
+					if (sizeof($alerte) > 0)
+					{ ?>
+						<p class='alerte alerte-danger'>Attention, 1 ou plusieurs option(s) sélectionnée(s) n'existe(nt) plus : <br>
+							<?php foreach ($alerte as $key => $value) echo "¤ ".$key."<br>";?>
+						</p>
+					<?php }
 				}
-
 				?>
 				</div>
 			<?php }

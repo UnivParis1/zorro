@@ -147,7 +147,7 @@ class model {
 	
 	function getListField($field_type)
 	{
-		$select = "SELECT idlist_field, value FROM list_field WHERE idfield_type = ?";
+		$select = "SELECT idlist_field, value, tem_active FROM list_field WHERE idfield_type = ?";
 		$params = array($field_type);
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();
@@ -155,7 +155,7 @@ class model {
 		{
 			while ($res = mysqli_fetch_assoc($result))
 			{
-				$fields[] = array('key' => $res['idlist_field'], 'value' => $res['value']);
+				$fields[] = array('key' => $res['idlist_field'], 'value' => $res['value'], 'tem_active' => $res['tem_active']);
 			}
 		}
 		else
