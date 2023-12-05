@@ -941,7 +941,7 @@
 								1 => array("pipe", "w"),  // stdout
 								2 => array("pipe", "w"),  // stderr
 						);
-						if (strpos($_SERVER['SystemRoot'], 'WINDOWS') === false)
+						if (isset($_SERVER['SystemRoot']) && strpos($_SERVER['SystemRoot'], 'WINDOWS') === false)
 						{
 							$process = proc_open("unoconv --doctype=document --format=pdf \"".PDF_PATH.$decree->getFileName("odt")."\"", $descriptorspec, $pipes);
 						}
