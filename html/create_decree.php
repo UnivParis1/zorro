@@ -1668,8 +1668,8 @@
 							for($i = 1; $i < sizeof($mod_decree_fields[$modelfield['idmodel_field']]); $i++)
 							{
 								echo "<script>ajouterValeur('".$modelfield['name']."')</script>";
-								echo "<script>document.getElementById('".$modelfield['name']."1').value = \"".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."\";</script>";
-								echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = \"".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."\";</script>";
+								echo "<script>document.getElementById('".$modelfield['name']."1').value = \"".htmlspecialchars($mod_decree_fields[$modelfield['idmodel_field']][$i]['value'])."\";</script>";
+								echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = \"".htmlspecialchars($mod_decree_fields[$modelfield['idmodel_field']][$i]['value'])."\";</script>";
 							}
 						}
 					}
