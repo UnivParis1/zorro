@@ -155,7 +155,7 @@ class model {
 		{
 			while ($res = mysqli_fetch_assoc($result))
 			{
-				$fields[] = array('key' => $res['idlist_field'], 'value' => $res['value'], 'tem_active' => $res['tem_active']);
+				$fields[] = array('key' => $res['idlist_field'], 'value' => htmlspecialchars($res['value']), 'tem_active' => $res['tem_active']);
 			}
 		}
 		else
