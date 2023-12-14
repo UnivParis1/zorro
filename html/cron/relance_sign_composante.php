@@ -36,43 +36,23 @@
     {
         echo $ue."/n";
     }
+    $message = "<html>
+                    <head>
 
-    if (MODE_TEST == 'O')
-    {
-        // Paramétrer sendmail_FROM
-        ini_set('sendmail_from', 'zorro@univ-paris1.fr');
-        ini_set('SMTP', 'smtp.univ-paris1.fr');
-        // Envoyer un email de relance
-        $message = "<html>
-                        <head>
-                    
-                        <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">
-                        <title></title>
-                        </head>
-                        <body>
-                        <p>Bonjour,</p>
-                        <p>Des arrêtés attendent une validation de votre part. <br>
-                        Veuillez consulter votre parapheur électronique <a
-                            href=\"".ESIGNATURE_BASE_URL.ESIGNATURE_SIGNBOOK."\">eSignature</a> dans votre ENT.</p>
-                        <p>Cordialement,</p>
-                        <p style='font-size:15px;'>Message automatique envoyé par l'application <a href=\"".URL_BASE_ZORRO."\">Zorro</a> de gestion des arrêtés<br>
-                        </p>
-                        </body>
-                    </html>";
-        $headers[] = "MIME-Version: 1.0";
-        $headers[] = "Content-type: text/html; charset=UTF-8";
-        $headers[] = "Reply-To: noreply@univ-paris1.fr";
-        foreach ($u_emails as $mail)
-        {
-            if (mail($mail, "Des arrêtés attendent votre validation.", $message, implode("\r\n",$headers)))
-            {
-                echo "Email envoyé avec succès à ".$mail;
-            }
-            else
-            {
-                echo "Echec de l'envoi de mail à ".$mail;
-            }
-        }
-    }
+                    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">
+                    <title></title>
+                    </head>
+                    <body>
+                    <p>Bonjour,</p>
+                    <p>Des arrêtés attendent une validation de votre part. <br>
+                    Veuillez consulter votre parapheur électronique <a
+                        href=\"".ESIGNATURE_BASE_URL.ESIGNATURE_SIGNBOOK."\">eSignature</a> dans votre ENT.</p>
+                    <p>Cordialement,</p>
+                    <p style='font-size:15px;'>Message automatique envoyé par l'application <a href=\"".URL_BASE_ZORRO."\">Zorro</a> de gestion des arrêtés<br>
+                    </p>
+                    </body>
+                </html>";
+    $subject = "Des arrêtés attendent votre validation.";
+    $ref->sendEmail($subject, $message, $u_emails);
     echo date("d/m/Y H:i:s")." fin de la relance composante.<br>";
 ?>

@@ -829,4 +829,192 @@ class reference {
 		array_multisort(array_column($tab, 'iddecree_type'), SORT_ASC, array_column($tab, 'name'), SORT_ASC, $tab);
 		return $tab;
 	}
+
+	function getListDecreeStatusForCompModel($user, $list_comp, $list_model, $year)
+	{
+		require_once 'ldap.php';
+		require_once 'model.php';
+		$ldap = new ldap();
+		$resp = array();
+		$stats = array();
+		$recap = array();
+		$tem_commission = false;
+		$tem_jury = false;
+		foreach($list_comp as $comp)
+		{
+			$supann = $ldap->getSupannCodeEntiteFromAPO($comp['code']);
+			$resp[$comp['code']] = $ldap->getStructureResp($supann);
+			echo "<br><b> Composante : ".$comp['value']."</b><br>";
+			echo "Responsables : <br>";
+			foreach($resp[$comp['code']] as $responsable)
+			{
+				echo $responsable['name']." ".$responsable['mail']." ".$responsable['role']."<br>";
+			}
+			$tem_relance = false;
+			$recap[$comp['code']] = '';
+			foreach($list_model as $idmodel => $model)
+			{
+				if ($idmodel != 8 && $idmodel != 38)
+				{
+					$obj_model = new model($this->_dbcon, $idmodel);
+					$dt = $obj_model->getDecreeType()['iddecree_type'];
+					if ($dt == 1 || $dt == 5)
+					{
+						$tem_jury = true;
+					}
+					elseif ($dt == 2 || $dt == 6)
+					{
+						$tem_commission = true;
+					}
+					$model_decrees = $user->getDecreesBy(array('idmodel' => $obj_model->getid(), 'createyear' => $year, 'composante' => 'structures-'.$supann), -1);
+					//var_dump($model_decrees);
+					$stats[$comp['code']][$idmodel] = $obj_model->getStats($model_decrees, $comp['code']);
+					if (sizeof($stats[$comp['code']][$idmodel]['liste_to_do']) > 0)
+					{
+						$tem_relance = true;
+						$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann;
+						$recap[$comp['code']] .= "<b> Modèle : ".$obj_model->getDecreeType()['name']." ".$model['name'];
+						$recap[$comp['code']] .= "<br> Nombre d'arrêtés à créer : ".sizeof($stats[$comp['code']][$idmodel]['liste_to_do'])."<br>";
+						$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']."</b><br>";
+						$recap[$comp['code']] .= "Détail :  <br>";
+						//var_dump($stats[$comp['code']][$idmodel]['liste_edit']);
+						foreach($stats[$comp['code']][$idmodel]['liste_to_do'] as $todo)
+						{
+							$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann."&etp=".$todo['code'];
+							$recap[$comp['code']] .= $todo['code']." : ".$todo['value']." --- ";
+							if (key_exists($todo['value'], $stats[$comp['code']][$idmodel]['liste_edit']))
+							{
+								$liste_periode = array();
+								$liste_periodes_edited = array_column($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']], 'periode');
+								array_multisort($liste_periodes_edited, SORT_ASC, $stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']]);
+								if (!in_array("Annuel", $liste_periodes_edited))
+								{
+									if (!in_array("semestre 1", $liste_periodes_edited))
+									{
+										// TODO : Ajouter paramétrage : modèle, composante, diplôme, periode
+										$params_url .= "&periode=S1";
+										$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">❌</a> - ";
+									}
+								}
+								foreach($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']] as $elem)
+								{
+									$recap[$comp['code']] .= " ".$elem['periode']." ".$elem['statut']['img']." - ";
+									$liste_periode[] = $elem['periode'];
+								}
+								if (!in_array("Annuel", $liste_periodes_edited))
+								{
+									if (!in_array("semestre 2", $liste_periodes_edited))
+									{
+										$params_url .= "&periode=S2";
+										$recap[$comp['code']] .= " semestre 2 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">❌</a> - ";
+									}
+								}
+							}
+							else
+							{
+								$recap[$comp['code']] .= "<a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">❌</a>";
+							}
+							$recap[$comp['code']] .= "
+							<br>";
+						}
+						$recap[$comp['code']] .= "<br>";
+					}
+				}
+			}
+			echo $recap[$comp['code']]."<br>";
+			if ($tem_relance)
+			{
+				echo "<p style='color:red;'> RELANCE à envoyer </p>";
+				$subject = "Des arrêtés attendent leur création.";
+				$message = "<html>
+				<head>
+
+				<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">
+				<title></title>
+				</head>
+				<body>
+				<p>Bonjour,</p>";
+				if ($tem_jury)
+				{
+					$message .= "<p>Veuillez trouver ci-après les arrêtés de jury de votre composante qui doivent être impérativement validés avant la tenue des délibérations.</p>";
+				}
+				if ($tem_commission)
+				{
+					$message .= "<p>Les commissions d'examen des voeux ne peuvent se réunir tant que les arrêtés correspondants n'ont pas été validés. Veuillez trouver ci-après l'état d'avancement des arrêtés de votre composante.</p>";
+				}
+				$message .= "<p>".$recap[$comp['code']]."</p>";
+				$message .= "<p>Légende :  cliquez sur l'icone pour effectuer l'action correspondante.<br>";
+				$message .= "✏️ :  accéder au brouillon sur Zorro.<br>";
+				$message .= "🕓🕕🕖 : accéder au document en cours de signature sur eSignature.<br>";
+				$message .= "✅ : accéder au document signé sur eSignature.<br>";
+				$message .= "❌ : créer le document sur Zorro.";
+				$message .= "</p>";
+				$message .= "<p>Veuillez créer les arrêtés sur Zorro.</p>";
+				$message .= "<p>Cordialement,</p>
+				<p style='font-size:15px;'>Message automatique envoyé par l'application <a href=\"".URL_BASE_ZORRO."\">Zorro</a> de gestion des arrêtés<br>
+				</p>
+				</body>
+				</html>";
+				$this->sendEmail($subject, $message, array_column($resp[$comp['code']], 'mail'));
+			}
+			echo "<br>___________________________";
+		}
+		return $recap;
+	}
+
+	function sendEmail($subject, $message, $recipients)
+	{
+		if (MODE_TEST == 'O')
+		{
+			$message .= "Message de test - destinataires prévus : ";
+			foreach($recipients as $recipient)
+			{
+				$message .= " ".$recipient;
+			}
+			$recipients = explode(';',SENDMAIL_TEST);
+		}
+		// Paramétrer sendmail_FROM
+		ini_set('sendmail_from', SENDMAIL_FROM);
+		ini_set('SMTP', SENDMAIL_SMTP);
+		// Envoyer un email de relance
+		$headers[] = "MIME-Version: 1.0";
+		$headers[] = "Content-type: text/html; charset=UTF-8";
+		$headers[] = "Reply-To: ".SENDMAIL_REPLY_TO;
+		$headers[] = "From: Zorro <".SENDMAIL_FROM.">";
+		$preferences = array("input-charset" => "UTF-8", "output-charset" => "UTF-8");
+		$encoded_subject = str_replace("Subject: ", "", iconv_mime_encode("Subject", $subject, $preferences));
+		foreach ($recipients as $mail)
+		{
+			if (mail($mail, $encoded_subject, $message, implode("\r\n",$headers)))
+			{
+				echo "Email envoyé avec succès à ".$mail;
+				return true;
+			}
+			else
+			{
+				echo "Echec de l'envoi de mail à ".$mail;
+				return false;
+			}
+		}
+		return false;
+	}
+
+	function getEtapeLibelle($cod_etp, $req)
+	{
+		return $this->executeQuery(array('schema' => 'APOGEE', 'query' => '','query_clause' => "SELECT col1,col2 FROM (".$req['query_clause'].") WHERE col1 = '".$cod_etp."'"));
+	}
+
+	function getDomaineEtape($cod_etp, $req, $liste_dom)
+	{
+		foreach ($liste_dom as $dom)
+		{
+			$domaine = $this->executeQuery(array('schema' => 'APOGEE', 'query' => '','query_clause' => "SELECT col1,col2 FROM (".$req['query_clause']." AND dfd.lib_dfd = '".str_replace("'", "''", $dom)."') WHERE col1 = '".$cod_etp."'"));
+			if (sizeof($domaine) > 0)
+			{
+				return $dom;
+			}
+		}
+		return array();
+	}
+
 }

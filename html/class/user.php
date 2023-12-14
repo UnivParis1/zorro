@@ -1,7 +1,7 @@
 <?php
-require_once './include/const.php';
-require_once './include/fonctions.php';
-require_once './class/ldap.php';
+require_once dirname(__FILE__,2).'/include/const.php';
+require_once dirname(__FILE__,2).'/include/fonctions.php';
+require_once dirname(__FILE__,2).'/class/ldap.php';
 
 class user {
 	
@@ -11,7 +11,7 @@ class user {
 	
 	function __construct($dbcon, $uid)
 	{
-		require_once ("./include/dbconnection.php");
+		require_once dirname(__FILE__,2)."/include/dbconnection.php";
 		$this->_dbcon = $dbcon;
 		$this->_uid = mysqli_real_escape_string($this->_dbcon,$uid);
 		$this->save();
@@ -297,7 +297,7 @@ class user {
 	function getStructureCodApo()
 	{
 		$ldap = new ldap();
-		return $ldap->getInfos($this->_uid, false)['supannrefid'];
+		return $ldap->getUserAndStructureInfos($this->_uid, false)['codeapo'];
 	}
 	
 	// Pas utilisé
@@ -583,7 +583,7 @@ class user {
 				$params[] = $iduser;
 			}
 			$groupes = $this->getGroupsZorro();
-			require_once './class/reference.php';
+			require_once dirname(__FILE__,2).'/class/reference.php';
 			$ref = new reference($this->_dbcon);
 			$admin = false;
 			if ($this->isAdmin()) // Responsable de structure => accès à tous les arrêtés du modèle pour sa structure
@@ -828,7 +828,7 @@ class user {
 
 	function getGroupsZorro()
 	{
-		require_once './class/reference.php';
+		require_once dirname(__FILE__,2).'/class/reference.php';
 		$ref = new reference($this->_dbcon);
 		$ldap = new ldap();
 		$groupes = $ref->getAllGroupes();

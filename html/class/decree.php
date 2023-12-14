@@ -1201,46 +1201,55 @@ class decree {
                 $contenu = "<a href='create_decree.php?id=".$this->getid()."'><img src='img/supprimer.svg' alt='annulé' width='".$width."px'></a>";
                 $title = 'Annulé';
                 $class = "img";
+				$image = '';
                 break;
             case STATUT_REFUSE :
                 $comment = $this->getRefuseComment();
                 $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'>".date('d/m/Y', strtotime($this->getMajDate()))."</a>";
                 $title = 'Refusé : '.$comment;
                 $class = "red";
+				$image = '';
                 break;
             case STATUT_BROUILLON :
                 $contenu = "<a href='create_decree.php?id=".$this->getid()."'><img src='img/brouillon.svg' alt='brouillon' width='".$width."px'></a>";
                 $title = 'Brouillon';
                 $class = "img";
+				$image = "<a href=\"".URL_BASE_ZORRO."/create_decree.php?id=".$this->getid()."\" target='_blank' alt='brouillon'>✏️</a>";
                 break;
             case STATUT_HORS_ZORRO :
                 $contenu = "<a href='create_decree.php?id=".$this->getid()."'><img src='img/valide_OK.svg' alt='hors_zorro' width='".$width."px'></a>";
                 $title = 'Hors Zorro';
                 $class = "img";
+				$image = '';
                 break;
             case STATUT_VALIDE :
                 $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'>".date('d/m/Y', strtotime($this->getMajDate()))."</a>";
                 $title = 'Validé';
                 $class = "green";
+				$image = "<a href='".$this->getEsignUrl()."' target='_blank' alt='validé'>✅</a>";
                 break;
             case STATUT_EN_COURS :
                 $step = $this->getSignStep();
 				$img = "<img src='img/enattenteA.svg' alt='signature en attente' width='".$width."px'>";
 				$title = "En cours de signature";
+				$image = "<a href='".$this->getEsignUrl()."' target='_blank' alt='signature en attente'>🕓</a>";
 				if ($step == 'Visa de la composante')
 				{
 					$img = "<img src='img/enattenteA.svg' alt='visa composante en attente' width='".$width."px'>";
 					$title = 'En cours de signature : '.$step;
+					$image = "<a href='".$this->getEsignUrl()."' target='_blank' alt='visa composante en attente'>🕓</a>";
 					if ($this->getNbSignForStep() == 1)
 					{
 						$img = "<img src='img/enattenteB.svg' alt='2e visa composante en attente' width='".$width."px'>";
 						$title = 'En cours de signature : 2e '.$step;
+						$image = "<a href='".$this->getEsignUrl()."' target='_blank' alt='2e visa composante en attente'>🕕</a>";
 					}
 				}
 				elseif ($step == 'Validation de la présidence')
 				{
 					$img = "<img src='img/enattenteC.svg' alt='validation présidence en attente' width='".$width."px'>";
 					$title = 'En cours de signature : '.$step;
+					$image = "<a href='".$this->getEsignUrl()."' target='_blank' alt='validation présidence en attente'>🕖</a>";
 				}
                 $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'>$img</a>";
                 $class = "img";
@@ -1249,24 +1258,28 @@ class decree {
                 $contenu = "<a href='create_decree.php?id=".$this->getid()."'><img src='img/erreur1.svg' alt='Document non trouvé sur eSignature' width='".$width."px'></a>";
                 $title = 'erreur';
                 $class = "img";
+				$image = '';
                 break;
             case STATUT_SUPPR_ESIGN :
                 $contenu = "<a href='create_decree.php?id=".$this->getid()."'><img src='img/supprimer.svg' alt='Document supprimé d\'eSignature' width='".$width."px'></a>";
                 $title = 'Document supprimé d\'eSignature';
                 $class = "img";
+				$image = '';
                 break;
             case STATUT_CORBEILLE :
                 $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'><img src='img/supprimer.svg' alt='Document dans la corbeille d\'eSignature' width='".$width."px'></a>";
                 $title = 'Document dans la corbeille d\'eSignature';
                 $class = "img";
+				$image = '';
                 break;
             default :
                 $contenu = "<a href='create_decree.php?id=".$this->getid()."'><img src='img/supprimer.svg' alt='annulé' width='".$width."px'></a>";
                 $title = 'Annulé';
                 $class = "img";
+				$image = '';
                 break;
         }
-		return array('contenu' => $contenu, 'title' => $title, 'class' => $class);
+		return array('contenu' => $contenu, 'title' => $title, 'class' => $class, 'img' => $image);
 	}
 
 	function getEsignUrl()

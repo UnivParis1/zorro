@@ -365,4 +365,332 @@ class model {
 		}
 		return $values;
 	}
+	function getStats($model_decrees, $composante)
+	{
+		require_once dirname(__FILE__,1).'/decree.php';
+		$query_field = $this->getLastQuery();
+		$liste_to_do = $this->getListDecreesToEditForComp($composante);
+
+		$idfield_periode = ($this->_idmodel == 12) ? 104 : 7; // idfield_type de la période 7 ou 104 pour capacité
+		$liste_edit = array();
+		$decree_made_by_periode = array("Annuel" => array(), "P1" => array(), "P2" => array());
+		$decree_doublon = array();
+		$nb_decree_made = 0;
+		$periode_weight = array("Annuel" => 1, "P1" => 0.5, "P2" => 0.5);
+		$liste_etp_to_do = array_map('htmlspecialchars',array_column($liste_to_do,'value'));
+		$decree_made = array(STATUT_VALIDE => $decree_made_by_periode, STATUT_EN_COURS => $decree_made_by_periode, "Validation de la présidence" => $decree_made_by_periode, "Visa de la composante" => $decree_made_by_periode, STATUT_BROUILLON => $decree_made_by_periode);
+		foreach($model_decrees as $mdecree)
+		{
+			$decree = new decree($this->_dbcon, null, null, $mdecree['iddecree']);
+			$query_value =  $decree->getFieldForFieldType($query_field);
+			$periode_value =  $decree->getFieldForFieldType($idfield_periode);
+			if (in_array($query_value, $liste_etp_to_do))
+			{
+				$liste_edit[$query_value][] = array('statut' => $decree->getStatusAff(), 'periode' => $periode_value == '' ? "Annuel" : $periode_value);
+
+				$gerer_doublon = false; $doublon_valide = false;
+				switch ($periode_value)
+				{
+					case '' : // Cas annuel
+						$status = $decree->getStatus(false);
+						switch ($status)
+						{
+							case STATUT_BROUILLON :
+								// On ne compte l'arrêté annuel en brouillon que si aucun arrêté annuel ou semestriel n'a été compté sur un statut supérieur
+								if (!in_array($query_value, $decree_made[$status]["Annuel"])
+									&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["Annuel"])
+									&& !in_array($query_value, $decree_made[STATUT_VALIDE]["Annuel"])
+									&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["P1"])
+									&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P1"])
+									&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["P2"])
+									&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P2"]))
+								{
+									// Contrôle de la présence d'un arrêté pour un semestre dans le même statut
+									$liste_statuts_inf = array($status);
+									$liste_periodes = array("P1", "P2");
+									foreach ($liste_statuts_inf as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+											if ($query_value_in_P !== FALSE)
+											{
+												unset($decree_made[$st][$pe][$query_value_in_P]);
+												$nb_decree_made -= $periode_weight[$pe];
+												//$gerer_doublon = true;
+											}
+										}
+									}
+									$decree_made[$status]["Annuel"][] = $query_value;
+									$nb_decree_made += $periode_weight["Annuel"];
+								}
+								break;
+							case STATUT_EN_COURS :
+								if (!in_array($query_value, $decree_made[$status]["Annuel"])
+									&& !in_array($query_value, $decree_made[STATUT_VALIDE]["Annuel"])
+									&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P1"])
+									&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P2"]))
+								{
+									// Contrôle de la présence d'un arrêté pour un semestre ou année dans le même statut et statuts inférieurs
+									$liste_statuts_inf = array($status, STATUT_BROUILLON);
+									$liste_periodes = array("P1", "P2", "Annuel");
+									$signStep = $decree->getSignStep();
+									foreach ($liste_statuts_inf as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+											if ($query_value_in_P !== FALSE)
+											{
+												unset($decree_made[$st][$pe][$query_value_in_P]);
+												$nb_decree_made -= $periode_weight[$pe];
+												$gerer_doublon = true;
+											}
+										}
+									}
+									$decree_made[$status]["Annuel"][] = $query_value;
+									$nb_decree_made += $periode_weight["Annuel"];
+									$search_in = array("Visa de la composante");
+									if ($signStep == "Validation de la présidence")
+									{
+										$search_in[] = "Validation de la présidence";
+									}
+									if ($gerer_doublon)
+									{
+										foreach($search_in as $si)
+										{
+											foreach ($liste_periodes as $pe)
+											{
+												$query_value_in_P = array_search($query_value, $decree_made[$si][$pe]);
+												if ($query_value_in_P !== FALSE)
+												{
+													unset($decree_made[$si][$pe][$query_value_in_P]);
+												}
+											}
+										}
+									}
+									$decree_made[$signStep]["Annuel"][] = $query_value;
+								}
+								elseif(in_array($query_value, $decree_made[$status]["Annuel"]))
+								{
+									// Le seul cas où on doit modifier la stat est si l'arrêté annuel à compter est à la validation de la présidence et l'arrêté annuel présent est au visa de la composante
+									$signStep = $decree->getSignStep();
+									$query_value_in_P = array_search($query_value, $decree_made["Visa de la composante"]["Annuel"]);
+									if ($signStep == "Validation de la présidence" && $query_value_in_P !== FALSE)
+									{
+										unset($decree_made["Visa de la composante"]["Annuel"][$query_value_in_P]);
+										$decree_made["Validation de la présidence"]["Annuel"][] = $query_value;
+									}
+									$gerer_doublon = true;
+								}
+								else
+								{
+									$gerer_doublon = true;
+								}
+								break;
+							case STATUT_VALIDE :
+								if (!in_array($query_value, $decree_made[$status]["Annuel"]))
+								{
+									// Contrôle de la présence d'un arrêté pour un semestre ou année dans le même statut et statuts inférieurs
+									$liste_statuts_inf = array($status, STATUT_EN_COURS, STATUT_BROUILLON);
+									$liste_periodes = array("P1", "P2", "Annuel");
+									foreach ($liste_statuts_inf as $st)
+									{
+										foreach ($liste_periodes as $pe)
+										{
+											$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+											if ($query_value_in_P !== FALSE)
+											{
+												unset($decree_made[$st][$pe][$query_value_in_P]);
+												$nb_decree_made -= $periode_weight[$pe];
+												$gerer_doublon = true;
+												if ($st == STATUT_VALIDE)
+												{
+													$doublon_valide = true;
+													$doublon_periode = ($pe == "Annuel") ? array("Annuel") : array("Annuel", $pe);
+												}
+											}
+										}
+									}
+									$decree_made[$status]["Annuel"][] = $query_value;
+									$nb_decree_made += $periode_weight["Annuel"];
+								}
+								else
+								{
+									$gerer_doublon = true;
+									$doublon_valide = true;
+									$doublon_periode = array("Annuel");
+								}
+								if ($gerer_doublon && $doublon_valide)
+								{
+									if (!array_key_exists($query_value, $decree_doublon))
+									{
+										$decree_doublon[$query_value] = $doublon_periode;
+									}
+									else
+									{
+										foreach($doublon_periode as $dp)
+										{
+											if (!in_array($dp,$decree_doublon[$query_value]))
+											{
+												$decree_doublon[$query_value][] = $dp;
+											}
+										}
+									}
+								}
+								break;
+						}
+						break;
+					case 'semestre 1' :
+					case 'première année' :
+					case 'semestre 2' :
+					case 'deuxième année' :
+						if ($periode_value == 'semestre 1' || $periode_value == 'première année')
+						{
+							$p = "P1";
+						}
+						else
+						{
+							$p = "P2";
+						}
+						$status = $decree->getStatus(false);
+						// Contrôle de la présence d'un arrêté pour le semestre ou année dans le même statut ou statuts supérieurs
+						switch ($status)
+						{
+							case STATUT_BROUILLON :
+								$liste_statuts_sup = array($status, STATUT_EN_COURS, STATUT_VALIDE);
+								$liste_periodes = array($p, "Annuel");
+								foreach ($liste_statuts_sup as $st)
+								{
+									foreach ($liste_periodes as $pe)
+									{
+										if (in_array($query_value, $decree_made[$st][$pe]))
+										{
+											$gerer_doublon = true;
+										}
+									}
+								}
+								if ($gerer_doublon)
+								{
+
+								}
+								else
+								{
+									$decree_made[$status][$p][] = $query_value;
+									$nb_decree_made += $periode_weight[$p];
+								}
+								break;
+							case STATUT_EN_COURS :
+								$signStep = $decree->getSignStep();
+								if ($signStep == "Validation de la présidence")
+								{
+									$liste_statuts_sup = array($signStep, $status, STATUT_VALIDE);
+									$liste_statuts_inf = array("Visa de la composante", STATUT_BROUILLON);
+								}
+								else // Visa de la composante
+								{
+									$liste_statuts_sup = array($signStep, "Validation de la présidence", $status, STATUT_VALIDE);
+									$liste_statuts_inf = array(STATUT_BROUILLON);
+								}
+								$liste_periodes = array($p, "Annuel");
+								foreach ($liste_statuts_sup as $st)
+								{
+									foreach ($liste_periodes as $pe)
+									{
+										if (in_array($query_value, $decree_made[$st][$pe]))
+										{
+											$gerer_doublon = true;
+										}
+									}
+								}
+								// chercher dans les statuts inférieurs pour les supprimer
+								foreach ($liste_statuts_inf as $st)
+								{
+									foreach ($liste_periodes as $pe)
+									{
+										$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+										if ($query_value_in_P !== FALSE)
+										{
+											unset($decree_made[$st][$pe][$query_value_in_P]);
+											$nb_decree_made -= $periode_weight[$pe];
+											$decree_made[$signStep][$p][] = $query_value;
+											$nb_decree_made += $periode_weight[$p];
+											$gerer_doublon = true;
+										}
+									}
+								}
+								if ($gerer_doublon)
+								{
+
+								}
+								else
+								{
+									$decree_made[$status][$p][] = $query_value;
+									$nb_decree_made += $periode_weight[$p];
+									$decree_made[$signStep][$p][] = $query_value;
+								}
+								break;
+							case STATUT_VALIDE :
+								$liste_statuts_sup = array($status);
+								$liste_statuts_inf = array(STATUT_BROUILLON, STATUT_EN_COURS);
+								$liste_periodes = array($p, "Annuel");
+								foreach ($liste_statuts_sup as $st)
+								{
+									foreach ($liste_periodes as $pe)
+									{
+										if (in_array($query_value, $decree_made[$st][$pe]))
+										{
+											$gerer_doublon = true;
+											$doublon_valide = true;
+											$doublon_periode = ($pe == $p) ? array($p) : array($pe, $p);
+										}
+									}
+								}
+								// chercher dans les statuts inférieurs pour les supprimer
+								foreach ($liste_statuts_inf as $st)
+								{
+									foreach ($liste_periodes as $pe)
+									{
+										$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
+										if ($query_value_in_P !== FALSE)
+										{
+											unset($decree_made[$st][$pe][$query_value_in_P]);
+											$nb_decree_made -= $periode_weight[$pe];
+											$gerer_doublon = true;
+										}
+									}
+								}
+								if ($gerer_doublon)
+								{
+									if ($doublon_valide)
+									{
+										if (!array_key_exists($query_value, $decree_doublon))
+										{
+											$decree_doublon[$query_value] = $doublon_periode;
+										}
+										else
+										{
+											foreach($doublon_periode as $dp)
+											{
+												if (!in_array($dp,$decree_doublon[$query_value]))
+												{
+													$decree_doublon[$query_value][] = $dp;
+												}
+											}
+										}
+									}
+								}
+								else
+								{
+									$decree_made[$status][$p][] = $query_value;
+									$nb_decree_made += $periode_weight[$p];
+								}
+								break;
+						}
+						break;
+				}
+			}
+		}
+		return array("decree_made" => $decree_made, "nb_decree_made" => $nb_decree_made, "decree_doublon" => $decree_doublon, "liste_edit" => $liste_edit, "query_field" => $query_field, "liste_to_do" => $liste_to_do);
+	}
 }

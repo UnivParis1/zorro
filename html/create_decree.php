@@ -34,6 +34,26 @@
     	$mode = 'modif';
     	$mod_decree_id = intval($_POST['mod_id']);
     }
+	elseif (isset($_GET['new']))
+	{
+		$mode = 'create';$mod_decree_active = true;
+		if (isset($_GET['idmodel']))
+		{
+			$post_selectarrete = $_GET['idmodel'];
+		}
+		if (isset($_GET['comp']))
+		{
+			$get_comp = $_GET['comp'];
+		}
+		if (isset($_GET['etp']))
+		{
+			$get_etp = $_GET['etp'];
+		}
+		if (isset($_GET['periode']))
+		{
+			$get_periode = ($_GET['periode'] == 'S1') ? 'semestre 1' : 'semestre 2';
+		}
+	}
     else 
     {
     	$mode = 'create';
@@ -1278,6 +1298,11 @@
 										<script>document.getElementById('<?php echo $modelfield['name'];?>1').value = "<?php echo $mod_decree_fields[$modelfield['idmodel_field']][0]['value']; ?>";</script>
 									<?php
 									}
+									elseif (isset($get_comp))
+									{ ?>
+										<script>document.getElementById('<?php echo $modelfield['name'];?>1_ref').value = "<?php echo $ldap->getStructureName($get_comp);?>";</script>
+										<script>document.getElementById('<?php echo $modelfield['name'];?>1').value = "<?php echo $get_comp;?>";</script>
+									<?php }
 									elseif (isset($_SESSION['description']) && isset($_SESSION['supannentiteaffectation']))
 									{ ?>
 										<script>document.getElementById('<?php echo $modelfield['name'];?>1_ref').value = "<?php echo $_SESSION['description'];?>";</script>
@@ -1318,6 +1343,33 @@
 									// récupérer et exécuter la requête
 									$query = $modelselected->getQueryField($modelfield['idfield_type']);
 									$result = $ref->executeQuery($query);
+									if (isset($get_etp))
+									{
+										if ($modelfield['idfield_type'] == 2) { // récupération du domaine
+											$modelselected->getQueryField(2); //domaine
+											$codcmp = $ldap->getInfoApo($get_comp);
+											if ($codcmp != '')
+											{
+												$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$codcmp."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+											}
+											else
+											{
+												$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." ORDER BY 2" : " ORDER BY 2";
+											}
+											$result = $ref->executeQuery($query);
+											$query_etp = $modelselected->getQueryField(3);
+											$domaineselected = $ref->getDomaineEtape($get_etp, $query_etp, array_column($result, 'value')); ?>
+											<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+												<option value="<?php echo $domaineselected;?>" selected><?php echo $domaineselected;?></option>
+											</select>
+										<?php }
+										elseif ($modelfield['idfield_type'] == 3) { // récupération du libellé de la mention
+											$libetp = $ref->getEtapeLibelle($get_etp, $query); ?>
+											<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+												<option value="<?php echo $libetp[0]['value'];?>" selected><?php echo $libetp[0]['value'];?></option>
+											</select>
+										<?php } ?>
+									<?php } else {
 									// liste déroulante
 									if ($modelfield['idfield_type'] == 3) { ?>
 										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majMention2(this);majSpecialite(this);">
@@ -1339,7 +1391,7 @@
 									}
 									elseif ($modelfield['idfield_type'] == 106)
 									{ ?>
-										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>"">
+										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
 										</select>
 										<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 										{ ?>
@@ -1372,44 +1424,54 @@
 									<?php
 									}
 								}
+								}
 								break;
 							case 'list':
 								$listFields = $modelselected->getListField($modelfield['idfield_type']);
 								$listSelected = array();
+								$alerte = array();
 								if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 								{
 									$listSelected = array_column($mod_decree_fields[$modelfield['idmodel_field']],'value');
 								}
-								if (sizeof($listFields) > 0)
-								{
-									$alerte = array(); ?>
-									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
-										<option value="">&nbsp;</option>
-									<?php foreach($listFields as $value)
-									{
-										if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
-										{
-											if ($value['tem_active'] == 'N')
-											{
-												$alerte[$value['value']] = true;
-											} ?>
-											<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
-										<?php }
-										elseif ($value['tem_active'] == 'N')
-												{
-													if (in_array($value['value'],$listSelected))
-													{
-														$alerte[$value['value']] = true; ?>
-														<option value="<?php echo $value['value'];?>"><?php echo $value['value']." (obsolète)";?></option>
-													<?php }
-										}
-										else
-										{ ?>
-											<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
-										<?php }
-									} ?>
+								if (isset($get_periode))
+								{ ?>
+									<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+										<option value="<?php echo $get_periode;?>" selected><?php echo $get_periode;?></option>
 									</select>
 								<?php }
+								else
+								{
+									if (sizeof($listFields) > 0)
+									{ ?>
+										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+											<option value="">&nbsp;</option>
+										<?php foreach($listFields as $value)
+										{
+											if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && $mod_decree_fields[$modelfield['idmodel_field']][$i-1]['value'] == $value['value'])
+											{
+												if ($value['tem_active'] == 'N')
+												{
+													$alerte[$value['value']] = true;
+												} ?>
+												<option value="<?php echo $value['value'];?>" selected="selected"><?php echo $value['value'];?></option>
+											<?php }
+											elseif ($value['tem_active'] == 'N')
+													{
+														if (in_array($value['value'],$listSelected))
+														{
+															$alerte[$value['value']] = true; ?>
+															<option value="<?php echo $value['value'];?>"><?php echo $value['value']." (obsolète)";?></option>
+														<?php }
+											}
+											else
+											{ ?>
+												<option value="<?php echo $value['value'];?>"><?php echo $value['value'];?></option>
+											<?php }
+										} ?>
+										</select>
+									<?php }
+								}
 								break;
 							case 'checkbox':
 							case 'checkbox2':
@@ -1668,12 +1730,12 @@
 							for($i = 1; $i < sizeof($mod_decree_fields[$modelfield['idmodel_field']]); $i++)
 							{
 								echo "<script>ajouterValeur('".$modelfield['name']."')</script>";
-								echo "<script>document.getElementById('".$modelfield['name']."1').value = \"".htmlspecialchars($mod_decree_fields[$modelfield['idmodel_field']][$i]['value'])."\";</script>";
-								echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = \"".htmlspecialchars($mod_decree_fields[$modelfield['idmodel_field']][$i]['value'])."\";</script>";
+								echo "<script>document.getElementById('".$modelfield['name']."1').value = \"".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."\";</script>";
+								echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = \"".$mod_decree_fields[$modelfield['idmodel_field']][$i]['value']."\";</script>";
 							}
 						}
 					}
-					if (sizeof($alerte) > 0)
+					if (isset($alerte) && sizeof($alerte) > 0)
 					{ ?>
 						<p class='alerte alerte-danger'>Attention, 1 ou plusieurs option(s) sélectionnée(s) n'existe(nt) plus : <br>
 							<?php foreach ($alerte as $key => $value) echo "¤ ".$key."<br>";?>
