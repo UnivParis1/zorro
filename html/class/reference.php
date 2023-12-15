@@ -893,7 +893,7 @@ class reference {
 									{
 										// TODO : Ajouter paramétrage : modèle, composante, diplôme, periode
 										$params_url .= "&periode=S1";
-										$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">❌</a> - ";
+										$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
 									}
 								}
 								foreach($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']] as $elem)
@@ -906,13 +906,13 @@ class reference {
 									if (!in_array("semestre 2", $liste_periodes_edited))
 									{
 										$params_url .= "&periode=S2";
-										$recap[$comp['code']] .= " semestre 2 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">❌</a> - ";
+										$recap[$comp['code']] .= " semestre 2 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
 									}
 								}
 							}
 							else
 							{
-								$recap[$comp['code']] .= "<a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">❌</a>";
+								$recap[$comp['code']] .= "<a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a>";
 							}
 							$recap[$comp['code']] .= "
 							<br>";
@@ -946,8 +946,8 @@ class reference {
 				$message .= "<p>Légende :  cliquez sur l'icone pour effectuer l'action correspondante.<br>";
 				$message .= "✏️ :  accéder au brouillon sur Zorro.<br>";
 				$message .= "🕓🕕🕖 : accéder au document en cours de signature sur eSignature.<br>";
-				$message .= "✅ : accéder au document signé sur eSignature.<br>";
-				$message .= "❌ : créer le document sur Zorro.";
+				$message .= "✔️ : accéder au document signé sur eSignature.<br>";
+				$message .= "➕ : créer le document sur Zorro.";
 				$message .= "</p>";
 				$message .= "<p>Veuillez créer les arrêtés sur Zorro.</p>";
 				$message .= "<p>Cordialement,</p>
