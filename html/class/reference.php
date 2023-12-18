@@ -955,7 +955,14 @@ class reference {
 				</p>
 				</body>
 				</html>";
-				$this->sendEmail($subject, $message, array_column($resp[$comp['code']], 'mail'));
+				if (TEM_ENVOI_MAIL == 'O')
+				{
+					$this->sendEmail($subject, $message, array_column($resp[$comp['code']], 'mail'));
+				}
+				else
+				{
+					echo "L'envoi de mail est désactivé. Les destinataires prévus sont : ".implode(",", array_column($resp[$comp['code']], 'mail'));
+				}
 			}
 			echo "<br>___________________________";
 		}
