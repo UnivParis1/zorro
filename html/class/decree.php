@@ -1226,7 +1226,7 @@ class decree {
                 $contenu = "<a href='".$this->getEsignUrl()."' target='_blank'>".date('d/m/Y', strtotime($this->getMajDate()))."</a>";
                 $title = 'Validé';
                 $class = "green";
-				$image = "<a href='".$this->getEsignUrl()."' target='_blank' alt='validé'>✔️</a>";
+				$image = "<a href='".$this->getEsignUrl()."' target='_blank' alt='validé'>✅</a>";
                 break;
             case STATUT_EN_COURS :
                 $step = $this->getSignStep();

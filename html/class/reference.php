@@ -946,7 +946,7 @@ class reference {
 				$message .= "<p>Légende :  cliquez sur l'icone pour effectuer l'action correspondante.<br>";
 				$message .= "✏️ :  accéder au brouillon sur Zorro.<br>";
 				$message .= "🕓🕕🕖 : accéder au document en cours de signature sur eSignature.<br>";
-				$message .= "✔️ : accéder au document signé sur eSignature.<br>";
+				$message .= "✅ : accéder au document signé sur eSignature.<br>";
 				$message .= "➕ : créer le document sur Zorro.";
 				$message .= "</p>";
 				$message .= "<p>Veuillez créer les arrêtés sur Zorro.</p>";
