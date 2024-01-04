@@ -1,7 +1,6 @@
 <?php
 	session_start();
-	ini_set('default_charset', 'utf-8');     
-    require_once ('CAS.php');
+	ini_set('default_charset', 'utf-8');
     require_once './include/casconnection.php';
     require_once ("./include/dbconnection.php");
     require_once ("./include/fonctions.php");

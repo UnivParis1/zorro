@@ -1,5 +1,4 @@
 <?php
-    require_once ('CAS.php');
     include './include/casconnection.php';
     include './class/ldap.php';
     require_once('./class/reference.php');
