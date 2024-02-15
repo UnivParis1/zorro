@@ -830,7 +830,7 @@ class reference {
 		return $tab;
 	}
 
-	function getListDecreeStatusForCompModel($user, $list_comp, $list_model, $year)
+	function getListDecreeStatusForCompModel($user, $list_comp, $list_model, $year, $tem_mail=true)
 	{
 		require_once 'ldap.php';
 		require_once 'model.php';
@@ -838,13 +838,14 @@ class reference {
 		$resp = array();
 		$stats = array();
 		$recap = array();
+		$recap_tab = array();
 		$tem_commission = false;
 		$tem_jury = false;
 		foreach($list_comp as $comp)
 		{
 			$supann = $ldap->getSupannCodeEntiteFromAPO($comp['code']);
 			$resp[$comp['code']] = $ldap->getStructureResp($supann);
-			echo "<br><b> Composante : ".$comp['value']."</b><br>";
+			echo "<br><b> Composante : ".$comp['value']." ".$comp['code']."</b><br>";
 			echo "Responsables : <br>";
 			foreach($resp[$comp['code']] as $responsable)
 			{
@@ -852,6 +853,7 @@ class reference {
 			}
 			$tem_relance = false;
 			$recap[$comp['code']] = '';
+			$recap_tab[$comp['code']] = array();
 			foreach($list_model as $idmodel => $model)
 			{
 				if ($idmodel != 8 && $idmodel != 38)
@@ -877,6 +879,9 @@ class reference {
 						$recap[$comp['code']] .= "<br> Nombre d'arrêtés à créer : ".sizeof($stats[$comp['code']][$idmodel]['liste_to_do'])."<br>";
 						$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']."</b><br>";
 						$recap[$comp['code']] .= "Détail :  <br>";
+						$recap_tab[$comp['code']] = array('modelname' => $obj_model->getDecreeType()['name']." ".$model['name'],
+														  'nbtocreate' => sizeof($stats[$comp['code']][$idmodel]['liste_to_do']),
+														  'nbcreated' => $stats[$comp['code']][$idmodel]['nb_decree_made']);
 						//var_dump($stats[$comp['code']][$idmodel]['liste_edit']);
 						foreach($stats[$comp['code']][$idmodel]['liste_to_do'] as $todo)
 						{
@@ -921,8 +926,8 @@ class reference {
 					}
 				}
 			}
-			echo $recap[$comp['code']]."<br>";
-			if ($tem_relance)
+			//echo $recap[$comp['code']]."<br>";
+			if ($tem_relance && $tem_mail)
 			{
 				echo "<p style='color:red;'> RELANCE à envoyer </p>";
 				$subject = "Des arrêtés attendent leur création.";
@@ -990,20 +995,25 @@ class reference {
 		$headers[] = "From: Zorro <".SENDMAIL_FROM.">";
 		$preferences = array("input-charset" => "UTF-8", "output-charset" => "UTF-8");
 		$encoded_subject = str_replace("Subject: ", "", iconv_mime_encode("Subject", $subject, $preferences));
+		$success = false;
 		foreach ($recipients as $mail)
 		{
 			if (mail($mail, $encoded_subject, $message, implode("\r\n",$headers)))
 			{
-				echo "Email envoyé avec succès à ".$mail;
-				return true;
+				echo "Email envoyé avec succès à ".$mail."<br>\n";
+				$success = true;
 			}
 			else
 			{
-				echo "Echec de l'envoi de mail à ".$mail;
+				echo "Echec de l'envoi de mail à ".$mail."<br>\n";
 				return false;
 			}
 		}
-		return false;
+		if ($success)
+		{
+			echo str_replace("<br>", "\n", $message)."<br>\n";
+		}
+		return $success;
 	}
 
 	function getEtapeLibelle($cod_etp, $req)
@@ -1022,6 +1032,26 @@ class reference {
 			}
 		}
 		return array();
+	}
+
+	function getParamsCron($cron_number)
+	{
+		$sql = "SELECT idcron, cron_number, cron_begin, cron_end, cron_day, cron_params FROM cron WHERE cron_number = ?";
+		$param = array($cron_number);
+		$result = prepared_select($this->_dbcon, $sql, $param);
+		$retour = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$retour[] = $row;
+			}
+		}
+		else
+		{
+			elog("Erreur de recherche des paramètres du cron $cron_number. ".mysqli_error($this->_dbcon));
+		}
+		return $retour;
 	}
 
 }

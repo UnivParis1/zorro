@@ -6,17 +6,42 @@
     echo date("d/m/Y H:i:s")." début de la relance création. \n";
     $user = new user($dbcon, CRON_USER);
     $ref = new reference($dbcon, $rdbApo);
-    $list_comp = $ref->getListComp();
-    $list_model = $ref->getListModel(1, true);
-    if (isset($_GET['comp']))
+    $list_comp = array_column($ref->getListComp(), null, 'code');
+    $param_cron = $ref->getParamsCron(1); // idcron = 1
+    $jour_today = date("l");
+    $date_today = date("Y-m-d");
+    $decree_type = 1; // Composition de jury
+    foreach ($param_cron as $cron)
     {
-        $list_comp = array($list_comp[$_GET['comp']]);
+        if ($cron['cron_begin'] <= $date_today && $cron['cron_end'] >= $date_today)
+        {
+            if ($cron['cron_day'] == $jour_today)
+            {
+                // cron params de la forme dtype=*iddecree_type_choisi*;comp=*code_composante_choisi*;model=*idmodel_choisi*
+                $list_params = explode(";",$cron['cron_params']);
+                $p = array();
+                foreach($list_params as $param)
+                {
+                    $temp = explode('=', $param);
+                    $p[$temp[0]] = $temp[1];
+                }
+                if (key_exists('dtype', $p))
+                {
+                    $decree_type = $p['dtype'];
+                }
+                $list_model = $ref->getListModel($decree_type, true);
+                if (key_exists('comp', $p))
+                {
+                    $list_comp = array($list_comp[$p['comp']]);
+                }
+                if (key_exists('model', $p))
+                {
+                    $list_model = array($p['model'] => $list_model[$p['model']]);
+                }
+                $year = (date('m') >= '09') ? date('Y') : date('Y') - 1;
+                $list_edit = $ref->getListDecreeStatusForCompModel($user, $list_comp, $list_model, $year);
+                echo "<br>".date("d/m/Y H:i:s")." fin de la relance création.<br>";
+            }
+        }
     }
-    if (isset($_GET['model']))
-    {
-        $list_model = array($list_model[$_GET['model']]); 
-    }
-    $year = (date('m') >= '09') ? date('Y') : date('Y') - 1;
-    $list_edit = $ref->getListDecreeStatusForCompModel($user, $list_comp, $list_model, $year);
-    echo "<br>".date("d/m/Y H:i:s")." fin de la relance création.<br>";
 ?>
