@@ -17,429 +17,105 @@ if (is_null($userid) or ($userid == ""))
 	header('Location: index.php');
 	exit();
 }
+$user = new user($dbcon, $userid);
+$user_apo = $user->getStructureCodApo(); echo $user_apo;
 
 // Récupération des modeles auxquels à accès l'utilisateur
 $menuItem = 'menu_stat';
 require ("include/menu.php");
 $liste_comp = array_column($ref->getListComp(), 'value', 'code');
 $liste_year = $ref->getCreationYears();
-if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
-{
-	$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
-	if ($userCAS->isSuperAdmin(false) || $userCAS->isDaji() || $userCAS->isAdminModel() || $user->isAdminModel())
-	{
-		$composante_selected = '';
-		if (isset($_POST['selectcomp']) && $_POST['selectcomp'] != '')
-		{
-			$post_selectcomp = $_POST['selectcomp'];
-			$ldap = new ldap();
-			$composante_selected = "structures-".$ldap->getSupannCodeEntiteFromAPO($post_selectcomp);
-		}
-		if (isset($_POST['selectyear']) && $_POST['selectyear'] != '')
-		{
-			$post_selectyear = $_POST['selectyear'];
-		}
-		if (isset($_POST['selectarrete']) && $_POST['selectarrete'] != '')
-		{
-			$post_selectarrete = $_POST['selectarrete'];
-			$model_selected = new model($dbcon, $post_selectarrete);
-			$model_selected_infos = $model_selected->getModelInfo();
-			$list_fields = $model_selected->getModelFields();
-			$export_path = $model_selected->getExportPath();
-			$modelworkflow = $model_selected->getModelWorkflow();
-			if ($userCAS->getUid() == $user->getUid())
-			{
-				$model_decrees = $userCAS->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1);
-			}
-			else
-			{
-				$model_decrees = $user->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1);
-			}
-			if (isset($post_selectcomp) && $post_selectcomp != '')
-			{
-				$liste_to_do = $model_selected->getListDecreesToEditForComp($post_selectcomp);
-			}
-			else
-			{
-				$liste_to_do = $model_selected->getListDecreesToEditForComp();
-			}
-			$query_field = $model_selected->getLastQuery();
-			$idfield_periode = ($post_selectarrete == 12) ? 104 : 7; // idfield_type de la période 7 ou 104 pour capacité
-			$liste_edit = array();
-			$corresp_period = array("semestre 1" => "P1", "1ère année" => "P1", "semestre 2" => "P2", "2ème année" => "P2", "Annuel" => "Annuel");
-			$decree_made_by_periode = array("Annuel" => array(), "P1" => array(), "P2" => array());
-			$decree_doublon = array();
-			$nb_decree_made = 0;
-			$periode_weight = array("Annuel" => 1, "P1" => 0.5, "P2" => 0.5);
-			$liste_etp_to_do = array_map('htmlspecialchars',array_column($liste_to_do,'value'));
-			$decree_made = array(STATUT_VALIDE => $decree_made_by_periode, STATUT_EN_COURS => $decree_made_by_periode, "Validation de la présidence" => $decree_made_by_periode, "Visa de la composante" => $decree_made_by_periode, STATUT_BROUILLON => $decree_made_by_periode);
-			foreach($model_decrees as $mdecree)
-			{
-				$decree = new decree($dbcon, null, null, $mdecree['iddecree']);
-				$query_value =  $decree->getFieldForFieldType($query_field);
-				$periode_value =  $decree->getFieldForFieldType($idfield_periode);
-				if (in_array($query_value, $liste_etp_to_do))
-				{
-					$liste_edit[$query_value][] = array('statut' => $decree->getStatusAff(), 'periode' => $periode_value);
 
-					$gerer_doublon = false; $doublon_valide = false;
-					switch ($periode_value)
-					{
-						case '' : // Cas annuel
-							$status = $decree->getStatus(false);
-							switch ($status)
-							{
-								case STATUT_BROUILLON :
-									// On ne compte l'arrêté annuel en brouillon que si aucun arrêté annuel ou semestriel n'a été compté sur un statut supérieur
-									if (!in_array($query_value, $decree_made[$status]["Annuel"]) 
-										&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["Annuel"])
-										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["Annuel"]) 
-										&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["P1"])
-										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P1"]) 
-										&& !in_array($query_value, $decree_made[STATUT_EN_COURS]["P2"])
-										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P2"]))
-									{
-										// Contrôle de la présence d'un arrêté pour un semestre dans le même statut
-										$liste_statuts_inf = array($status);
-										$liste_periodes = array("P1", "P2");
-										foreach ($liste_statuts_inf as $st)
-										{
-											foreach ($liste_periodes as $pe)
-											{
-												$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
-												if ($query_value_in_P !== FALSE)
-												{
-													unset($decree_made[$st][$pe][$query_value_in_P]);
-													$nb_decree_made -= $periode_weight[$pe];
-													//$gerer_doublon = true;
-												}
-											}
-										}
-										$decree_made[$status]["Annuel"][] = $query_value;
-										$nb_decree_made += $periode_weight["Annuel"];
-									}
-									/*else
-									{
-										$gerer_doublon = true;
-									}
-									if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
-									{
-										$decree_doublon[] = $query_value;
-									}*/
-									break;
-								case STATUT_EN_COURS :
-									if (!in_array($query_value, $decree_made[$status]["Annuel"])
-										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["Annuel"])
-										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P1"])
-										&& !in_array($query_value, $decree_made[STATUT_VALIDE]["P2"]))
-									{
-										// Contrôle de la présence d'un arrêté pour un semestre ou année dans le même statut et statuts inférieurs
-										$liste_statuts_inf = array($status, STATUT_BROUILLON);
-										$liste_periodes = array("P1", "P2", "Annuel");
-										$signStep = $decree->getSignStep();
-										foreach ($liste_statuts_inf as $st)
-										{
-											foreach ($liste_periodes as $pe)
-											{
-												$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
-												if ($query_value_in_P !== FALSE)
-												{
-													unset($decree_made[$st][$pe][$query_value_in_P]);
-													$nb_decree_made -= $periode_weight[$pe];
-													$gerer_doublon = true;
-												}
-											}
-										}
-										$decree_made[$status]["Annuel"][] = $query_value;
-										$nb_decree_made += $periode_weight["Annuel"];
-										$search_in = array("Visa de la composante");
-										if ($signStep == "Validation de la présidence")
-										{
-											$search_in[] = "Validation de la présidence";
-										}
-										if ($gerer_doublon)
-										{
-											foreach($search_in as $si)
-											{
-												foreach ($liste_periodes as $pe)
-												{
-													$query_value_in_P = array_search($query_value, $decree_made[$si][$pe]);
-													if ($query_value_in_P !== FALSE)
-													{
-														unset($decree_made[$si][$pe][$query_value_in_P]);
-													}
-												}
-											}
-										}
-										$decree_made[$signStep]["Annuel"][] = $query_value;
-									}
-									elseif(in_array($query_value, $decree_made[$status]["Annuel"]))
-									{
-										// Le seul cas où on doit modifier la stat est si l'arrêté annuel à compter est à la validation de la présidence et l'arrêté annuel présent est au visa de la composante
-										$signStep = $decree->getSignStep();
-										$query_value_in_P = array_search($query_value, $decree_made["Visa de la composante"]["Annuel"]);
-										if ($signStep == "Validation de la présidence" && $query_value_in_P !== FALSE)
-										{
-											unset($decree_made["Visa de la composante"]["Annuel"][$query_value_in_P]);
-											$decree_made["Validation de la présidence"]["Annuel"][] = $query_value;
-										}
-										$gerer_doublon = true;
-									}
-									else
-									{
-										$gerer_doublon = true;
-									}
-									/*if ($gerer_doublon && !array_key_exists($query_value, $decree_doublon))
-									{
-										$decree_doublon[] = $query_value;
-									}*/
-									break;
-								case STATUT_VALIDE :
-									if (!in_array($query_value, $decree_made[$status]["Annuel"]))
-									{
-										// Contrôle de la présence d'un arrêté pour un semestre ou année dans le même statut et statuts inférieurs
-										$liste_statuts_inf = array($status, STATUT_EN_COURS, STATUT_BROUILLON);
-										$liste_periodes = array("P1", "P2", "Annuel");
-										foreach ($liste_statuts_inf as $st)
-										{
-											foreach ($liste_periodes as $pe)
-											{
-												$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
-												if ($query_value_in_P !== FALSE)
-												{
-													unset($decree_made[$st][$pe][$query_value_in_P]);
-													$nb_decree_made -= $periode_weight[$pe];
-													$gerer_doublon = true;
-													if ($st == STATUT_VALIDE)
-													{
-														$doublon_valide = true;
-														$doublon_periode = ($pe == "Annuel") ? array("Annuel") : array("Annuel", $pe);
-													}
-												}
-											}
-										}
-										$decree_made[$status]["Annuel"][] = $query_value;
-										$nb_decree_made += $periode_weight["Annuel"];
-									}
-									else
-									{
-										$gerer_doublon = true;
-										$doublon_valide = true;
-										$doublon_periode = array("Annuel");
-									}
-									if ($gerer_doublon && $doublon_valide)
-									{
-										if (!array_key_exists($query_value, $decree_doublon))
-										{
-											$decree_doublon[$query_value] = $doublon_periode;
-										}
-										else
-										{
-											foreach($doublon_periode as $dp)
-											{
-												if (!in_array($dp,$decree_doublon[$query_value]))
-												{
-													$decree_doublon[$query_value][] = $dp;
-												}
-											}
-										}
-									}
-									break;
-							}
-							break;
-						case 'semestre 1' :
-						case 'première année' :
-						case 'semestre 2' :
-						case 'deuxième année' :
-							if ($periode_value == 'semestre 1' || $periode_value == 'première année')
-							{
-								$p = "P1";
-							}
-							else
-							{
-								$p = "P2";
-							}
-							$status = $decree->getStatus(false);
-							// Contrôle de la présence d'un arrêté pour le semestre ou année dans le même statut ou statuts supérieurs
-							switch ($status)
-							{
-								case STATUT_BROUILLON :
-									$liste_statuts_sup = array($status, STATUT_EN_COURS, STATUT_VALIDE);
-									$liste_periodes = array($p, "Annuel");
-									foreach ($liste_statuts_sup as $st)
-									{
-										foreach ($liste_periodes as $pe)
-										{
-											if (in_array($query_value, $decree_made[$st][$pe]))
-											{
-												$gerer_doublon = true;
-											}
-										}
-									}
-									if ($gerer_doublon)
-									{
-										/*if (!array_key_exists($query_value, $decree_doublon))
-										{
-											$decree_doublon[] = $query_value;
-										}*/
-									}
-									else
-									{
-										$decree_made[$status][$p][] = $query_value;
-										$nb_decree_made += $periode_weight[$p];
-									}
-									break;
-								case STATUT_EN_COURS :
-									$signStep = $decree->getSignStep();
-									if ($signStep == "Validation de la présidence")
-									{
-										$liste_statuts_sup = array($signStep, $status, STATUT_VALIDE);
-										$liste_statuts_inf = array("Visa de la composante", STATUT_BROUILLON);
-									}
-									else // Visa de la composante
-									{
-										$liste_statuts_sup = array($signStep, "Validation de la présidence", $status, STATUT_VALIDE);
-										$liste_statuts_inf = array(STATUT_BROUILLON);
-									}
-									$liste_periodes = array($p, "Annuel");
-									foreach ($liste_statuts_sup as $st)
-									{
-										foreach ($liste_periodes as $pe)
-										{
-											if (in_array($query_value, $decree_made[$st][$pe]))
-											{
-												$gerer_doublon = true;
-											}
-										}
-									}
-									// chercher dans les statuts inférieurs pour les supprimer
-									foreach ($liste_statuts_inf as $st)
-									{
-										foreach ($liste_periodes as $pe)
-										{
-											$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
-											if ($query_value_in_P !== FALSE)
-											{
-												unset($decree_made[$st][$pe][$query_value_in_P]);
-												$nb_decree_made -= $periode_weight[$pe];
-												$decree_made[$signStep][$p][] = $query_value;
-												$nb_decree_made += $periode_weight[$p];
-												$gerer_doublon = true;
-											}
-										}
-									}
-									if ($gerer_doublon)
-									{
-										/*if (!array_key_exists($query_value, $decree_doublon))
-										{
-											$decree_doublon[] = $query_value;
-										}*/
-									}
-									else
-									{
-										$decree_made[$status][$p][] = $query_value;
-										$nb_decree_made += $periode_weight[$p];
-										$decree_made[$signStep][$p][] = $query_value;
-									}
-									break;
-								case STATUT_VALIDE :
-									$liste_statuts_sup = array($status);
-									$liste_statuts_inf = array(STATUT_BROUILLON, STATUT_EN_COURS);
-									$liste_periodes = array($p, "Annuel");
-									foreach ($liste_statuts_sup as $st)
-									{
-										foreach ($liste_periodes as $pe)
-										{
-											if (in_array($query_value, $decree_made[$st][$pe]))
-											{
-												$gerer_doublon = true;
-												$doublon_valide = true;
-												$doublon_periode = ($pe == $p) ? array($p) : array($pe, $p);
-											}
-										}
-									}
-									// chercher dans les statuts inférieurs pour les supprimer
-									foreach ($liste_statuts_inf as $st)
-									{
-										foreach ($liste_periodes as $pe)
-										{
-											$query_value_in_P = array_search($query_value, $decree_made[$st][$pe]);
-											if ($query_value_in_P !== FALSE)
-											{
-												unset($decree_made[$st][$pe][$query_value_in_P]);
-												$nb_decree_made -= $periode_weight[$pe];
-												$gerer_doublon = true;
-											}
-										}
-									}
-									if ($gerer_doublon)
-									{
-										if ($doublon_valide)
-										{
-											if (!array_key_exists($query_value, $decree_doublon))
-											{
-												$decree_doublon[$query_value] = $doublon_periode;
-											}
-											else
-											{
-												foreach($doublon_periode as $dp)
-												{
-													if (!in_array($dp,$decree_doublon[$query_value]))
-													{
-														$decree_doublon[$query_value][] = $dp;
-													}
-												}
-											}
-										}
-									}
-									else
-									{
-										$decree_made[$status][$p][] = $query_value;
-										$nb_decree_made += $periode_weight[$p];
-									}
-									break;
-							}
-							break;
-					}
-				}
-			}
-		}
-		else
-		{
-		}
-?>
-<div id="contenu1">
-	<h2> Statistiques </h2>
-	<?php
-	// Récupération des modeles auxquels à accès l'utilisateur
-	$user = new user($dbcon, $userid);
-	$superadmin = false;
-	if ($user->isSuperAdmin() || $user->isDaji())
+// Récupération des modeles auxquels à accès l'utilisateur
+$superadmin = false;
+if ($user->isSuperAdmin() || $user->isDaji())
+{
+	// donner accès à tous les modèles
+	$superadmin = true;
+	$models = $ref->getListModel();
+	foreach ($models as $idmodel => $infos)
 	{
-		// donner accès à tous les modèles
-		$superadmin = true;
-		$models = $ref->getListModel();
-		foreach ($models as $idmodel => $infos)
+		if ($infos['iddecree_type'] == 1 || $infos['iddecree_type'] == 2 || $infos['iddecree_type'] == 5 || $infos['iddecree_type'] == 6)
 		{
-			if ($infos['iddecree_type'] == 1 || $infos['iddecree_type'] == 2)
-			{
-				$model = new model($dbcon, $idmodel);
-				$listModels[] = $model->getModelInfo();
-			}
-		}
-	}
-	else
-	{
-		$roles = $user->getGroupeRoles($_SESSION['groupes'], null, true); // roles actifs de l'utilisateur
-		//print_r2($_SESSION['groupes']);
-		$listModels = array();
-		foreach ($roles as $role)
-		{
-			$model = new model($dbcon, $role['idmodel']);
+			$model = new model($dbcon, $idmodel);
 			$listModels[] = $model->getModelInfo();
 		}
 	}
-	?>
+}
+else
+{
+	$roles = $user->getGroupeRoles($_SESSION['groupes'], null, true); // roles actifs de l'utilisateur
+	$listModels = array();
+	foreach ($roles as $role)
+	{
+		$model = new model($dbcon, $role['idmodel']);
+		$listModels[] = $model->getModelInfo();
+	}
+	$listModels = $ref->sortModel($listModels);
+	if (!$user->isAdminModel())
+	{
+		if (array_key_exists($user_apo, $liste_comp))
+		{
+			$liste_comp = array($user_apo => $liste_comp[$user_apo]);
+		}
+		else
+		{
+			$liste_comp = array();
+		}
+	}
+}
+
+if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
+{
+	$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
+	$composante_selected = '';
+	if (isset($_POST['selectcomp']) && $_POST['selectcomp'] != '')
+	{
+		$post_selectcomp = $_POST['selectcomp'];
+		$ldap = new ldap();
+		if (!array_key_exists($post_selectcomp, $liste_comp))
+		{
+			$post_selectcomp = key($liste_comp);
+		}
+		$composante_selected = "structures-".$ldap->getSupannCodeEntiteFromAPO($post_selectcomp);
+	}
+	if (isset($_POST['selectyear']) && $_POST['selectyear'] != '')
+	{
+		$post_selectyear = $_POST['selectyear'];
+	}
+	if (isset($_POST['selectarrete']) && $_POST['selectarrete'] != '')
+	{
+		$post_selectarrete = $_POST['selectarrete'];
+		$model_selected = new model($dbcon, $post_selectarrete);
+		$model_selected_infos = $model_selected->getModelInfo();
+		$list_fields = $model_selected->getModelFields();
+		$export_path = $model_selected->getExportPath();
+		$modelworkflow = $model_selected->getModelWorkflow();
+		if ($userCAS->getUid() == $user->getUid())
+		{
+			$model_decrees = $userCAS->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1, 0, -1, false, true);
+		}
+		else
+		{
+			$model_decrees = $user->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1, 0, -1, false, true);
+		}
+		if (isset($post_selectcomp) && $post_selectcomp != '')
+		{
+			$composante = $post_selectcomp;
+		}
+		else
+		{
+			$composante = NULL;
+		}
+		$stat = $model_selected->getStats($model_decrees, $composante);
+		$corresp_period = array("semestre 1" => "P1", "1ère année" => "P1", "semestre 2" => "P2", "2ème année" => "P2", "Annuel" => "Annuel");
+	}
+	else
+	{
+	}
+?>
+<div id="contenu1">
+	<h2> Statistiques </h2>
 	<?php if (sizeof($listModels) == 0 ) { ?>
 		<div class="gauche">
 		Vous n'avez accès à aucun modèle de document. <br>
@@ -463,18 +139,26 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 		</select>
 		<select style="width:14em" name="selectcomp" id="selectcomp">
 			<?php
-			if (!isset($post_selectcomp)) { ?>
-			<option value="" selected="selected">Composante (facultatif)</option>
-			<?php } else { ?>
-				<option value="">Composante (facultatif)</option>
-			<?php }
-			foreach ($liste_comp as $codcmp => $liccmp) {
-				if (isset($post_selectcomp) && $post_selectcomp == $codcmp) { ?>
+				if (sizeof($liste_comp) ==  1)
+				{
+					$codcmp = key($liste_comp); $liccmp = $liste_comp[$codcmp];
+					?>
 					<option value="<?php echo $codcmp;?>" selected="selected"><?php echo $liccmp;?></option>
-				<?php } else { ?>
-					<option value="<?php echo $codcmp;?>"><?php echo $liccmp;?></option>
-				<?php }
-			} ?>
+				<?php } else { 
+					if (!isset($post_selectcomp)) { ?>
+					<option value="" selected="selected">Composante (facultatif)</option>
+					<?php } else { ?>
+						<option value="">Composante (facultatif)</option>
+					<?php }
+					foreach ($liste_comp as $codcmp => $liccmp) {
+						if (isset($post_selectcomp) && $post_selectcomp == $codcmp) { ?>
+							<option value="<?php echo $codcmp;?>" selected="selected"><?php echo $liccmp;?></option>
+						<?php } else { ?>
+							<option value="<?php echo $codcmp;?>"><?php echo $liccmp;?></option>
+						<?php }
+					}
+				}
+			?>
 		</select>
 		<select style="width:26em" name="selectarrete" id="selectarrete">
 		        <?php
@@ -510,34 +194,33 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 	<?php } ?>
 	<?php if (isset($model_selected_infos))
 	{
-		//print_r2($model_selected_infos);
 		?>
 		<div class="stat">
-			<label class="labstat">Nombre d'arrêtés annuels attendus : </label><?php if ($query_field == NULL) { echo "1" ;} else { echo sizeof($liste_to_do);} ?><br>
-			<label class="labstat" title="On ne compte qu'une seule fois les arrêtés créés pour une mention. Un arrêté semestriel est compté 0.5. Si plusieurs arrêtés créés pour une mention couvrent la même période, la priorité est donnée au statut le plus avancé puis à la période la plus longue.">Nombre d'arrêtés créés ❔ : </label><?php echo $nb_decree_made;?>
+			<label class="labstat">Nombre d'arrêtés annuels attendus : </label><?php if ($stat["query_field"] == NULL) { echo "1" ;} else { echo sizeof($stat["liste_to_do"]);} ?><br>
+			<label class="labstat" title="On ne compte qu'une seule fois les arrêtés créés pour une mention. Un arrêté semestriel est compté 0.5. Si plusieurs arrêtés créés pour une mention couvrent la même période, la priorité est donnée au statut le plus avancé puis à la période la plus longue.">Nombre d'arrêtés créés ❔ : </label><?php echo $stat["nb_decree_made"];?>
 			<ul>
-				<li><label class="labsubstat">Validé : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]) + (sizeof($decree_made[STATUT_VALIDE]["P1"]) / 2) + (sizeof($decree_made[STATUT_VALIDE]["P2"]) / 2); ?></li>
+				<li><label class="labsubstat">Validé : </label><?php echo sizeof($stat["decree_made"][STATUT_VALIDE]["Annuel"]) + (sizeof($stat["decree_made"][STATUT_VALIDE]["P1"]) / 2) + (sizeof($stat["decree_made"][STATUT_VALIDE]["P2"]) / 2); ?></li>
 				<ul>
-					<li><label class="labsubsubstat">Annuel : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["Annuel"]);?></li>
+					<li><label class="labsubsubstat">Annuel : </label><?php echo sizeof($stat["decree_made"][STATUT_VALIDE]["Annuel"]);?></li>
 					<?php if ($post_selectarrete == 12) { ?>
-						<li><label class="labsubsubstat">1ère année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
-						<li><label class="labsubsubstat">2ème année : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
+						<li><label class="labsubsubstat">1ère année : </label><?php echo sizeof($stat["decree_made"][STATUT_VALIDE]["P1"])/2;?></li>
+						<li><label class="labsubsubstat">2ème année : </label><?php echo sizeof($stat["decree_made"][STATUT_VALIDE]["P2"])/2;?></li>
 					<?php } else { ?>
-						<li><label class="labsubsubstat">Semestre 1 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P1"])/2;?></li>
-						<li><label class="labsubsubstat">Semestre 2 : </label><?php echo sizeof($decree_made[STATUT_VALIDE]["P2"])/2;?></li>
+						<li><label class="labsubsubstat">Semestre 1 : </label><?php echo sizeof($stat["decree_made"][STATUT_VALIDE]["P1"])/2;?></li>
+						<li><label class="labsubsubstat">Semestre 2 : </label><?php echo sizeof($stat["decree_made"][STATUT_VALIDE]["P2"])/2;?></li>
 					<?php } ?>
 				</ul>
-				<li><label class="labsubstat">En cours de signature : </label><?php echo sizeof($decree_made[STATUT_EN_COURS]["Annuel"]) + (sizeof($decree_made[STATUT_EN_COURS]["P1"]) / 2) + (sizeof($decree_made[STATUT_EN_COURS]["P2"]) / 2); ?></li>
+				<li><label class="labsubstat">En cours de signature : </label><?php echo sizeof($stat["decree_made"][STATUT_EN_COURS]["Annuel"]) + (sizeof($stat["decree_made"][STATUT_EN_COURS]["P1"]) / 2) + (sizeof($stat["decree_made"][STATUT_EN_COURS]["P2"]) / 2); ?></li>
 				<ul>
-					<li><label class="labsubsubstat">Présidence : </label><?php echo sizeof($decree_made["Validation de la présidence"]["Annuel"]) + (sizeof($decree_made["Validation de la présidence"]["P1"]) / 2) + (sizeof($decree_made["Validation de la présidence"]["P2"]) / 2); ?></li>
-					<li><label class="labsubsubstat">Composante : </label><?php echo sizeof($decree_made["Visa de la composante"]["Annuel"]) + (sizeof($decree_made["Visa de la composante"]["P1"]) / 2) + (sizeof($decree_made["Visa de la composante"]["P2"]) / 2); ?></li>
+					<li><label class="labsubsubstat">Présidence : </label><?php echo sizeof($stat["decree_made"]["Validation de la présidence"]["Annuel"]) + (sizeof($stat["decree_made"]["Validation de la présidence"]["P1"]) / 2) + (sizeof($stat["decree_made"]["Validation de la présidence"]["P2"]) / 2); ?></li>
+					<li><label class="labsubsubstat">Composante : </label><?php echo sizeof($stat["decree_made"]["Visa de la composante"]["Annuel"]) + (sizeof($stat["decree_made"]["Visa de la composante"]["P1"]) / 2) + (sizeof($stat["decree_made"]["Visa de la composante"]["P2"]) / 2); ?></li>
 				</ul>
-				<li><label class="labsubstat">Brouillon : </label><?php echo sizeof($decree_made[STATUT_BROUILLON]["Annuel"]) + (sizeof($decree_made[STATUT_BROUILLON]["P1"]) / 2) + (sizeof($decree_made[STATUT_BROUILLON]["P2"]) / 2); ?></li>
+				<li><label class="labsubstat">Brouillon : </label><?php echo sizeof($stat["decree_made"][STATUT_BROUILLON]["Annuel"]) + (sizeof($stat["decree_made"][STATUT_BROUILLON]["P1"]) / 2) + (sizeof($stat["decree_made"][STATUT_BROUILLON]["P2"]) / 2); ?></li>
 			</ul>
-			<label class="labstat">Nombre d'arrêtés NON créés : </label><?php echo sizeof($liste_to_do) - $nb_decree_made;?><br>
-			<label class="labstat" title="La période des arrêtés en doublon est affichée en orange dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><span class='warning_doublon'><?php echo sizeof($decree_doublon);?></span><br><br>
+			<label class="labstat">Nombre d'arrêtés NON créés : </label><?php echo sizeof($stat["liste_to_do"]) - $stat["nb_decree_made"];?><br>
+			<label class="labstat" title="La période des arrêtés en doublon est affichée en orange dans le tableau ci-dessous.">Nombre d'arrêtés validés en doublon ❔ : </label><span class='warning_doublon'><?php echo sizeof($stat["decree_doublon"]);?></span><br><br>
 		</div>
-		<?php if (sizeof($liste_to_do) > 0)
+		<?php if (sizeof($stat["liste_to_do"]) > 0)
 		{ ?>
 			<div>
 				<table class="tableausimple">
@@ -550,46 +233,46 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 						<th class="titresimple">Statut</th>
 						<th class="titresimple">Suivi eSignature</th>
 					</tr>
-				<?php foreach ($liste_to_do as $todo)
+				<?php foreach ($stat["liste_to_do"] as $todo)
 				{ ?>
 					<tr>
 						<?php 
 						$valeur = htmlspecialchars($todo['value']);
-						$decree_edited = array_key_exists($valeur, $liste_edit);
-						$rowspan =  $decree_edited ? sizeof($liste_edit[$valeur]) : 1; ?>
+						$decree_edited = array_key_exists($valeur, $stat["liste_edit"]);
+						$rowspan =  $decree_edited ? sizeof($stat["liste_edit"][$valeur]) : 1; ?>
 						<td rowspan=<?php echo $rowspan;?> ><?php echo $todo['code'];?></td>
-						<td rowspan=<?php echo $rowspan;?>s><?php echo $todo['value'];?></td>
+						<td rowspan=<?php echo $rowspan;?>><?php echo $todo['value'];?></td>
 						<td rowspan=<?php echo $rowspan;?>><?php echo $liste_comp[$todo['cmp']];?></td>
 						<?php if ($decree_edited) 
 						{ ?>
 							<?php ?>
-							<?php $periode = $liste_edit[$valeur][0]['periode'] == '' ? "Annuel" : $liste_edit[$valeur][0]['periode'];
-							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
+							<?php $periode = $stat["liste_edit"][$valeur][0]['periode'] == '' ? "Annuel" : $stat["liste_edit"][$valeur][0]['periode'];
+							$periode_doublon = (array_key_exists($valeur, $stat["decree_doublon"]) && in_array($corresp_period[$periode], $stat["decree_doublon"][$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
-							<td class="<?php echo $liste_edit[$valeur][0]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][0]['statut']['title'];?>"><?php echo $liste_edit[$valeur][0]['statut']['contenu']; ?></td>
-							<?php $pos = strpos($liste_edit[$valeur][0]['statut']['contenu'], "signrequests");
+							<td class="<?php echo $stat["liste_edit"][$valeur][0]['statut']['class'];?>" title="<?php echo $stat["liste_edit"][$valeur][0]['statut']['title'];?>"><?php echo $stat["liste_edit"][$valeur][0]['statut']['contenu']; ?></td>
+							<?php $pos = strpos($stat["liste_edit"][$valeur][0]['statut']['contenu'], "signrequests");
 							if ($pos !== FALSE) {
-								$esignatureid = substr($liste_edit[$valeur][0]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][0]['statut']['contenu'], "target") -2 - $pos - 13); ?>
+								$esignatureid = substr($stat["liste_edit"][$valeur][0]['statut']['contenu'], $pos + 13, strpos($stat["liste_edit"][$valeur][0]['statut']['contenu'], "target") -2 - $pos - 13); ?>
 								<td><a href="<?php echo 'info_signature.php?esignatureid='.$esignatureid; ?>"><?php echo $esignatureid;?></a></td>
 							<?php } else { ?>
 								<td></td>
 							<?php } ?>
 						<?php } else { ?>
 							<td></td>
-							<td></td>
+							<td><a href="<?php echo URL_BASE_ZORRO."/create_decree.php?new&idmodel=".$post_selectarrete."&comp=".$composante_selected."&etp=".$todo['code']; ?>" target="_blank">Créer</a></td>
 							<td></td>
 						<?php } ?>
 					</tr>
 					<?php for($i = 1; $i < $rowspan; $i++)
 					{ ?>
 						<tr>
-							<?php $periode = $liste_edit[$valeur][$i]['periode'] == '' ? "Annuel" : $liste_edit[$valeur][$i]['periode'];
-							$periode_doublon = (array_key_exists($valeur, $decree_doublon) && in_array($corresp_period[$periode], $decree_doublon[$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
+							<?php $periode = $stat["liste_edit"][$valeur][$i]['periode'] == '' ? "Annuel" : $stat["liste_edit"][$valeur][$i]['periode'];
+							$periode_doublon = (array_key_exists($valeur, $stat["decree_doublon"]) && in_array($corresp_period[$periode], $stat["decree_doublon"][$valeur])) ? "class='warning_doublon' title='doublon'" : "";?>
 							<td <?php echo $periode_doublon; ?>><?php echo $periode; ?></td>
-							<td class="<?php echo $liste_edit[$valeur][$i]['statut']['class'];?>" title="<?php echo $liste_edit[$valeur][$i]['statut']['title'];?>"><?php echo $liste_edit[$valeur][$i]['statut']['contenu']; ?></td>
-							<?php $pos = strpos($liste_edit[$valeur][$i]['statut']['contenu'], "signrequests");
+							<td class="<?php echo $stat["liste_edit"][$valeur][$i]['statut']['class'];?>" title="<?php echo $stat["liste_edit"][$valeur][$i]['statut']['title'];?>"><?php echo $stat["liste_edit"][$valeur][$i]['statut']['contenu']; ?></td>
+							<?php $pos = strpos($stat["liste_edit"][$valeur][$i]['statut']['contenu'], "signrequests");
 							if ($pos !== FALSE) {
-								$esignatureid = substr($liste_edit[$valeur][$i]['statut']['contenu'], $pos + 13, strpos($liste_edit[$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>
+								$esignatureid = substr($stat["liste_edit"][$valeur][$i]['statut']['contenu'], $pos + 13, strpos($stat["liste_edit"][$valeur][$i]['statut']['contenu'], "target") -2 - $pos - 13); ?>
 								<td><a href="<?php echo 'info_signature.php?esignatureid='.$esignatureid; ?>"><?php echo $esignatureid;?></a></td>
 							<?php } else { ?>
 								<td></td>
@@ -604,10 +287,6 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 </div>
 	<?php } ?>
 <?php } else { ?>
-<div id="contenu1">
-	<h2> Accès interdit </h2>
-</div>
-<?php } } else { ?>
 <div id="contenu1">
 	<h2> Accès interdit </h2>
 </div>

@@ -529,7 +529,7 @@ class user {
 		}
 	}
 	
-	function getDecreesBy($criteres, $limit, $last_id = 0, $orderby = -1, $desc = false)
+	function getDecreesBy($criteres, $limit, $last_id = 0, $orderby = -1, $desc = false, $nousercontrol = false)
 	{
 		// TODO
 		$listdecrees = array();
@@ -560,7 +560,7 @@ class user {
 							ON dt.iddecree_type = m.iddecree_type
 						LEFT JOIN user
 							ON user.iduser = d.iduser";
-		if ($this->isSuperAdmin() || $this->isDaji()) // Accès à tous les arrêtés
+		if ($this->isSuperAdmin() || $this->isDaji() || $nousercontrol) // Accès à tous les arrêtés
 		{
 			$select .= " WHERE (d.iduser LIKE '%' ";
 			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
