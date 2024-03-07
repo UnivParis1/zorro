@@ -12,7 +12,7 @@ function findPerson($name, $id = '')
 	//var input_elt = $( ".token-autocomplete input" );
 	echo "$( '#".$name.$id."' ).autocompleteUser(
 			'".WSGROUPS_URL.WSGROUPS_SEARCH_USERCAS."', { select: completionAgent, wantedAttr: 'displayName',
-			wsParams: { allowInvalidAccounts: 0, showExtendedInfo: 1, filter_eduPersonAffiliation: 'employee|staff' } });
+			wsParams: { allowInvalidAccounts: 0, filter_eduPersonAffiliation: 'employee|staff' } });
 	";
 	echo "</script>";
 
@@ -39,7 +39,7 @@ function findStudent($name, $id = '')
 	//var input_elt = $( ".token-autocomplete input" );
 	echo "$( '#".$name.$id."_ref' ).autocompleteUser(
 			'".WSGROUPS_URL.WSGROUPS_SEARCH_USERCAS."', { select: completionStudent, wantedAttr: 'uid',
-			wsParams: { allowInvalidAccounts: 0, showExtendedInfo: 1, filter_eduPersonAffiliation: 'student' } });
+			wsParams: { allowInvalidAccounts: 0, filter_eduPersonAffiliation: 'student' } });
 	";
 	echo "</script>";
 }
