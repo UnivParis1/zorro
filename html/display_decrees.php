@@ -23,7 +23,11 @@
         <td class="cellulesimple" title="<?php echo $objdecree->getFileName(); ?>"><a href="create_decree.php?id=<?php echo $decree['iddecree'];?>"><?php echo $nom_aff; ?></a></td>
         <td class="cellulesimple"><?php echo $decree['modelname']; ?></td>
         <td class="cellulesimple"><?php echo $ldap->getStructureName($decree['structure']); ?></td>
-        <td class="cellulesimple"><?php echo $ldap->getDisplayName($decree['uid']); ?></td>
+        <?php if (!is_null($decree['uidmaj']) && $decree['uidmaj'] != $decree['uid']) { ?>
+            <td class="cellulesimple" title="Modifié par : <?php echo $ldap->getDisplayName($decree['uidmaj']);?>"><?php echo $ldap->getDisplayName($decree['uid'])."*"; ?></td>
+        <?php } else { ?>
+            <td class="cellulesimple"><?php echo $ldap->getDisplayName($decree['uid']); ?></td>
+        <?php } ?>
         <td class="cellulesimple date"><?php echo date('d/m/Y',strtotime($decree['majdate'])); ?></td>
         <?php
         $aff_statut = $objdecree->getStatusAff();?>

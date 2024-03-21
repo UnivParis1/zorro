@@ -300,6 +300,7 @@ class ldap {
 					if ($codeApo != '')
 					{
 						$retour['codeapo'] = $codeApo;
+						$retour['structcodeapo'] = $structuremere;
 						break;
 					}
 				}

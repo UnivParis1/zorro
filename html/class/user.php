@@ -299,6 +299,23 @@ class user {
 		$ldap = new ldap();
 		return $ldap->getUserAndStructureInfos($this->_uid, false)['codeapo'];
 	}
+
+	function getStructurePorteuseApo()
+	{
+		if (isset($_SESSION['structporteuse']))
+		{
+			return $_SESSION['structporteuse'];
+		}
+		$ldap = new ldap();
+		$info_user_struct = $ldap->getUserAndStructureInfos($this->_uid, false);
+		$retour = NULL;
+		if (key_exists('structcodeapo', $info_user_struct))
+		{
+			$retour = $info_user_struct['structcodeapo'];
+			$_SESSION['structporteuse'] = $retour;
+		}
+		return $retour;
+	}
 	
 	// Pas utilisé
 	function getModelsAdmin()
@@ -423,6 +440,18 @@ class user {
 					return true;
 				}
 			}
+			else
+			{
+				$structapo = $this->getStructurePorteuseApo();
+				if ($structapo != NULL)
+				{
+					$groupe_role = array_column($this->getGroupeRoles($_SESSION['groupes'], 'model', true), 'idrole', 'idmodel');
+					if ($structapo == $decree['structure'] && array_key_exists($decree['idmodel'], $groupe_role))
+					{
+						return true;
+					}
+				}
+			}
 		}
 		return false;
 	}
@@ -541,6 +570,7 @@ class user {
 						m.name as modelname,
 						d.structure,
 						user.uid as uid,
+						u2.uid as uidmaj,
 						IFNULL(d.majdate, d.createdate) AS majdate,
 						d.status,
 						d.iddecree,
@@ -559,7 +589,9 @@ class user {
 						INNER JOIN decree_type dt
 							ON dt.iddecree_type = m.iddecree_type
 						LEFT JOIN user
-							ON user.iduser = d.iduser";
+							ON user.iduser = d.iduser
+						LEFT JOIN user u2
+							ON u2.iduser = d.idmajuser";
 		if ($this->isSuperAdmin() || $this->isDaji() || $nousercontrol) // Accès à tous les arrêtés
 		{
 			$select .= " WHERE (d.iduser LIKE '%' ";
@@ -571,11 +603,29 @@ class user {
 		}
 		else
 		{
+			// on souhaite récupérer la structure porteuse du code composante apogée
+			// pour donner accès aux arrêtés créés pour la composante aux personnels
+			$hasstructapo = false;
+			$structporteuse = $this->getStructurePorteuseApo();
+			if ($structporteuse != NULL)
+			{
+				$hasstructapo = true;
+			}
 			if (array_key_exists('idmodel', $criteres) && $criteres['idmodel'] != null)
 			{
-				$select .= " WHERE ((d.iduser = ? AND d.idmodel = ?) ";
-				$params[] = $iduser;
-				$params[] = $criteres['idmodel'];
+				if ($hasstructapo)
+				{
+					$select .= " WHERE (((d.iduser = ? OR d.structure = ?) AND d.idmodel = ?) ";
+					$params[] = $iduser;
+					$params[] = $structporteuse;
+					$params[] = $criteres['idmodel'];
+				}
+				else
+				{
+					$select .= " WHERE ((d.iduser = ? AND d.idmodel = ?) ";
+					$params[] = $iduser;
+					$params[] = $criteres['idmodel'];
+				}
 			}
 			else
 			{
@@ -682,9 +732,19 @@ class user {
 							}
 							else
 							{
-								$select .= ' OR (d.iduser = ? AND d.idmodel = ?) ';
-								$params[] = $iduser;
-								$params[] = $role['idmodel'];
+								if ($hasstructapo)
+								{
+									$select .= ' OR ((d.iduser = ? OR d.structure = ?) AND d.idmodel = ?) ';
+									$params[] = $iduser;
+									$params[] = $structporteuse;
+									$params[] = $role['idmodel'];
+								}
+								else
+								{
+									$select .= ' OR (d.iduser = ? AND d.idmodel = ?) ';
+									$params[] = $iduser;
+									$params[] = $role['idmodel'];
+								}
 							}
 						}
 					}
@@ -809,6 +869,7 @@ class user {
 			$select .= " ? ";
 			$params[] = $limit;
 		}
+		elog("Requête : ".$select);
 		if (sizeof($params) == 0)
 		{
 			$result = mysqli_query($this->_dbcon, $select);
