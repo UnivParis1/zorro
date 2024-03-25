@@ -302,10 +302,10 @@ class user {
 
 	function getStructurePorteuseApo()
 	{
-		if (isset($_SESSION['structporteuse']))
+		/*if (isset($_SESSION['structporteuse']))
 		{
 			return $_SESSION['structporteuse'];
-		}
+		}*/
 		$ldap = new ldap();
 		$info_user_struct = $ldap->getUserAndStructureInfos($this->_uid, false);
 		$retour = NULL;
@@ -430,18 +430,17 @@ class user {
 				return true;
 			}
 			// L'utilisateur appartient à la structure pour laquelle le document a été créé
-			elseif ($this->isAdmin())
-			{
-				$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
-				$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
-				//print_r2($listStructuresFilles);
-				if (in_array($decree['structure'], $listStructuresFilles))
-				{
-					return true;
-				}
-			}
 			else
 			{
+				if ($this->isAdmin())
+				{
+					$listStructuresFilles = $this->getAdminSubStructs($_SESSION['supannentiteaffectation']);
+					$listStructuresFilles[] = 'structures-'.$_SESSION['supannentiteaffectation'];
+					if (in_array($decree['structure'], $listStructuresFilles))
+					{
+						return true;
+					}
+				}
 				$structapo = $this->getStructurePorteuseApo();
 				if ($structapo != NULL)
 				{
@@ -643,13 +642,17 @@ class user {
 				$structure = isset($_SESSION['supannentiteaffectation']) ? $_SESSION['supannentiteaffectation'] : $ldap->getInfos($this->_uid, false)['supannentiteaffectation'];
 				$listStructuresFilles = $this->getAdminSubStructs($structure);
 				$listStructuresFilles[] = 'structures-'.$structure;
-				//print_r2($listStructuresFilles);
 				$select .= " OR (d.structure IN (?";
 				$params[] = $listStructuresFilles[0];
 				for($i = 1; $i < sizeof($listStructuresFilles); $i++)
 				{
 					$select .= ', ?';
 					$params[] = $listStructuresFilles[$i];
+				}
+				if ($hasstructapo)
+				{
+					$select .= ', ?';
+					$params[] = $structporteuse;
 				}
 				$select .= ') ';
 			}
