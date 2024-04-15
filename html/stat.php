@@ -18,7 +18,7 @@ if (is_null($userid) or ($userid == ""))
 	exit();
 }
 $user = new user($dbcon, $userid);
-$user_apo = $user->getStructureCodApo(); echo $user_apo;
+$user_apo = $user->getStructureCodApo();
 
 // Récupération des modeles auxquels à accès l'utilisateur
 $menuItem = 'menu_stat';
