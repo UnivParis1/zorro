@@ -192,6 +192,11 @@
 					</li>	
 					<?php } ?>
 					<?php if ($user->isSuperAdmin()) { ?>
+					<li id='menu_export' <?php echo ($menuItem == 'menu_export') ? "class='navcourant'" : '';?> >
+						<a href="export.php">Exports</a>
+					</li>
+					<?php } ?>
+					<?php if ($user->isSuperAdmin()) { ?>
 					<li id='menu_maintenance' <?php echo ($menuItem == 'menu_maintenance') ? "class='navcourant'" : '';?> >
 						<a href="maintenance.php">Mode Maintenance</a>
 					</li>

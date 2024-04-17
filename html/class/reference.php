@@ -967,6 +967,7 @@ class reference {
 				else
 				{
 					echo "L'envoi de mail est désactivé. Les destinataires prévus sont : ".implode(",", array_column($resp[$comp['code']], 'mail'));
+					echo "Le mail prévu est : ".$message;
 				}
 			}
 			echo "<br>___________________________";
@@ -1052,6 +1053,60 @@ class reference {
 			elog("Erreur de recherche des paramètres du cron $cron_number. ".mysqli_error($this->_dbcon));
 		}
 		return $retour;
+	}
+
+	function getCommissionsPresidents($annee, $anneeplusun, $nbjours=0)
+	{
+		$sql = "SELECT
+					dfi2.value as mention,
+					dfi.value as president,
+					NVL(d.majdate, d.createdate) as majdate
+				FROM
+					model_field mfi
+					INNER JOIN model m
+						ON m.idmodel = mfi.idmodel
+					INNER JOIN decree_type dty
+						ON dty.iddecree_type = m.iddecree_type
+							AND dty.iddecree_type IN ('2', '6') # Commission et Comission IAE
+					INNER JOIN decree_field dfi
+						ON dfi.idmodel_field = mfi.idmodel_field
+					INNER JOIN decree d
+						ON d.iddecree = dfi.iddecree
+							AND d.status = 'v' # uniquement les arrêtés signés
+							AND ((d.year = ? AND MONTH(d.createdate) >= 9)
+								OR (d.year = ? AND MONTH(d.createdate) < 9))
+					INNER JOIN decree_field dfi2
+						ON dfi2.iddecree = d.iddecree
+					INNER JOIN model_field mfi2
+						ON mfi2.idmodel = mfi.idmodel
+							AND mfi2.idfield_type = 3 # mention du diplôme
+							AND mfi2.idmodel_field = dfi2.idmodel_field
+				WHERE
+					mfi.idfield_type = 4 # Président
+					AND not exists (SELECT d2.iddecree FROM decree d2 INNER JOIN decree_field dfi3 ON dfi3.iddecree = d2.iddecree
+					WHERE NVL(d2.majdate, d2.createdate) > NVL(d.majdate, d.createdate) AND d2.status = 'v'
+					AND dfi3.value = dfi2.value) ";
+		$params = array($annee, $anneeplusun);
+		if ($nbjours > 0)
+		{
+			$sql .= " AND d.majdate > DATE_SUB(SYSDATE(), INTERVAL ? DAY) # Activer si on souhaite récupérer uniquement les arrêtés signés depuis X jours";
+			$params[] = $nbjours;
+		}
+		$result = prepared_select($this->_dbcon, $sql, $params);
+		$donnees = array();
+		if (mysqli_error($this->_dbcon))
+		{
+			elog("Erreur a l'execution de la requete président de commission par mention.");
+		}
+		else
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$donnees[] = $res;
+			}
+		}
+		//var_dump($donnees);
+		return $donnees;
 	}
 
 }
