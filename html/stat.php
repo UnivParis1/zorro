@@ -93,11 +93,11 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 		$modelworkflow = $model_selected->getModelWorkflow();
 		if ($userCAS->getUid() == $user->getUid())
 		{
-			$model_decrees = $userCAS->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1, 0, -1, false, true);
+			$model_decrees = $userCAS->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected, 'allcomp' => "TRUE"), -1, 0, -1, false, true);
 		}
 		else
 		{
-			$model_decrees = $user->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected), -1, 0, -1, false, true);
+			$model_decrees = $user->getDecreesBy(array('idmodel' => $model_selected->getid(), 'createyear' => $post_selectyear, 'composante' => $composante_selected, 'allcomp' => "TRUE"), -1, 0, -1, false, true);
 		}
 		if (isset($post_selectcomp) && $post_selectcomp != '')
 		{

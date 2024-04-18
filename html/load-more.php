@@ -35,6 +35,11 @@ if (isset($_GET['last_id']))
 		$post_number = $_GET['number'];
 		$params['findnum'] = $post_number;
     }
+    if (isset($_GET['allcomp']) && $_GET['allcomp'] != '')
+    {
+		$allcomp = $_GET['allcomp'];
+		$params['allcomp'] = $allcomp;
+    }
     $userid = $_GET['userid'];
     $user = new user($dbcon, $userid);
     $alldecrees = $user->getDecreesBy($params, 20, intval($_GET['last_id']), $_GET['orderby'], $_GET['desc']);

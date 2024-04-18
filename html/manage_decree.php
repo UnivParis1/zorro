@@ -44,6 +44,12 @@
 		$post_findannee = $_POST['findannee'];
 		$params['year'] = $post_findannee;
     }
+	$checked = "title=\"Afficher les arrêtés de mon service/UFR\"";
+    if (isset($_POST['allcomp']) && $_POST['allcomp'] == "TRUE")
+    {
+		$params['allcomp'] = $_POST['allcomp'];
+		$checked = "title=\"Afficher uniquement mes arrêtés\" checked";
+    }
      
     // Récupération des modeles auxquels à accès l'utilisateur
     $user = new user($dbcon, $userid);
@@ -139,6 +145,8 @@
 					<option value="<?php echo $name;?>"><?php echo $value;?></option>
 			<?php } } ?>
 		</select>
+		<label for="allcomp">Service/UFR</label>
+		<input type="checkbox" id="allcomp" name="allcomp" value="TRUE" onclick="submit()" <?php echo $checked;?>>
 		<input type="hidden" id="orderby" value=5>
 		<input type="hidden" id="desc" value="FALSE">
 		<input type="hidden" id="nbaff" value=0>

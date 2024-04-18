@@ -161,7 +161,7 @@ option.inactive {
 
 .recherche   {
     margin-bottom: 25px;
-    max-width: 820px;
+    max-width: 850px;
     margin-left:auto; margin-right: auto;
 }
 
@@ -170,7 +170,19 @@ option.inactive {
     border: 1px solid #00326e5c;
     padding: 4px 3px 4px 5px;
     font-family: arial;
-    width: 12.5em;
+    /*width: 12.5em;*/
+}
+.recherche form label {
+    display: inline-block;
+    font-weight: bold;
+    border-top: none;
+    color: #00326e;
+    margin-bottom: 1px;
+    margin-top: 1px;
+    padding-right: 1px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    min-width: 0px;
 }
 
  .recherche select, .recherche select#selectarrete  {

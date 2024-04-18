@@ -606,7 +606,7 @@ class user {
 			// pour donner accès aux arrêtés créés pour la composante aux personnels
 			$hasstructapo = false;
 			$structporteuse = $this->getStructurePorteuseApo();
-			if ($structporteuse != NULL)
+			if ($structporteuse != NULL  && key_exists("allcomp", $criteres))
 			{
 				$hasstructapo = true;
 			}

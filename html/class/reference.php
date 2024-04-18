@@ -868,7 +868,7 @@ class reference {
 					{
 						$tem_commission = true;
 					}
-					$model_decrees = $user->getDecreesBy(array('idmodel' => $obj_model->getid(), 'createyear' => $year, 'composante' => 'structures-'.$supann), -1);
+					$model_decrees = $user->getDecreesBy(array('idmodel' => $obj_model->getid(), 'createyear' => $year, 'composante' => 'structures-'.$supann, 'allcomp' => 'TRUE'), -1);
 					//var_dump($model_decrees);
 					$stats[$comp['code']][$idmodel] = $obj_model->getStats($model_decrees, $comp['code']);
 					if (sizeof($stats[$comp['code']][$idmodel]['liste_to_do']) > 0)

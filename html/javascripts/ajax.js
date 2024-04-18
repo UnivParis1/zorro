@@ -505,14 +505,19 @@ $(window).scroll(function() {
 		var contenu = document.getElementById('contenu').value;
 		var findnum = document.getElementById('findnum').value;
 		var year = document.getElementById('findannee').value;
-		loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu, findnum, year);
+		if (document.getElementById('allcomp').checked == true) {
+			var allcomp = document.getElementById('allcomp').value;
+		} else {
+			var allcomp = '';
+		}
+		loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu, findnum, year, allcomp);
 		scrollLoad = false;
     }
 });
 
-function loadMore(last_id, userid, orderby, desc, idmodel, status, contenu, num, year){
+function loadMore(last_id, userid, orderby, desc, idmodel, status, contenu, num, year, allcomp){
   $.ajax({
-      url: 'load-more.php?last_id=' + last_id + '&userid=' + userid + '&orderby=' + orderby + '&desc=' + desc + '&status=' + status + '&idmodel=' + idmodel + '&contenu=' + contenu + '&number=' + num + '&year=' + year ,
+      url: 'load-more.php?last_id=' + last_id + '&userid=' + userid + '&orderby=' + orderby + '&desc=' + desc + '&status=' + status + '&idmodel=' + idmodel + '&contenu=' + contenu + '&number=' + num + '&year=' + year + '&allcomp=' + allcomp ,
       type: "get",
       beforeSend: function(){
           $('#ajax-load').show();
@@ -540,6 +545,11 @@ function refreshtab(){
 	var contenu = document.getElementById('contenu').value;
 	var findnum = document.getElementById('findnum').value;
 	var year = document.getElementById('findannee').value;
-	loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu, findnum, year);
+	if (document.getElementById('allcomp').checked == true) {
+		var allcomp = document.getElementById('allcomp').value;
+	} else {
+		var allcomp = '';
+	}
+	loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu, findnum, year, allcomp);
 	scrollLoad = false;
 }
