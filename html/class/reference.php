@@ -1085,6 +1085,7 @@ class reference {
 					mfi.idfield_type = 4 # Président
 					AND not exists (SELECT d2.iddecree FROM decree d2 INNER JOIN decree_field dfi3 ON dfi3.iddecree = d2.iddecree
 					WHERE NVL(d2.majdate, d2.createdate) > NVL(d.majdate, d.createdate) AND d2.status = 'v'
+					AND d2.idmodel = d.idmodel AND d2.year >= d.year
 					AND dfi3.value = dfi2.value) ";
 		$params = array($annee, $anneeplusun);
 		if ($nbjours > 0)
