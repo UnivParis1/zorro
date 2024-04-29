@@ -1110,4 +1110,21 @@ class reference {
 		return $donnees;
 	}
 
+	function getAllMentionsCommissions()
+	{
+		require_once 'model.php';
+		$liste_to_do = array();
+		$list_comp = array_column($this->getListComp(), 'value', 'code');
+		$list_model = array_merge($this->getListModel(2, true), $this->getListModel(6, true));
+		foreach($list_comp as $cod_comp => $comp)
+		{
+			foreach($list_model as $model)
+			{
+				$obj_model = new model($this->_dbcon, $model['idmodel']);
+				$liste_to_do = array_merge($liste_to_do, $obj_model->getListDecreesToEditForComp($cod_comp));
+			}
+		}
+		return array_combine(array_column($liste_to_do, 'value'), $liste_to_do);
+	}
+
 }

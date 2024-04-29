@@ -18,7 +18,8 @@
 
 	if (isset($_POST['formation_president']))
 	{
-		$ref = new reference($dbcon);
+		$ref = new reference($dbcon, $rdbApo);
+		$allmentions = $ref->getAllMentionsCommissions();
 		$anneeuni = explode("-", $ref->getAnneeUni());
 		$annee = $anneeuni[0];
 		$anneeplusun = $anneeuni[1];
@@ -36,6 +37,14 @@
 		{
 			$csv .= "\"".html_entity_decode($ligne['mention'])."\";\"".html_entity_decode($ligne['president'])."\"\n";
 		}
+		$mentions_donnees = array_column($donnees, 'mention');
+		foreach ($allmentions as $mention => $value)
+		{
+			if (!key_exists($mention, $mentions_donnees))
+			{
+				$csv .= "\"".html_entity_decode($mention)."\";\"\"\n";
+			}
+		}
 		$doc = fopen(PDF_PATH."presidents_commissions.csv", 'w+');
 		fputs($doc, $csv);
 		fclose($doc);
@@ -47,7 +56,6 @@
 
 	$menuItem = 'menu_export';
 	require ("include/menu.php");
-
 	if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 	{
 		$userCAS = new user($dbcon, $_SESSION['phpCAS']['user']);
