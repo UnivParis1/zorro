@@ -40,7 +40,7 @@
 		$mentions_donnees = array_column($donnees, 'mention');
 		foreach ($allmentions as $mention => $value)
 		{
-			if (!key_exists($mention, $mentions_donnees))
+			if (!in_array($mention, $mentions_donnees))
 			{
 				$csv .= "\"".html_entity_decode($mention)."\";\"\"\n";
 			}
