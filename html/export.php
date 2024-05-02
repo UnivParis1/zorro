@@ -33,14 +33,16 @@
 		}
 	
 		$csv = "mention;president\n";
+		$mentions_decode = array();
 		foreach ($donnees as $ligne)
 		{
-			$csv .= "\"".html_entity_decode($ligne['mention'])."\";\"".html_entity_decode($ligne['president'])."\"\n";
+			$md = html_entity_decode($ligne['mention']);
+			$csv .= "\"".$md."\";\"".html_entity_decode($ligne['president'])."\"\n";
+			$mentions_decode[] = $md;
 		}
-		$mentions_donnees = array_column($donnees, 'mention');
 		foreach ($allmentions as $mention => $value)
 		{
-			if (!in_array($mention, $mentions_donnees))
+			if (!in_array(html_entity_decode($mention), $mentions_decode))
 			{
 				$csv .= "\"".html_entity_decode($mention)."\";\"\"\n";
 			}
