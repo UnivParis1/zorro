@@ -873,56 +873,60 @@ class reference {
 					$stats[$comp['code']][$idmodel] = $obj_model->getStats($model_decrees, $comp['code']);
 					if (sizeof($stats[$comp['code']][$idmodel]['liste_to_do']) > 0)
 					{
-						$tem_relance = true;
-						$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann;
-						$recap[$comp['code']] .= "<b> Modèle : ".$obj_model->getDecreeType()['name']." ".$model['name'];
-						$recap[$comp['code']] .= "<br> Nombre d'arrêtés à créer : ".sizeof($stats[$comp['code']][$idmodel]['liste_to_do'])."<br>";
-						$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']."</b><br>";
-						$recap[$comp['code']] .= "Détail :  <br>";
-						$recap_tab[$comp['code']] = array('modelname' => $obj_model->getDecreeType()['name']." ".$model['name'],
-														  'nbtocreate' => sizeof($stats[$comp['code']][$idmodel]['liste_to_do']),
-														  'nbcreated' => $stats[$comp['code']][$idmodel]['nb_decree_made']);
-						//var_dump($stats[$comp['code']][$idmodel]['liste_edit']);
-						foreach($stats[$comp['code']][$idmodel]['liste_to_do'] as $todo)
+						$nb_decree_val = sizeof($stats[$comp['code']][$idmodel]["decree_made"][STATUT_VALIDE]["Annuel"]) + (sizeof($stats[$comp['code']][$idmodel]["decree_made"][STATUT_VALIDE]["P1"]) / 2) + (sizeof($stats[$comp['code']][$idmodel]["decree_made"][STATUT_VALIDE]["P2"]) / 2);
+						if (sizeof($stats[$comp['code']][$idmodel]['liste_to_do']) > $nb_decree_val)
 						{
-							$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann."&etp=".$todo['code'];
-							$recap[$comp['code']] .= $todo['code']." : ".$todo['value']." --- ";
-							if (key_exists($todo['value'], $stats[$comp['code']][$idmodel]['liste_edit']))
+							$tem_relance = true;
+							$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann;
+							$recap[$comp['code']] .= "<b> Modèle : ".$obj_model->getDecreeType()['name']." ".$model['name'];
+							$recap[$comp['code']] .= "<br> Nombre d'arrêtés à créer : ".sizeof($stats[$comp['code']][$idmodel]['liste_to_do'])."<br>";
+							$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']."</b><br>";
+							$recap[$comp['code']] .= "Détail :  <br>";
+							$recap_tab[$comp['code']] = array('modelname' => $obj_model->getDecreeType()['name']." ".$model['name'],
+															'nbtocreate' => sizeof($stats[$comp['code']][$idmodel]['liste_to_do']),
+															'nbcreated' => $stats[$comp['code']][$idmodel]['nb_decree_made']);
+							//var_dump($stats[$comp['code']][$idmodel]['liste_edit']);
+							foreach($stats[$comp['code']][$idmodel]['liste_to_do'] as $todo)
 							{
-								$liste_periode = array();
-								$liste_periodes_edited = array_column($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']], 'periode');
-								array_multisort($liste_periodes_edited, SORT_ASC, $stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']]);
-								if (!in_array("Annuel", $liste_periodes_edited))
+								$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann."&etp=".$todo['code'];
+								$recap[$comp['code']] .= $todo['code']." : ".$todo['value']." --- ";
+								if (key_exists($todo['value'], $stats[$comp['code']][$idmodel]['liste_edit']))
 								{
-									if (!in_array("semestre 1", $liste_periodes_edited))
+									$liste_periode = array();
+									$liste_periodes_edited = array_column($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']], 'periode');
+									array_multisort($liste_periodes_edited, SORT_ASC, $stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']]);
+									if (!in_array("Annuel", $liste_periodes_edited))
 									{
-										// TODO : Ajouter paramétrage : modèle, composante, diplôme, periode
-										$params_url .= "&periode=S1";
-										$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
+										if (!in_array("semestre 1", $liste_periodes_edited))
+										{
+											// TODO : Ajouter paramétrage : modèle, composante, diplôme, periode
+											$params_url .= "&periode=S1";
+											$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
+										}
+									}
+									foreach($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']] as $elem)
+									{
+										$recap[$comp['code']] .= " ".$elem['periode']." ".$elem['statut']['img']." - ";
+										$liste_periode[] = $elem['periode'];
+									}
+									if (!in_array("Annuel", $liste_periodes_edited))
+									{
+										if (!in_array("semestre 2", $liste_periodes_edited))
+										{
+											$params_url .= "&periode=S2";
+											$recap[$comp['code']] .= " semestre 2 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
+										}
 									}
 								}
-								foreach($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']] as $elem)
+								else
 								{
-									$recap[$comp['code']] .= " ".$elem['periode']." ".$elem['statut']['img']." - ";
-									$liste_periode[] = $elem['periode'];
+									$recap[$comp['code']] .= "<a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a>";
 								}
-								if (!in_array("Annuel", $liste_periodes_edited))
-								{
-									if (!in_array("semestre 2", $liste_periodes_edited))
-									{
-										$params_url .= "&periode=S2";
-										$recap[$comp['code']] .= " semestre 2 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
-									}
-								}
+								$recap[$comp['code']] .= "
+								<br>";
 							}
-							else
-							{
-								$recap[$comp['code']] .= "<a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a>";
-							}
-							$recap[$comp['code']] .= "
-							<br>";
+							$recap[$comp['code']] .= "<br>";
 						}
-						$recap[$comp['code']] .= "<br>";
 					}
 				}
 			}
