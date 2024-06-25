@@ -32,19 +32,19 @@
 			$donnees = $ref->getCommissionsPresidents($annee, $anneeplusun);
 		}
 	
-		$csv = "mention;president\n";
+		$csv = "president;mention\n";
 		$mentions_decode = array();
 		foreach ($donnees as $ligne)
 		{
 			$md = html_entity_decode($ligne['mention']);
-			$csv .= "\"".$md."\";\"".html_entity_decode($ligne['president'])."\"\n";
+			$csv .= "\"".html_entity_decode($ligne['president'])."\";\"".$md."\"\n";
 			$mentions_decode[] = $md;
 		}
 		foreach ($allmentions as $mention => $value)
 		{
 			if (!in_array(html_entity_decode($mention), $mentions_decode))
 			{
-				$csv .= "\"".html_entity_decode($mention)."\";\"\"\n";
+				$csv .= "\"\";\"".html_entity_decode($mention)."\"\n";
 			}
 		}
 		$doc = fopen(PDF_PATH."presidents_commissions.csv", 'w+');
