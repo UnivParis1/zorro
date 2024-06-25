@@ -75,6 +75,35 @@
 		exit();
 	}
 
+	if (isset($_POST['formation_responsables']))
+	{
+		$ref = new reference($dbcon, $rdbApo);
+		$ldap = new ldap();
+		$allmentions = $ref->getAllMentionsCommissions();
+		$list_comp = array_column($ref->getListComp(), 'value', 'code');
+		$list_mention_resp = "mention;responsable\n";
+		foreach ($list_comp as $cle => $codcomp)
+		{
+			$supann = $ldap->getSupannCodeEntiteFromAPO($cle);
+			$resp = $ldap->getStructureResp($supann);
+			$list_resp[$cle] = $resp;
+		}
+		foreach ($allmentions as $mention => $detail)
+		{
+			foreach($list_resp[$detail['cmp']] as $login => $contact)
+			{
+				$list_mention_resp .= "\"".html_entity_decode($mention)."\";\"".$contact['mail']."\"\n";
+			}
+		}
+		$doc = fopen(PDF_PATH."mentions_responsables.csv", 'w+');
+		fputs($doc, $list_mention_resp);
+		fclose($doc);
+		header("Content-Type: text/csv");
+		header("Content-disposition: attachment; filename=\"mentions_responsables".date("Ymd").".csv\"");
+		readfile(PDF_PATH."mentions_responsables.csv");
+		exit();
+	}
+
 	$menuItem = 'menu_export';
 	require ("include/menu.php");
 	if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
@@ -88,6 +117,10 @@
 					<label>Formation / Président de jury pour Gestion des recours</label>
 					<label title="laisser vide pour la totalité">Arrêtés validés depuis</label> <input type='number' name='depuis'> jour(s)
 					<a href="#" target="_blank"><input type='submit' name='formation_president' value='csv'></a>
+				</form>
+				<form name='formation_responsables' method='post' action='export.php'>
+					<label>Formation / Responsables de composante</label>
+					<a href="#" target="_blank"><input type='submit' name='formation_responsables' value='csv'></a>
 				</form>
 				<form name='formation_liste' method='post' action='export.php'>
 					<label>Liste des formations pour la DEVE</label>
