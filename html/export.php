@@ -37,7 +37,7 @@
 		foreach ($donnees as $ligne)
 		{
 			$md = html_entity_decode($ligne['mention']);
-			$csv .= "\"".html_entity_decode($ligne['president'])."\";\"".$md."\";\"".$allmentions[$ligne['mention']]['code']."\"\n";
+			$csv .= "\"".html_entity_decode($ligne['president'])."\";\"".$md."\";\"".$allmentions[$md]['code']."\"\n";
 			$mentions_decode[] = $md;
 		}
 		foreach ($allmentions as $mention => $value)
