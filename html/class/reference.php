@@ -951,13 +951,15 @@ class reference {
 				{
 					$message .= "<p>Les commissions d'examen des voeux ne peuvent se réunir tant que les arrêtés correspondants n'ont pas été validés. Veuillez trouver ci-après l'état d'avancement des arrêtés de votre composante.</p>";
 				}
-				$message .= "<p>".$recap[$comp['code']]."</p>";
-				$message .= "<p>Légende :  cliquez sur l'icone pour effectuer l'action correspondante.<br>";
-				$message .= "✏️ :  accéder au brouillon sur Zorro.<br>";
-				$message .= "🕓🕕🕖 : accéder au document en cours de signature sur eSignature.<br>";
-				$message .= "✅ : accéder au document signé sur eSignature.<br>";
-				$message .= "➕ : créer le document sur Zorro.";
+				$message .= "<p><b>Légende</b> : cliquez sur l'icône pour effectuer l'action correspondante. <br>";
+				$message .= "<b>Ces statuts nécessitent une action de votre part sur Zorro. </b> <br>";
+				$message .= "✏️ : accéder au brouillon sur Zorro. Vous pouvez le compléter puis engager le circuit de signature ou le supprimer s'il n'est plus utile. <br>";
+				$message .= "➕ : créer le document sur Zorro. Vous pourrez ensuite engager le circuit de signature. <br>";
+				$message .= "<b>Les statuts suivants sont indiqués à titre d'information et ne nécessitent pas d'action sur Zorro. </b><br>";
+				$message .= "🕓🕕🕖 : accéder au document en cours de signature sur eSignature et visualiser la progression du circuit. <br>";
+				$message .= "✅ : accéder au document signé sur eSignature. L'arrêté est créé, validé et publié. <br>";
 				$message .= "</p>";
+				$message .= "<p>".$recap[$comp['code']]."</p>";
 				$message .= "<p>Veuillez créer les arrêtés sur Zorro.</p>";
 				$message .= "<p>Cordialement,</p>
 				<p style='font-size:15px;'>Message automatique envoyé par l'application <a href=\"".URL_BASE_ZORRO."\">Zorro</a> de gestion des arrêtés<br>
