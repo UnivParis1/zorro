@@ -545,6 +545,7 @@
 						$modelfieldstype = array_column($modelfields, 'datatype', 'idmodel_field');
 						$modelfieldscomp = array_column($modelfields, 'complement_after', 'name');
 						$modelfieldscompb = array_column($modelfields, 'complement_before', 'name');
+						$modelfieldsblank = array_column($modelfields, 'tem_blank_line', 'name');
 						//echo "<br>modelfieldsarrange <br><br>"; print_r2($modelfieldsarrange);
 						//echo "<br>modelfieldstype <br><br>"; print_r2($modelfieldstype);
 						// copie du modele pour l'arrêté
@@ -887,7 +888,8 @@
 									$champsamodif[] = array("valeur" => $ancprixjour, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
 								elseif ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
-										|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))) // Pour supprimer les lignes des sections inutilisées
+										|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))  // Pour supprimer les lignes des sections inutilisées
+										|| (array_key_exists($field, $modelfieldsblank) && $modelfieldsblank[$field] == 'O')) // Pour supprimer les lignes laissées vides par un champ facultatif
 								{
 									// Pour supprimer la ligne dans le document chercher le "<text:p" précédent et "</text:p>" suivant
 									$position_debut = strrpos(substr($contenu, 0, $position1), "<text:p");
