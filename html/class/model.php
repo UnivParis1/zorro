@@ -349,7 +349,7 @@ class model {
 		return $field_type;
 	}
 
-	function getListDecreesToEditForComp($composante = null)
+	function getListDecreesToEditForComp($composante = null, $cod_anu = null)
 	{
 		$values = array();
 		$field_type = $this->getLastQuery();
@@ -360,16 +360,20 @@ class model {
 			{
 				$select['query_clause'] .= " AND chv.cod_cmp = '".$composante."'";
 			}
+			if ($cod_anu == NULL) $cod_anu = COD_ANU;
+			$select['query_clause'] .= " AND anu.cod_anu = '".$cod_anu."' ";
 			$select['query_clause'] .= ' ORDER BY 3, 2 ';
 			$values = $this->_ref->executeQuery($select);
 		}
 		return $values;
 	}
-	function getStats($model_decrees, $composante)
+
+
+	function getStats($model_decrees, $composante, $year = NULL)
 	{
 		require_once dirname(__FILE__,1).'/decree.php';
 		$query_field = $this->getLastQuery();
-		$liste_to_do = $this->getListDecreesToEditForComp($composante);
+		$liste_to_do = $this->getListDecreesToEditForComp($composante, $year);
 
 		$idfield_periode = ($this->_idmodel == 12) ? 104 : 7; // idfield_type de la période 7 ou 104 pour capacité
 		$liste_edit = array();

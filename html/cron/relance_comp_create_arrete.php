@@ -38,7 +38,7 @@
                 {
                     $list_model = array($p['model'] => $list_model[$p['model']]);
                 }
-                $year = (date('m') >= '09') ? date('Y') : date('Y') - 1;
+                $year = NULL;
                 $list_edit = $ref->getListDecreeStatusForCompModel($user, $list_comp, $list_model, $year);
             }
         }

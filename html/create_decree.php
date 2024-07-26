@@ -481,6 +481,7 @@
 						$decree = new decree($dbcon, $year, $numero_dispo);
 						elog('decree cree avec numero : '.$numero_dispo);
 						$decree->save($user->getid(), $idmodel, $structure);
+						$decree->setUnivYear();
 						if ($modelfield['datatype'] == 'object')
 						{
 							$listobjects = $ref->getObjectsList();
@@ -516,17 +517,10 @@
 					$modelfile = new ZipArchive();
 					if (file_exists("./models/".$modelselected->getfile()))
 					{
-						// TODO : Rendre l'année universitaire d'affichage paramétrable en BDD dans le modèle
-						if (($decree->getModel()->getModelInfo()['iddecree_type'] == 2 || $decree->getModel()->getModelInfo()['iddecree_type'] == 6) && $decree->getModel()->getModelInfo()['idmodel'] != 7 && $decree->getModel()->getModelInfo()['idmodel'] != 41)
-						{
-							$anneeuniv = $ref->getAnneeUni(1);
-						}
-						else
-						{
-							$anneeuniv = $ref->getAnneeUni();
-							$anneeunivplusun =  $ref->getAnneeUni(1);
-							$anneeunivplusdeux = $ref->getAnneeUni(2);
-						}
+						$anneeuniv = $decree->getUnivYear();
+						$anneeunivexplode = explode('-', $anneeuniv);
+						$anneeunivplusun =  $anneeunivexplode[1].'-'.($anneeunivexplode[1]+1);
+						$anneeunivplusdeux = ($anneeunivexplode[1]+1).'-'.($anneeunivexplode[1]+2);
 						$fieldstoinsert = $decree->getFields();
 						// echo "fieldstoinsert <br><br>";print_r2($fieldstoinsert);
 						$modelfields = $modelselected->getModelFields();

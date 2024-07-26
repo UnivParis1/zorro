@@ -6,7 +6,7 @@
 	require_once('./class/user.php');
 
 	// Initialisation de l'utilisateur
-	$ref = new reference('', '');
+	$ref = new reference($dbcon, '');
 	$userid = $ref->getUserUid();
 	//echo $_SESSION['uid'];
 	if (is_null($userid) or ($userid == ""))
@@ -15,14 +15,22 @@
 		header('Location: index.php');
 		exit();
 	}
-
+	$liste_year = $ref->getCreationYears();
+	if (isset($_POST['selectyear']) && $_POST['selectyear'] != '')
+	{
+		$post_selectyear = $_POST['selectyear'];
+	}
+	else
+	{
+		$post_selectyear = $ref->getAnneeUni();
+	}
+	$anneeuni = explode("-", $post_selectyear);
+	$annee = $anneeuni[0];
+	$anneeplusun = $anneeuni[1];
 	if (isset($_POST['formation_president']))
 	{
 		$ref = new reference($dbcon, $rdbApo);
-		$allmentions = $ref->getAllMentionsCommissions();
-		$anneeuni = explode("-", $ref->getAnneeUni());
-		$annee = $anneeuni[0];
-		$anneeplusun = $anneeuni[1];
+		$allmentions = $ref->getAllMentionsCommissions($annee);
 		if (isset($_POST['depuis']) && $_POST['depuis'] != '')
 		{
 			$donnees = $ref->getCommissionsPresidents($annee, $anneeplusun, $_POST['depuis']);
@@ -59,7 +67,7 @@
 	if (isset($_POST['formation_liste']))
 	{
 		$ref = new reference($dbcon, $rdbApo);
-		$allmentions = $ref->getAllMentionsCommissions();
+		$allmentions = $ref->getAllMentionsCommissions($annee);
 		$list_comp = array_column($ref->getListComp(), 'value', 'code');
 		$list_mention_comp = "mention;composante\n";
 		foreach ($allmentions as $mention => $detail)
@@ -79,7 +87,7 @@
 	{
 		$ref = new reference($dbcon, $rdbApo);
 		$ldap = new ldap();
-		$allmentions = $ref->getAllMentionsCommissions();
+		$allmentions = $ref->getAllMentionsCommissions($annee);
 		$list_comp = array_column($ref->getListComp(), 'value', 'code');
 		$list_mention_resp = "mention;responsable\n";
 		foreach ($list_comp as $cle => $codcomp)
@@ -117,18 +125,37 @@
 		{ ?>
 			<div id="contenu1">
 				<h2>Exports</h2>
+					<form name='annee_uni' method='post' action='export.php'>
+						<label>Pour l'année de référence :</label>
+						<select name="selectyear" id="selectyear" onchange="this.form.submit()">
+							<?php
+								if (!isset($post_selectyear)) {
+									$post_selectyear = COD_ANU.'-'.(COD_ANU+1);
+								}
+								foreach ($liste_year as $year) {
+									if ((isset($post_selectyear) && $post_selectyear == $year)) { ?>
+										<option value="<?php echo $year;?>" selected="selected"><?php echo $year;?></option>
+									<?php } else { ?>
+										<option value="<?php echo $year;?>"><?php echo $year;?></option>
+									<?php }
+								} ?>
+						</select>
+					</form>
 				<form name='formation_president' method='post' action='export.php'>
 					<label>Formation / Président de jury pour Gestion des recours</label>
 					<label title="laisser vide pour la totalité">Arrêtés validés depuis</label> <input type='number' name='depuis'> jour(s)
 					<a href="#" target="_blank"><input type='submit' name='formation_president' value='csv'></a>
+					<input type="hidden" name="selectyear" id="selectyear" value=<?php echo $post_selectyear;?>>
 				</form>
 				<form name='formation_responsables' method='post' action='export.php'>
 					<label>Formation / Responsables de composante</label>
 					<a href="#" target="_blank"><input type='submit' name='formation_responsables' value='csv'></a>
+					<input type="hidden" name="selectyear" id="selectyear" value=<?php echo $post_selectyear;?>>
 				</form>
 				<form name='formation_liste' method='post' action='export.php'>
 					<label>Liste des formations pour la DEVE</label>
 					<a href="#" target="_blank"><input type='submit' name='formation_liste' value='csv'></a>
+					<input type="hidden" name="selectyear" id="selectyear" value=<?php echo $post_selectyear;?>>
 				</form>
 			</div>
 		<?php 

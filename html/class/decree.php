@@ -378,6 +378,7 @@ class decree {
 			}
 		}
 	}
+
 	function getFields()
 	{
 		$select = "SELECT * FROM decree_field WHERE iddecree = ?";
@@ -421,6 +422,34 @@ class decree {
 		{
 			elog("Erreur à la suppression du numéro ".$this->_year.'/'.$this->_number." du decree : ".$this->getId()." ".mysqli_error($this->_dbcon));
 		}
+	}
+
+	function setUnivYear()
+	{
+		$model = $this->getModel();
+		$univ_year = $model->getModelInfo()['create_year'];
+		$ref = new reference('', '');
+		switch ($univ_year)
+		{
+			case 'annee_univ_suiv' : $value = $ref->getAnneeUni(1); break;
+			default : $value = $ref->getAnneeUni(); break;
+		}
+		$update = "UPDATE decree SET univ_year = ? WHERE iddecree = ? ";
+		$params = array($value, $this->getid());
+		$result = prepared_query($this->_dbcon, $update, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("Année universitaire pour le decree id : ".$this->getid()." : ".$value);
+		}
+		else
+		{
+			elog("Erreur à l'enregistrement de l'année universitaire du decree : ".$this->getId()." ".mysqli_error($this->_dbcon));
+		}
+	}
+
+	function getUnivYear()
+	{
+		return $this->getDecree()['univ_year'];
 	}
 	
 	function getModel()
@@ -951,8 +980,7 @@ class decree {
 	{
 		$model = $this->getModel();
 		$model_export_path = $model->getExportPath();
-		$date = date('m');
-		$year = ($date < '9') ? date('Y')-1 : date('Y');
+		$year = substr($this->getUnivYear(), 0, 4);
 		$decree_type = $model->getDecreeType();
 		$ref = new reference($this->_dbcon, '');
 		// Les modèles de la DEVE
@@ -993,11 +1021,6 @@ class decree {
 		}
 		else
 		{
-			if ($decree_type['iddecree_type'] == 2 || $decree_type['iddecree_type'] == 6)
-			{
-				// Les arrêtés de commissions sont générés pour l'année universitaire suivante
-				$year ++;
-			}
 			// TARGET_ULR.export_path_decree_type.structure_export_path.year.export_path_model
 			$structure = $this->getStructure();
 			$struct_export_path = $ref->getStructureExportPath($structure);

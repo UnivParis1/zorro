@@ -107,7 +107,14 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 		{
 			$composante = NULL;
 		}
-		$stat = $model_selected->getStats($model_decrees, $composante);
+		if (isset($post_selectyear))
+		{
+			$stat = $model_selected->getStats($model_decrees, $composante, substr($post_selectyear, 0, 4));
+		}
+		else
+		{
+			$stat = $model_selected->getStats($model_decrees, $composante);
+		}
 		$corresp_period = array("semestre 1" => "P1", "1ère année" => "P1", "semestre 2" => "P2", "2ème année" => "P2", "Annuel" => "Annuel");
 	}
 	else
@@ -127,13 +134,13 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 		<select name="selectyear" id="selectyear">
 		<?php
 			if (!isset($post_selectyear)) {
-				$post_selectyear = date('Y');
+				$post_selectyear = COD_ANU.'-'.(COD_ANU+1);
 			} 
 			foreach ($liste_year as $year) {
 				if ((isset($post_selectyear) && $post_selectyear == $year)) { ?>
-					<option value="<?php echo $year;?>" selected="selected"><?php echo $year."/".($year+1);?></option>
+					<option value="<?php echo $year;?>" selected="selected"><?php echo $year;?></option>
 				<?php } else { ?>
-					<option value="<?php echo $year;?>"><?php echo $year."/".($year+1);?></option>
+					<option value="<?php echo $year;?>"><?php echo $year;?></option>
 				<?php }
 			} ?>
 		</select>

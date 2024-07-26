@@ -41,6 +41,7 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 	require_once './class/reference.php';
 	$ref = new reference($dbcon, $rdbApo);
 	$model = new model($dbcon, $_POST['idmodel']);
+	$year = $model->getModelInfo()['create_year'] == 'annee_univ_suiv' ? substr($ref->getAnneeUni(1), 0, 4) : substr($ref->getAnneeUni(), 0, 4);
 	$cod_cmp = $_POST['cod_cmp_dom'];
 	if (!isset($_POST['coddfd']))
 	{
@@ -49,11 +50,11 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 			$query = $model->getQueryField(2); //domaine
 			if ($cod_cmp != '')
 			{
-				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND anu.cod_anu = '".$year."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND anu.cod_anu = '".$year."' ORDER BY 2";
 			}
 			else
 			{
-				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." ORDER BY 2" : " ORDER BY 2";
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND anu.cod_anu = '".$year."' ORDER BY 2" : " AND anu.cod_anu = '".$year."' ORDER BY 2";
 			}
 			$result = $ref->executeQuery($query);
 			$valeur = '';
@@ -80,11 +81,11 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 			$sql_mention = " AND mev.lib_mev = '".str_replace("'", "''", $_POST['mention'])."' ";
 			if ($cod_cmp != '')
 			{
-				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_mention." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2" : $sql_mention." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_mention." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND anu.cod_anu = '".$year."' ORDER BY 2" : $sql_mention." AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND anu.cod_anu = '".$year."' ORDER BY 2";
 			}
 			else
 			{
-				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_mention." ORDER BY 2" : $sql_mention." ORDER BY 2";
+				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_mention." AND anu.cod_anu = '".$year."' ORDER BY 2" : $sql_mention." AND anu.cod_anu = '".$year."' ORDER BY 2";
 			}
 			$result = $ref->executeQuery($query);
 			$valeur = '';
@@ -114,7 +115,7 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 			$sql_comp = $cod_cmp != '' ? " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."'" : '';
 			$sql_dfd = $_POST['coddfd'] != '' ? " AND dfd.lib_dfd = '".str_replace("'", "''", $_POST['coddfd'])."'" : '';
 			$sql_etp = $_POST['etp'] != '' ? " AND vet2.lib_web_vet = '".str_replace("'", "''", $_POST['etp'])."'" : '';
-			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd.$sql_etp." ORDER BY 2" : $sql_comp.$sql_dfd.$sql_etp." ORDER BY 2";
+			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd.$sql_etp." AND anu.cod_anu = '".$year."' ORDER BY 2" : $sql_comp.$sql_dfd.$sql_etp." AND anu.cod_anu = '".$year."' ORDER BY 2";
 			//elog(var_export($query, true));
 			$result = $ref->executeQuery($query);
 			$valeur = '';
@@ -140,7 +141,7 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 			$query = $model->getQueryField(3); //mention
 			$sql_comp = $cod_cmp != '' ? " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."'" : '';
 			$sql_dfd = $_POST['coddfd'] != '' ? " AND dfd.lib_dfd = '".str_replace("'", "''", $_POST['coddfd'])."'" : '';
-			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd." ORDER BY 2" : $sql_comp.$sql_dfd." ORDER BY 2";
+			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd." AND anu.cod_anu = '".$year."' ORDER BY 2" : $sql_comp.$sql_dfd." AND anu.cod_anu = '".$year."' ORDER BY 2";
 			//elog(var_export($query, true));
 			$result = $ref->executeQuery($query);
 			$valeur = '';

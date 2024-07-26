@@ -354,14 +354,32 @@ class reference {
 
 	function getAnneeUni($yearafter = 0)
 	{
-
-		if (date('m') < 9)
+		if (defined("COD_ANU"))
 		{
-			$year = (date('Y')-1+$yearafter).'-'.(date('Y')+$yearafter);
+			$year = (COD_ANU+$yearafter).'-'.(COD_ANU+1+$yearafter);
+		}
+		elseif ($this->_rdbApo != NULL)
+		{
+			$sth = oci_parse($this->_rdbApo, "SELECT cod_anu FROM UP1.up1_annee_uni WHERE eta_anu_zorro = 'O'");
+			$res = oci_execute($sth);
+			if ($res)
+			{
+				if ($annee = oci_fetch_row($sth))
+				{
+					$year = ($annee[0]+$yearafter).'-'.($annee[0]+1+$yearafter);
+				}
+			}
 		}
 		else
 		{
-			$year = (date('Y')+$yearafter).'-'.(date('Y')+1+$yearafter);
+			if (date('m') < 7)
+			{
+				$year = (date('Y')-1+$yearafter).'-'.(date('Y')+$yearafter);
+			}
+			else
+			{
+				$year = (date('Y')+$yearafter).'-'.(date('Y')+1+$yearafter);
+			}
 		}
 		return $year;
 	}
@@ -473,7 +491,7 @@ class reference {
 
 	function getCreationYears()
 	{
-		$select = "SELECT DISTINCT case when month(createdate) >= 9 THEN year(createdate) else year(createdate) - 1 end as \"year\" FROM decree ORDER BY iddecree desc";
+		$select = "SELECT DISTINCT univ_year as \"year\" FROM decree ORDER BY univ_year desc";
 		$result = mysqli_query($this->_dbcon, $select);
 		$years = array();
 		if (mysqli_error($this->_dbcon))
@@ -841,6 +859,7 @@ class reference {
 		$recap_tab = array();
 		$tem_commission = false;
 		$tem_jury = false;
+		$yearup = $year;
 		foreach($list_comp as $comp)
 		{
 			$supann = $ldap->getSupannCodeEntiteFromAPO($comp['code']);
@@ -868,7 +887,11 @@ class reference {
 					{
 						$tem_commission = true;
 					}
-					$model_decrees = $user->getDecreesBy(array('idmodel' => $obj_model->getid(), 'createyear' => $year, 'composante' => 'structures-'.$supann, 'allcomp' => 'TRUE'), -1);
+					if ($year == NULL)
+					{
+						$yearup = $model['create_year'] == 'annee_univ_suiv' ? $this->getAnneeUni(1) : $this->getAnneeUni();
+					}
+					$model_decrees = $user->getDecreesBy(array('idmodel' => $obj_model->getid(), 'createyear' => $yearup, 'composante' => 'structures-'.$supann, 'allcomp' => 'TRUE'), -1);
 					//var_dump($model_decrees);
 					$stats[$comp['code']][$idmodel] = $obj_model->getStats($model_decrees, $comp['code']);
 					if (sizeof($stats[$comp['code']][$idmodel]['liste_to_do']) > 0)
@@ -880,7 +903,8 @@ class reference {
 							$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann;
 							$recap[$comp['code']] .= "<b> Modèle : ".$obj_model->getDecreeType()['name']." ".$model['name'];
 							$recap[$comp['code']] .= "<br> Nombre d'arrêtés à créer : ".sizeof($stats[$comp['code']][$idmodel]['liste_to_do'])."<br>";
-							$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']."</b><br>";
+							$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']."<br>";
+							$recap[$comp['code']] .= "Année universitaire de référence : ".$yearup."</b><br>";
 							$recap[$comp['code']] .= "Détail :  <br>";
 							$recap_tab[$comp['code']] = array('modelname' => $obj_model->getDecreeType()['name']." ".$model['name'],
 															'nbtocreate' => sizeof($stats[$comp['code']][$idmodel]['liste_to_do']),
@@ -1073,14 +1097,13 @@ class reference {
 						ON m.idmodel = mfi.idmodel
 					INNER JOIN decree_type dty
 						ON dty.iddecree_type = m.iddecree_type
-							AND dty.iddecree_type IN ('2', '6') # Commission et Comission IAE
+							AND dty.iddecree_type IN ('2', '6') # Commission et Commission IAE
 					INNER JOIN decree_field dfi
 						ON dfi.idmodel_field = mfi.idmodel_field
 					INNER JOIN decree d
 						ON d.iddecree = dfi.iddecree
 							AND d.status = 'v' # uniquement les arrêtés signés
-							AND ((d.year = ? AND MONTH(d.createdate) >= 9)
-								OR (d.year = ? AND MONTH(d.createdate) < 9))
+							AND d.univ_year = ?
 					INNER JOIN decree_field dfi2
 						ON dfi2.iddecree = d.iddecree
 					INNER JOIN model_field mfi2
@@ -1093,7 +1116,7 @@ class reference {
 					WHERE NVL(d2.majdate, d2.createdate) > NVL(d.majdate, d.createdate) AND d2.status = 'v'
 					AND d2.idmodel = d.idmodel AND d2.year >= d.year
 					AND dfi3.value = dfi2.value) ";
-		$params = array($annee, $anneeplusun);
+		$params = array($annee.'-'.$anneeplusun);
 		if ($nbjours > 0)
 		{
 			$sql .= " AND d.majdate > DATE_SUB(SYSDATE(), INTERVAL ? DAY) # Activer si on souhaite récupérer uniquement les arrêtés signés depuis X jours";
@@ -1112,11 +1135,10 @@ class reference {
 				$donnees[] = $res;
 			}
 		}
-		//var_dump($donnees);
 		return $donnees;
 	}
 
-	function getAllMentionsCommissions()
+	function getAllMentionsCommissions($year)
 	{
 		require_once 'model.php';
 		$liste_to_do = array();
@@ -1127,7 +1149,7 @@ class reference {
 			foreach($list_model as $model)
 			{
 				$obj_model = new model($this->_dbcon, $model['idmodel']);
-				$liste_to_do = array_merge($liste_to_do, $obj_model->getListDecreesToEditForComp($cod_comp));
+				$liste_to_do = array_merge($liste_to_do, $obj_model->getListDecreesToEditForComp($cod_comp, $year));
 			}
 		}
 		return array_combine(array_column($liste_to_do, 'value'), $liste_to_do);

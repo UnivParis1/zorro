@@ -577,6 +577,7 @@ class user {
 						d.year,
 						d.createdate,
 						d.idesignature,
+						d.univ_year,
 						dt.name as decreetypename,
 						YEAR(IFNULL(d.majdate, d.createdate)) as y,
 						MONTH(IFNULL(d.majdate, d.createdate)) as m,
@@ -783,8 +784,7 @@ class user {
 			}
 			if (array_key_exists('createyear', $criteres) && $criteres['createyear'] != null)
 			{
-				$select .= " AND ((year(createdate) = ? AND month(createdate) >= 9) OR (year(createdate) = ? + 1 AND month(createdate) < 9)) ";
-				$params[] = $criteres['createyear'];
+				$select .= " AND univ_year = ? ";
 				$params[] = $criteres['createyear'];
 			}
 			if (array_key_exists('findnum', $criteres) && $criteres['findnum'] != null)
@@ -872,7 +872,6 @@ class user {
 			$select .= " ? ";
 			$params[] = $limit;
 		}
-		elog("Requête : ".$select);
 		if (sizeof($params) == 0)
 		{
 			$result = mysqli_query($this->_dbcon, $select);
