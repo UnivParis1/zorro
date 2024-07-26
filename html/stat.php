@@ -266,7 +266,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 							<?php } ?>
 						<?php } else { ?>
 							<td></td>
-							<td><a href="<?php echo URL_BASE_ZORRO."/create_decree.php?new&idmodel=".$post_selectarrete."&comp=".$composante_selected."&etp=".$todo['code']; ?>" target="_blank">Créer</a></td>
+							<td><a href="<?php echo URL_BASE_ZORRO."/create_decree.php?new&idmodel=".$post_selectarrete."&comp="."structures-".$ldap->getSupannCodeEntiteFromAPO($todo['cmp'])."&etp=".$todo['code']; ?>" target="_blank">Créer</a></td>
 							<td></td>
 						<?php } ?>
 					</tr>
