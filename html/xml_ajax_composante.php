@@ -47,6 +47,13 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 	{
 		if (!isset($_POST['mention']))
 		{
+			$valeur = '';
+			if (isset($_POST['iddecree']))
+			{
+				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+				$valeur = $mod_decree->getFieldForFieldType(2);
+				$year = substr($mod_decree->getUnivYear(), 0, 4);
+			}
 			$query = $model->getQueryField(2); //domaine
 			if ($cod_cmp != '')
 			{
@@ -57,12 +64,6 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND anu.cod_anu = '".$year."' ORDER BY 2" : " AND anu.cod_anu = '".$year."' ORDER BY 2";
 			}
 			$result = $ref->executeQuery($query);
-			$valeur = '';
-			if (isset($_POST['iddecree']))
-			{
-				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
-				$valeur = $mod_decree->getFieldForFieldType(2);
-			}
 			foreach ($result as $dom)
 			{
 				if ($valeur == $dom['value'])
@@ -77,6 +78,13 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 		}
 		else
 		{
+			$valeur = '';
+			if (isset($_POST['iddecree']))
+			{
+				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+				$valeur = $mod_decree->getFieldForFieldType(8);
+				$year = substr($mod_decree->getUnivYear(), 0, 4);
+			}
 			$query = $model->getQueryField(8); //specialite
 			$sql_mention = " AND mev.lib_mev = '".str_replace("'", "''", $_POST['mention'])."' ";
 			if ($cod_cmp != '')
@@ -88,12 +96,6 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 				$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_mention." AND anu.cod_anu = '".$year."' ORDER BY 2" : $sql_mention." AND anu.cod_anu = '".$year."' ORDER BY 2";
 			}
 			$result = $ref->executeQuery($query);
-			$valeur = '';
-			if (isset($_POST['iddecree']))
-			{
-				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
-				$valeur = $mod_decree->getFieldForFieldType(8);
-			}
 			foreach ($result as $spec)
 			{
 				if ($valeur == $spec['value'])
@@ -111,6 +113,13 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 	{
 		if (isset($_POST['etp']))
 		{
+			$valeur = '';
+			if (isset($_POST['iddecree']))
+			{
+				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+				$valeur = $mod_decree->getFieldForFieldType(106);
+				$year = substr($mod_decree->getUnivYear(), 0, 4);
+			}
 			$query = $model->getQueryField(106); //mention2
 			$sql_comp = $cod_cmp != '' ? " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."'" : '';
 			$sql_dfd = $_POST['coddfd'] != '' ? " AND dfd.lib_dfd = '".str_replace("'", "''", $_POST['coddfd'])."'" : '';
@@ -118,12 +127,6 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd.$sql_etp." AND anu.cod_anu = '".$year."' ORDER BY 2" : $sql_comp.$sql_dfd.$sql_etp." AND anu.cod_anu = '".$year."' ORDER BY 2";
 			//elog(var_export($query, true));
 			$result = $ref->executeQuery($query);
-			$valeur = '';
-			if (isset($_POST['iddecree']))
-			{
-				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
-				$valeur = $mod_decree->getFieldForFieldType(106);
-			}
 			foreach ($result as $dom)
 			{
 				if ($valeur == htmlspecialchars($dom['value']))
@@ -138,18 +141,19 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 		}
 		else
 		{
+			$valeur = '';
+			if (isset($_POST['iddecree']))
+			{
+				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
+				$valeur = $mod_decree->getFieldForFieldType(3);
+				$year = substr($mod_decree->getUnivYear(), 0, 4);
+			}
 			$query = $model->getQueryField(3); //mention
 			$sql_comp = $cod_cmp != '' ? " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."'" : '';
 			$sql_dfd = $_POST['coddfd'] != '' ? " AND dfd.lib_dfd = '".str_replace("'", "''", $_POST['coddfd'])."'" : '';
 			$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause'].$sql_comp.$sql_dfd." AND anu.cod_anu = '".$year."' ORDER BY 2" : $sql_comp.$sql_dfd." AND anu.cod_anu = '".$year."' ORDER BY 2";
 			//elog(var_export($query, true));
 			$result = $ref->executeQuery($query);
-			$valeur = '';
-			if (isset($_POST['iddecree']))
-			{
-				$mod_decree = new decree($dbcon, null, null, $_POST['iddecree']);
-				$valeur = $mod_decree->getFieldForFieldType(3);
-			}
 			foreach ($result as $dom)
 			{
 				if ($valeur == htmlspecialchars($dom['value']))
