@@ -1238,7 +1238,7 @@
 					<div class="section">
 					<h3><?php echo $modelfield['lib_section']; ?></h3>
 				<?php }
-				if ($modelfield['linkedto'] != NULL)
+				if ($modelfield['linkedto'] != NULL && !isset($get_etp))
 				{
 					if (!(isset($mod_decree_fields) && key_exists($modelfield['linkedto'], $mod_decree_fields)))
 					{
@@ -1343,13 +1343,14 @@
 										if ($modelfield['idfield_type'] == 2) { // récupération du domaine
 											$modelselected->getQueryField(2); //domaine
 											$codcmp = $ldap->getInfoApo($get_comp);
+											$yearselected = $modelselected->getModelInfo()['create_year'] == 'annee_univ_suiv' ? substr($ref->getAnneeUni(1), 0, 4) : substr($ref->getAnneeUni(), 0, 4);
 											if ($codcmp != '')
 											{
-												$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$codcmp."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' ORDER BY 2";
+												$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND chv.cod_cmp = '".$codcmp."' AND anu.cod_anu = '".$yearselected."' ORDER BY 2" : " AND chv.cod_cmp = '".$_POST['cod_cmp_dom']."' AND anu.cod_anu = '".$yearselected."' ORDER BY 2";
 											}
 											else
 											{
-												$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." ORDER BY 2" : " ORDER BY 2";
+												$query['query_clause'] = ($query['query_clause'] != NULL) ? $query['query_clause']." AND anu.cod_anu = '".$yearselected."' ORDER BY 2" : " AND anu.cod_anu = '".$yearselected."' ORDER BY 2";
 											}
 											$result = $ref->executeQuery($query);
 											$query_etp = $modelselected->getQueryField(3);
@@ -1578,8 +1579,10 @@
 										<input type='hidden' id='affichecomposante' value="<?php echo $value;?>" readonly>
 								<?php }
 									else
-									{ ?>
-										<input type='hidden' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' onchange="activeLinked('<?php echo $modelfield['name'];?>');">
+									{
+										$value = (isset($get_comp)) ? "value = ".$ldap->getInfoApo($get_comp) : "";
+									?>
+										<input type='hidden' id='<?php echo $modelfield['name'].$i;?>' name='<?php echo $modelfield['name'].$i;?>' onchange="activeLinked('<?php echo $modelfield['name'];?>');" <?php echo $value; ?>>
 										<input type='hidden' id='affichecomposante' value="" readonly>
 									<?php }
 								}
