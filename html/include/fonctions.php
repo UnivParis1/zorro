@@ -39,7 +39,7 @@ function findStudent($name, $id = '')
 	//var input_elt = $( ".token-autocomplete input" );
 	echo "$( '#".$name.$id."_ref' ).autocompleteUser(
 			'".WSGROUPS_URL.WSGROUPS_SEARCH_USERCAS."', { select: completionStudent, wantedAttr: 'uid',
-			wsParams: { allowInvalidAccounts: 0, filter_eduPersonAffiliation: 'student' } });
+			wsParams: { allowInvalidAccounts: 0, filter_eduPersonAffiliation: 'student|alum' } });
 	";
 	echo "</script>";
 }
