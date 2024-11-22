@@ -1210,7 +1210,8 @@
 		</form>
 		</div>
 		<?php } ?>
-		<?php if (isset($post_selectarrete) && $post_selectarrete != '' || (isset($mod_select_decree) && $access))
+		<?php $modeldroit = array_column($listModels,'idmodel'); ?>
+		<?php if (isset($post_selectarrete) && $post_selectarrete != '' || (isset($mod_select_decree) && $access && in_array($mod_select_decree['idmodel'], $modeldroit)))
 			{
 				$selectarrete = isset($mod_select_decree) ? $mod_select_decree['idmodel'] : $post_selectarrete;
 				$modelselected = new model($dbcon, $selectarrete);
