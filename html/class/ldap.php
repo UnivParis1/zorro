@@ -51,7 +51,7 @@ class ldap {
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
 		$infos_ldap = array();
-		if (sizeof($entries) > 0)
+		if (key_exists('count', $entries) && $entries['count'] > 0)
 		{
 			elog($filtre);
 			$affectation = array_key_exists('supannentiteaffectation', $entries[0]) ? $entries[0]['supannentiteaffectation'][0] : null;
@@ -549,7 +549,7 @@ class ldap {
 		$attributs = array('uid','mail');
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
-		if (sizeof($entries) > 0 && key_exists('mail', $entries[0]))
+		if (sizeof($entries) > 0 && $entries['count'] > 0 && key_exists('mail', $entries[0]))
 		{
 			return $entries[0]['mail'][0];
 		}

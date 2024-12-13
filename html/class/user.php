@@ -256,10 +256,10 @@ class user {
 		}
 		else
 		{
-			elog("L'utilisateur n'a pas de responsabilité sur sa structure");
+			elog("L'utilisateur ".$this->_uid." n'a pas de responsabilité sur sa structure");
 			return FALSE;
 		}
-		elog( "L'utilisateur n'a pas d'affectation <br>");
+		elog( "L'utilisateur ".$this->_uid." n'a pas d'affectation <br>");
 		return FALSE;
 	}
 
@@ -297,7 +297,9 @@ class user {
 	function getStructureCodApo()
 	{
 		$ldap = new ldap();
-		return $ldap->getUserAndStructureInfos($this->_uid, false)['codeapo'];
+		$struct = $ldap->getUserAndStructureInfos($this->_uid, false);
+		$codapo = (key_exists('codeapo', $struct)) ? $struct['codeapo'] : null;
+		return $codapo;
 	}
 
 	function getStructurePorteuseApo()
@@ -417,7 +419,7 @@ class user {
 	function hasAccessDecree($decree)
 	{
 		// L'utilisateur a créé le document ou est super admin
-		if ($this->getId() == $decree['iduser'] || $this->isSuperAdmin() || $this->isDaji())
+		if ($this->getid() == $decree['iduser'] || $this->isSuperAdmin() || $this->isDaji())
 		{
 			return true;
 		}
