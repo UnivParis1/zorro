@@ -609,7 +609,7 @@ class user {
 			// pour donner accès aux arrêtés créés pour la composante aux personnels
 			$hasstructapo = false;
 			$structporteuse = $this->getStructurePorteuseApo();
-			if ($structporteuse != NULL  && key_exists("allcomp", $criteres))
+			if ($structporteuse !== NULL  && key_exists("allcomp", $criteres))
 			{
 				$hasstructapo = true;
 			}
@@ -631,8 +631,8 @@ class user {
 			}
 			else
 			{
-				$select .= " WHERE (d.iduser = ? "; // Au minimum accès à ses propres arrêtés
-				$params[] = $iduser;
+				$select .= " WHERE ( ? ";
+				$params[] = '';
 			}
 			$groupes = $this->getGroupsZorro();
 			require_once dirname(__FILE__,2).'/class/reference.php';
