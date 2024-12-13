@@ -197,6 +197,11 @@
 					</li>
 					<?php } ?>
 					<?php if ($user->isSuperAdmin()) { ?>
+					<li id='menu_circuit' <?php echo ($menuItem == 'menu_circuit') ? "class='navcourant'" : '';?> >
+						<a href="info_circuit.php">Info Circuit</a>
+					</li>
+					<?php } ?>
+					<?php if ($user->isSuperAdmin()) { ?>
 					<li id='menu_maintenance' <?php echo ($menuItem == 'menu_maintenance') ? "class='navcourant'" : '';?> >
 						<a href="maintenance.php">Mode Maintenance</a>
 					</li>
