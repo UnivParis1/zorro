@@ -153,7 +153,7 @@
 	<div class="containerApp"> 
 		<header id="header-zorro">
 			<nav class="navigat" >
-				<ul >
+				<ul>
 				<?php if ($ref->getModeMaintenance()) { ?>
 					<li>MAINTENANCE</li>
 				<?php } elseif (MODE_TEST == 'O') { ?>
@@ -168,43 +168,42 @@
 						<a href="manage_decree.php">Mes documents</a>
 					</li>
 					<?php } ?>
-					<?php /*if ($user->isSuperAdmin() || $user->isDaji() || $user->isAdminModel()) { */?>
 					<li id='menu_stat' <?php echo ($menuItem == 'menu_stat') ? "class='navcourant'" : '';?> >
 						<a href="stat.php">Indicateurs</a>
 					</li>
-					<?php /* } */
-					if ($user->isSuperAdmin()) { ?>
-					<li id='menu_role' <?php echo ($menuItem == 'menu_role') ? "class='navcourant'" : '';?> >
-						<a href="manage_role.php">Autorisations</a>
-					</li>
-					<li id='menu_model' <?php echo ($menuItem == 'menu_model') ? "class='navcourant'" : '';?> >
-						<a href="manage_model.php">Modèles</a>
-					</li>
-					<?php }
-					if ($user->isSuperAdmin() || $menuItem == 'menu_signature') { ?>
-					<li id='menu_signature' <?php echo ($menuItem == 'menu_signature') ? "class='navcourant'" : '';?> >
-						<a href="info_signature.php">Suivi eSignature</a>
-					</li>
-					<?php } ?>
-					<?php if (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
-					<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
-						<a href="admin_substitution.php">Changer d'utilisateur (<?php echo $user->getUid();?>)</a>
-					</li>	
-					<?php } ?>
-					<?php if ($user->isSuperAdmin()) { ?>
-					<li id='menu_export' <?php echo ($menuItem == 'menu_export') ? "class='navcourant'" : '';?> >
-						<a href="export.php">Exports</a>
-					</li>
-					<?php } ?>
-					<?php if ($user->isSuperAdmin()) { ?>
-					<li id='menu_circuit' <?php echo ($menuItem == 'menu_circuit') ? "class='navcourant'" : '';?> >
-						<a href="info_circuit.php">Info Circuit</a>
-					</li>
-					<?php } ?>
-					<?php if ($user->isSuperAdmin()) { ?>
-					<li id='menu_maintenance' <?php echo ($menuItem == 'menu_maintenance') ? "class='navcourant'" : '';?> >
-						<a href="maintenance.php">Mode Maintenance</a>
-					</li>
+					<?php if ($user->isSuperAdmin()) 
+					{
+						$menuAdmin = array('menu_admin', 'menu_role', 'menu_signature', 'menu_circuit', 'menu_export', 'menu_model', 'menu_maintenance'); ?>
+						<li <?php echo in_array($menuItem, $menuAdmin) ? "class='navcourant'" : '';?> onmouseover="document.getElementById('submenu_admin').setAttribute('style', 'visibility:visible');" onmouseleave="document.getElementById('submenu_admin').setAttribute('style', 'visibility:hidden');">Admin</li>
+						<menu class="sub" id ="submenu_admin" style="visibility:hidden" onmouseover="this.setAttribute('style', 'visibility:visible');" onmouseleave="document.getElementById('submenu_admin').setAttribute('style', 'visibility:hidden');">
+							<li id='menu_role' <?php echo ($menuItem == 'menu_role') ? "class='navcourant'" : '';?> >
+								<a href="manage_role.php">Autorisations</a>
+							</li>
+							<li id='menu_signature' <?php echo ($menuItem == 'menu_signature') ? "class='navcourant'" : '';?> >
+								<a href="info_signature.php">Suivi eSignature</a>
+							</li>
+							<li id='menu_circuit' <?php echo ($menuItem == 'menu_circuit') ? "class='navcourant'" : '';?> >
+								<a href="info_circuit.php">Info Circuit</a>
+							</li>
+							<li id='menu_export' <?php echo ($menuItem == 'menu_export') ? "class='navcourant'" : '';?> >
+								<a href="export.php">Exports</a>
+							</li>
+							<!--<li id='menu_model' <?php echo ($menuItem == 'menu_model') ? "class='navcourant'" : '';?> >
+								<a href="manage_model.php">Modèles</a>
+							</li>-->
+							<li id='menu_maintenance' <?php echo ($menuItem == 'menu_maintenance') ? "class='navcourant'" : '';?> >
+								<a href="maintenance.php">Mode Maintenance</a>
+							</li>
+							<?php if (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
+								<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
+									<a href="admin_substitution.php">Changer d'utilisateur (<?php echo $user->getUid();?>)</a>
+								</li>
+							<?php } ?>
+						</menu>
+					<?php } elseif (isset($userCAS) && $userCAS->isSuperAdmin(false)) { ?>
+						<li id='menu_admin' <?php echo ($menuItem == 'menu_admin') ? "class='navcourant'" : '';?> >
+							<a href="admin_substitution.php">Changer d'utilisateur (<?php echo $user->getUid();?>)</a>
+						</li>
 					<?php } ?>
 				</ul>
 			</nav>

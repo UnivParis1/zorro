@@ -13,6 +13,19 @@ a:hover { color: #205599 ;  text-decoration: underline; }
 
 header#header-zorro { padding-top: 8px; }
 
+nav.navigat ul menu.sub { margin: 8px; }
+
+nav.navigat ul menu.sub li {
+    display:inline;
+    border-left : 1px #FFFFFF4F solid;
+	background: #575a61;
+	text-align: center;
+    padding: 8px 8px 8px;
+	color: white;
+}
+
+nav.navigat ul menu.sub li.navcourant { background: #9f6c07; }
+
 nav.navigat { margin-top: 9px; background: #727780; padding : 2px;  }
 
 nav.navigat ul { height: 14px;  text-align: center; padding: 0px; margin-top: 0;  }
