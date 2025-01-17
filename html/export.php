@@ -94,6 +94,11 @@
 		{
 			$supann = $ldap->getSupannCodeEntiteFromAPO($cle);
 			$resp = $ldap->getStructureResp($supann);
+			// Traitement spécial pour l'EDS
+			if (substr($supann, 0, 2) == 'DS' && $supann != 'DS21')
+			{
+				$resp = array_merge($resp, $ldap->getStructureResp('DS'));
+			}
 			$list_resp[$cle] = $resp;
 		}
 		foreach ($allmentions as $mention => $detail)
