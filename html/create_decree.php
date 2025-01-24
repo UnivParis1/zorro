@@ -981,7 +981,6 @@
 							elog( "stderr :\n");
 							elog($stderr);
 							elog( "La création du document PDF a échoué. <br>");
-							$message .= "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
 						}
 						else
 						{
