@@ -8,10 +8,8 @@
     switch ($_SERVER['REQUEST_METHOD'])
     {
         case 'GET':
-            elog(var_export($_GET, true));
             if (array_key_exists("signRequestId", $_GET) || array_key_exists("esignatureid", $_GET))  // Synchronisation d'un document avec le statut de eSignature
             {
-                elog("synchronisation du statut du document");
                 $status = "";
                 $reason = "";
                 $esignatureid = isset($_GET["signRequestId"]) ? $_GET["signRequestId"] : $_GET["esignatureid"];
@@ -19,19 +17,21 @@
                 {
                     $erreur = "Le paramètre esignature n'est pas renseigné.";
                     $result_json = array('status' => 'Error', 'description' => $erreur);
+                    elog(var_export($_GET, true));
+                    elog("synchronisation du statut du document");
                     elog(" ERROR => " . $erreur);
                 }
                 else
                 {
-                    elog("id esignature :".$esignatureid);
+                    //elog("id esignature :".$esignatureid);
                     if ($ref->idEsignatureExists($esignatureid))
                     {
                         $decree = $ref->getDecreeByIdEsignature($esignatureid);
                         if ($decree !== false)
                         {
-                            elog ("statut de la demande ".$decree->getid()." avant synchro fin de circuit eSignature : ".$decree->getStatus(false));
+                            //elog ("statut de la demande ".$decree->getid()." avant synchro fin de circuit eSignature : ".$decree->getStatus(false));
                             $decree->synchroEsignatureStatus($decree->getStatus(false));
-                            elog ("statut de la demande ".$decree->getid()." après synchro fin de circuit eSignature : ".$decree->getStatus(false));
+                            //elog ("statut de la demande ".$decree->getid()." après synchro fin de circuit eSignature : ".$decree->getStatus(false));
                             $result_json = array('status' => 'Ok', 'description' => $erreur);
                         }
                         else
@@ -51,7 +51,7 @@
         case 'POST':
             $erreur = "Le mode POST n'est pas supporté dans ce WS";
             $result_json = array('status' => 'Error', 'description' => $erreur);
-            elog(" Appel du WS en mode POST => Erreur = " . $erreur);
+            //elog(" Appel du WS en mode POST => Erreur = " . $erreur);
             break;
     }
 
