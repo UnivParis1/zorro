@@ -563,7 +563,7 @@ class decree {
 		}
 		else 
 		{
-			elog("Synchronisation... ".ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
+			//elog("Synchronisation... ".ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature);
 			$curl = curl_init();
 			$opts = array(
 					CURLOPT_URL => ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_GET_SIGNREQ . $idesignature,
@@ -585,13 +585,13 @@ class decree {
 			$response = json_decode($json, true);
 			//print_r2($response);
 			
-			elog("Le json est =>  " . var_export($json,true));
+			//elog("Le json est =>  " . var_export($json,true));
 			
 			//elog("La réponse est =>  " . var_export($response,true));
 			if ($json == '' || $json == 'null')
 			{
 				// on vérifie si le document a été supprimé d'esignature
-				elog("Le json est vide ou null pour l'id ".$idesignature);
+				//elog("Le json est vide ou null pour l'id ".$idesignature);
 				$curl = curl_init();
 				$opts = array(
 						CURLOPT_URL => ESIGNATURE_BASE_URL.ESIGNATURE_CURLOPT_URL_STATUS . $idesignature,
@@ -609,7 +609,7 @@ class decree {
 				{
 					elog(" Erreur Curl =>  " . $error);
 				}
-				elog("Le json est =>  " . var_export($json,true));
+				//elog("Le json est =>  " . var_export($json,true));
 				if ($json == 'fully-deleted')
 				{
 					if ($status != STATUT_VALIDE)
@@ -633,17 +633,17 @@ class decree {
 				{
 					if (! isset($response['error']))
 					{
-						elog ("Success. setStatus...");
+						//elog ("Success. setStatus...");
 						if (isset($response['parentSignBook']['status']))
 						{
-							elog("Statut de la demande sur eSignature : ".$response['parentSignBook']['status']);
+							//elog("Statut de la demande sur eSignature : ".$response['parentSignBook']['status']);
 							$current_status = $response['parentSignBook']['status'];
 						}
 						else
 						{
 							$current_status = '';
 						}
-						elog("current status ".$current_status);
+						//elog("current status ".$current_status);
 						$new_status = $current_status;
 						switch (strtolower($current_status))
 						{
@@ -712,13 +712,13 @@ class decree {
 									$date = date("Y-m-d H:i:s", intdiv($response['parentSignBook']['endDate'], 1000));
 								}
 								break;
-							case '' : elog('Erreur Statut vide esignature... Ne rien faire');
+							case '' : //elog('Erreur Statut vide esignature... Ne rien faire');
 								break;
 							default :
 								$new_status = STATUT_ERREUR; // error
 								$date = date("Y-m-d H:i:s");
 						}
-						elog ("Nouveau statut le $date de la demande : ".$new_status);
+						//elog ("Nouveau statut le $date de la demande : ".$new_status);
 						if ($status != $new_status)
 						{
 							$this->setStatus($new_status, $date, 0);
@@ -732,7 +732,7 @@ class decree {
 				}
 				else
 				{
-					elog("Le json est du HTML.");
+					elog("Erreur : Le json est du HTML.");
 				}
 			}
 		}
