@@ -471,6 +471,11 @@ class reference {
 		return $this->executeQuery(array('schema' => 'APOGEE', 'query' => "SELECT cod_cmp, lic_cmp FROM composante WHERE tem_en_sve_cmp = 'O' ORDER BY lic_cmp"));
 	}
 
+	function getListCompHorsIAE()
+	{
+		return $this->executeQuery(array('schema' => 'APOGEE', 'query' => "SELECT cod_cmp, lic_cmp FROM composante WHERE tem_en_sve_cmp = 'O' AND cod_cmp <> '13' ORDER BY lic_cmp"));
+	}
+
 	function getYears()
 	{
 		$select = 'SELECT DISTINCT year FROM decree';
@@ -1142,7 +1147,7 @@ class reference {
 	{
 		require_once 'model.php';
 		$liste_to_do = array();
-		$list_comp = array_column($this->getListComp(), 'value', 'code');
+		$list_comp = array_column($this->getListCompHorsIAE(), 'value', 'code');
 		$list_model = array_merge($this->getListModel(2, true), $this->getListModel(6, true));
 		foreach($list_comp as $cod_comp => $comp)
 		{

@@ -68,8 +68,8 @@
 	{
 		$ref = new reference($dbcon, $rdbApo);
 		$allmentions = $ref->getAllMentionsCommissions($annee);
-		$list_comp = array_column($ref->getListComp(), 'value', 'code');
 		$list_mention_comp = "mention;composante\n";
+		$list_comp = array_column($ref->getListCompHorsIAE(), 'value', 'code');
 		foreach ($allmentions as $mention => $detail)
 		{
 			$list_mention_comp .= "\"".html_entity_decode($mention)."\";\"".$list_comp[$detail['cmp']]."\"\n";
@@ -88,8 +88,8 @@
 		$ref = new reference($dbcon, $rdbApo);
 		$ldap = new ldap();
 		$allmentions = $ref->getAllMentionsCommissions($annee);
-		$list_comp = array_column($ref->getListComp(), 'value', 'code');
 		$list_mention_resp = "mention;responsable\n";
+		$list_comp = array_column($ref->getListCompHorsIAE(), 'value', 'code');
 		foreach ($list_comp as $cle => $codcomp)
 		{
 			$supann = $ldap->getSupannCodeEntiteFromAPO($cle);
