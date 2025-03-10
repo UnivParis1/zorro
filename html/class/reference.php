@@ -742,7 +742,7 @@ class reference {
 		if ($iddecree == '')
 		{
 			$sql = "INSERT INTO room (idroom_type, old_tarif_heure, new_tarif_heure, old_tarif_demi, new_tarif_demi, old_tarif_jour, new_tarif_jour) VALUES (?, ?, ?, ?, ?, ? , ?)";
-			$param = array($idroom_type, $this->format_price($oldtarifheure), $this->format_price($newtarifheure), $this->format_price($oldtarifdemi), $this->format_price($newtarifdemi), $this->format_price($oldtarifjour), $this->format_price($newtarifjour));
+			$param = array($idroom_type, $oldtarifheure, $this->format_price($newtarifheure), $oldtarifdemi, $this->format_price($newtarifdemi), $oldtarifjour, $this->format_price($newtarifjour));
 			$result = prepared_query($this->_dbcon, $sql, $param);
 			if ( !mysqli_error($this->_dbcon))
 			{
@@ -762,7 +762,7 @@ class reference {
 			if ($idroom != 0)
 			{
 				$sql = "UPDATE room SET old_tarif_heure = ?, new_tarif_heure = ?, old_tarif_demi = ?, new_tarif_demi = ?, old_tarif_jour = ?, new_tarif_jour = ? WHERE idroom = ?";
-				$param = array($this->format_price($oldtarifheure), $this->format_price($newtarifheure), $this->format_price($oldtarifdemi), $this->format_price($newtarifdemi), $this->format_price($oldtarifjour), $this->format_price($newtarifjour), $idroom);
+				$param = array($oldtarifheure, $this->format_price($newtarifheure), $oldtarifdemi, $this->format_price($newtarifdemi), $oldtarifjour, $this->format_price($newtarifjour), $idroom);
 				$result = prepared_query($this->_dbcon, $sql, $param);
 				if ( !mysqli_error($this->_dbcon))
 				{
@@ -778,7 +778,7 @@ class reference {
 			else
 			{
 				$sql = "INSERT INTO room (idroom_type, old_tarif_heure, new_tarif_heure, old_tarif_demi, new_tarif_demi, old_tarif_jour, new_tarif_jour) VALUES (?, ?, ?, ?, ?, ?, ?)";
-				$param = array($idroom_type, $this->format_price($oldtarifheure), $this->format_price($newtarifheure), $this->format_price($oldtarifdemi), $this->format_price($newtarifdemi), $this->format_price($oldtarifjour), $this->format_price($newtarifjour));
+				$param = array($idroom_type, $oldtarifheure, $this->format_price($newtarifheure), $oldtarifdemi, $this->format_price($newtarifdemi), $oldtarifjour, $this->format_price($newtarifjour));
 				$result = prepared_query($this->_dbcon, $sql, $param);
 				if ( !mysqli_error($this->_dbcon))
 				{
