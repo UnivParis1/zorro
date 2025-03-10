@@ -687,7 +687,7 @@ class reference {
 
 	function format_price($price)
 	{
-		return $price != '' && !str_contains($price, ' ') ? number_format($price, 2, '.', ' ') : $price;
+		return $price != '' && is_float($price) ? number_format($price, 2, '.', ' ') : $price;
 	}
 
 	function getRoomsList()
