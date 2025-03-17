@@ -118,7 +118,6 @@
 	    }
 		$listModels = $ref->sortModel($listModels);
     }
-    
     $menuItem = 'menu_create';
     require ("include/menu.php");
 	if ($ref->getModeMaintenance() && !(isset($userCAS) && $userCAS->isSuperAdmin(false)))
@@ -1368,7 +1367,8 @@
 									<?php } else {
 									// liste déroulante
 									if ($modelfield['idfield_type'] == 3) { ?>
-										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majMention2(this);majSpecialite(this);">
+										<!--<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majMention2(this);majSpecialite(this);">-->
+										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majCodeMention();majMention2(this);majSpecialite(this);">
 										</select>
 										<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 										{ ?>

@@ -158,11 +158,11 @@ elseif(isset($_POST['cod_cmp_dom']) && isset($_POST['idmodel']))
 			{
 				if ($valeur == htmlspecialchars($dom['value']))
 				{
-					echo "<item id=\"".htmlspecialchars($dom['value'])."\" libelle=\"".htmlspecialchars($dom['value'])."\" selected=\"true\" />";
+					echo "<item id=\"".htmlspecialchars($dom['value'])."\" libelle=\"".htmlspecialchars($dom['value'])."\" code=\"".$dom['code']."\" selected=\"true\" />";
 				}
 				else
 				{
-					echo "<item id=\"".htmlspecialchars($dom['value'])."\" libelle=\"".htmlspecialchars($dom['value'])."\" selected=\"false\" />";
+					echo "<item id=\"".htmlspecialchars($dom['value'])."\" libelle=\"".htmlspecialchars($dom['value'])."\" code=\"".$dom['code']."\" selected=\"false\" />";
 				}
 			}
 		}

@@ -68,11 +68,11 @@
 	{
 		$ref = new reference($dbcon, $rdbApo);
 		$allmentions = $ref->getAllMentionsCommissions($annee);
-		$list_mention_comp = "mention;composante\n";
 		$list_comp = array_column($ref->getListCompHorsIAE(), 'value', 'code');
+		$list_mention_comp = "code;mention;composante\n";
 		foreach ($allmentions as $mention => $detail)
 		{
-			$list_mention_comp .= "\"".html_entity_decode($mention)."\";\"".$list_comp[$detail['cmp']]."\"\n";
+			$list_mention_comp .= "\"".$detail['code']."\";\"".html_entity_decode($mention)."\";\"".$list_comp[$detail['cmp']]."\"\n";
 		}
 		$doc = fopen(PDF_PATH."mentions_composantes.csv", 'w+');
 		fputs($doc, $list_mention_comp);
@@ -88,8 +88,8 @@
 		$ref = new reference($dbcon, $rdbApo);
 		$ldap = new ldap();
 		$allmentions = $ref->getAllMentionsCommissions($annee);
-		$list_mention_resp = "mention;responsable\n";
 		$list_comp = array_column($ref->getListCompHorsIAE(), 'value', 'code');
+		$list_mention_resp = "code;mention;responsable\n";
 		foreach ($list_comp as $cle => $codcomp)
 		{
 			$supann = $ldap->getSupannCodeEntiteFromAPO($cle);
@@ -105,11 +105,11 @@
 		{
 			if (sizeof($list_resp[$detail['cmp']]) == 0)
 			{
-				$list_mention_resp .= "\"".html_entity_decode($mention)."\";\"\"\n";
+				$list_mention_resp .= "\"".html_entity_decode($mention)."\";\"".$detail['code']."\";\"\"\n";
 			}
 			foreach($list_resp[$detail['cmp']] as $login => $contact)
 			{
-				$list_mention_resp .= "\"".html_entity_decode($mention)."\";\"".$contact['mail']."\"\n";
+				$list_mention_resp .= "\"".html_entity_decode($mention)."\";\"".$detail['code']."\";\"".$contact['mail']."\"\n";
 			}
 		}
 		$doc = fopen(PDF_PATH."mentions_responsables.csv", 'w+');

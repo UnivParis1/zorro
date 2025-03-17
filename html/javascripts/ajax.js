@@ -130,6 +130,7 @@ function majDomaine(select,valeur='')
 		{
 			readListDomaines(xhr.responseXML);
 			majMention('', valeur);
+			majCodeMention();
 			majMention2('', valeur);
 			majSpecialite('', valeur);
 		}
@@ -218,6 +219,7 @@ function majMention(select, valeur='')
 			readListMentions(xhr.responseXML);
 			majSpecialite('', valeur);
 			majMention2('', valeur);
+			majCodeMention();
 		}
 	}
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -231,30 +233,76 @@ function readListMentions(data)
 	var mentions = data.getElementsByTagName("item");
 	var listementions = document.getElementById("mention1");
 	var mention_div = document.getElementById("mention_div");
-	mention_div.setAttribute("style", "display:block;");
+	var listecodes = document.getElementById("codemention1");
+	var mention_div = document.getElementById("codemention_div");
+	mention_div.setAttribute("style", "display:none;");
 	listementions.innerHTML = "";
 	if (mentions.length > 0)
 	{
+		if (listecodes == null)
+		{
+			var oSelect;
+			oSelect = document.createElement("select");
+			oSelect.setAttribute("id", "codemention1");
+			oSelect.setAttribute("name", "codemention1");
+			mention_div.appendChild(oSelect);
+			listecodes = document.getElementById("codemention1");
+		}
+		listecodes.innerHTML = "";
 		if (mentions.length == 1)
 		{
 			var listeRes = ajouteLigneSelect (listementions, "", "");
+			var listeCod = ajouteLigneSelect (listecodes, "", "");
 		}
 		else
 		{
 			var listeRes = ajouteLigneSelect (listementions, "", "", true);
+			var listeCod = ajouteLigneSelect (listecodes, "", "", true);
 		}
 		for (var i=0, c=mentions.length; i<c; i++)
 		{
 			if (mentions[i].getAttribute("selected") == "true")
 			{
-				selected = true;
+				var selected = true;
+				var elem = document.getElementById("codemention1");
+				elem.setAttribute("value", mentions[i].getAttribute("code"));
+				elem.setAttribute("name", "codemention1");
 			}
 			else
 			{
-				selected = false;
+				var selected = false;
 			}
 			//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
 			listeRes = ajouteLigneSelect (listeRes, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("id"), selected);
+			listeCod = ajouteLigneSelect (listeCod, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("code"), selected);
+		}
+	}
+}
+
+function majCodeMention()
+{
+	var code = document.getElementById("codemention1");
+	var etp = document.getElementById("mention1");
+	if (code !== null && etp !== null)
+	{
+		var options = code.options;
+		var mod = false;
+		for (var i=1, c=options.length; i<c; i++)
+		{
+			if (i == etp.selectedIndex)
+			{
+				options[i].setAttribute("selected", true);
+				code.setAttribute("value", options[i].value);
+				mod = true;
+			}
+			else
+			{
+				options[i].removeAttribute("selected");
+			}
+		}
+		if (mod == false)
+		{
+			code.removeAttribute("value");
 		}
 	}
 }
@@ -312,7 +360,7 @@ function readListSpecialites(data)
 	var specialites = data.getElementsByTagName("item");
 	var listespecialites = document.getElementById("parcours1");
 	var specialite_div = document.getElementById("parcours_div");
-	if (specialite_div !== null)
+	if (listespecialites !== null)
 	{
 		specialite_div.setAttribute("style", "display:block;");
 		listespecialites.innerHTML = "";
@@ -346,7 +394,6 @@ function readListSpecialites(data)
 /* Met a jour la 2e mention */
 function majMention2(select, valeur='')
 {
-	//alert("maj mention "+valeur);
 	var cod = document.getElementById("composantecod1");
 	if (cod === null)
 	{
@@ -367,26 +414,28 @@ function majMention2(select, valeur='')
 		dom = dom.value;
 	}
 	var etp = document.getElementById("mention1");
-	if (dom === null)
+	if (etp === null)
 	{
 		etp = '';
 	}
 	else
 	{
+		var code = document.getElementById("codemention1");
+		if (code !== null)
+		{
+			code.selectedIndex = etp.selectedIndex;
+		}
 		etp = etp.value;
 	}
 	var xhr = getXMLHttpRequest();
 	if (valeur != '')
 	{
 		var params = "cod_cmp_dom="+cod+"&idmodel="+id+"&coddfd="+dom+"&iddecree="+valeur+"&etp="+etp;
-		//alert(params);
 	}
 	else
 	{
 		var params = "cod_cmp_dom="+cod+"&idmodel="+id+"&coddfd="+dom+"&etp="+etp;
-		//alert(params);
 	}
-	//alert("cod_cmp_dom="+cod+"&idmodel="+id+"&coddfd="+dom);
 	xhr.open("POST", "xml_ajax_composante.php", true);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0))
@@ -405,30 +454,32 @@ function readListMentions2(data)
 	var mentions = data.getElementsByTagName("item");
 	var listementions = document.getElementById("mention21");
 	var mention_div = document.getElementById("mention2_div");
-	mention_div.setAttribute("style", "display:block;");
-	listementions.innerHTML = "";
-	if (mentions.length > 0)
+	if (mention_div !== null)
 	{
-		if (mentions.length == 1)
+		mention_div.setAttribute("style", "display:block;");
+		listementions.innerHTML = "";
+		if (mentions.length > 0)
 		{
-			var listeRes = ajouteLigneSelect (listementions, "", "");
-		}
-		else
-		{
-			var listeRes = ajouteLigneSelect (listementions, "", "", true);
-		}
-		for (var i=0, c=mentions.length; i<c; i++)
-		{
-			if (mentions[i].getAttribute("selected") == "true")
+			if (mentions.length == 1)
 			{
-				selected = true;
+				var listeRes = ajouteLigneSelect (listementions, "", "");
 			}
 			else
 			{
-				selected = false;
+				var listeRes = ajouteLigneSelect (listementions, "", "", true);
 			}
-			//alert(mentions[i].getAttribute("id")+' '+mentions[i].getAttribute("libelle"));
-			listeRes = ajouteLigneSelect (listeRes, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("id"), selected);
+			for (var i=0, c=mentions.length; i<c; i++)
+			{
+				if (mentions[i].getAttribute("selected") == "true")
+				{
+					var selected = true;
+				}
+				else
+				{
+					var selected = false;
+				}
+				listeRes = ajouteLigneSelect (listeRes, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("id"), selected);
+			}
 		}
 	}
 }
