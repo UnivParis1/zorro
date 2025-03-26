@@ -105,11 +105,11 @@
 		{
 			if (sizeof($list_resp[$detail['cmp']]) == 0)
 			{
-				$list_mention_resp .= "\"".html_entity_decode($mention)."\";\"".$detail['code']."\";\"\"\n";
+				$list_mention_resp .= "\"".$detail['code']."\";\"".html_entity_decode($mention)."\";\"\"\n";
 			}
 			foreach($list_resp[$detail['cmp']] as $login => $contact)
 			{
-				$list_mention_resp .= "\"".html_entity_decode($mention)."\";\"".$detail['code']."\";\"".$contact['mail']."\"\n";
+				$list_mention_resp .= "\"".$detail['code']."\";\"".html_entity_decode($mention)."\";\"".$contact['mail']."\"\n";
 			}
 		}
 		$doc = fopen(PDF_PATH."mentions_responsables.csv", 'w+');
