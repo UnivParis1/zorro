@@ -244,7 +244,7 @@ if (isset($_SESSION['phpCAS']) && array_key_exists('user', $_SESSION['phpCAS']))
 				{ ?>
 					<tr>
 						<?php 
-						$valeur = htmlspecialchars($todo['value']);
+						$valeur = htmlspecialchars($todo['code']);
 						$decree_edited = array_key_exists($valeur, $stat["liste_edit"]);
 						$rowspan =  $decree_edited ? sizeof($stat["liste_edit"][$valeur]) : 1; ?>
 						<td rowspan=<?php echo $rowspan;?> ><?php echo $todo['code'];?></td>

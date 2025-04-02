@@ -45,14 +45,14 @@
 		foreach ($donnees as $ligne)
 		{
 			$md = html_entity_decode($ligne['mention']);
-			$csv .= "\"".html_entity_decode($ligne['president'])."\";\"".$md."\";\"".$allmentions[$md]['code']."\"\n";
+			$csv .= "\"".html_entity_decode($ligne['president'])."\";\"".$allmentions[$md]['value']."\";\"".$md."\"\n";
 			$mentions_decode[] = $md;
 		}
-		foreach ($allmentions as $mention => $value)
+		foreach ($allmentions as $codemention => $value)
 		{
-			if (!in_array(html_entity_decode($mention), $mentions_decode))
+			if (!in_array($codemention, $mentions_decode))
 			{
-				$csv .= "\"\";\"".html_entity_decode($mention)."\";\"".$value['code']."\"\n";
+				$csv .= "\"\";\"".html_entity_decode($value['value'])."\";\"".$codemention."\"\n";
 			}
 		}
 		$doc = fopen(PDF_PATH."presidents_commissions.csv", 'w+');
@@ -70,9 +70,9 @@
 		$allmentions = $ref->getAllMentionsCommissions($annee);
 		$list_comp = array_column($ref->getListCompHorsIAE(), 'value', 'code');
 		$list_mention_comp = "code;mention;composante\n";
-		foreach ($allmentions as $mention => $detail)
+		foreach ($allmentions as $codemention => $detail)
 		{
-			$list_mention_comp .= "\"".$detail['code']."\";\"".html_entity_decode($mention)."\";\"".$list_comp[$detail['cmp']]."\"\n";
+			$list_mention_comp .= "\"".$codemention."\";\"".html_entity_decode($detail['value'])."\";\"".$list_comp[$detail['cmp']]."\"\n";
 		}
 		$doc = fopen(PDF_PATH."mentions_composantes.csv", 'w+');
 		fputs($doc, $list_mention_comp);
@@ -101,15 +101,15 @@
 			}
 			$list_resp[$cle] = $resp;
 		}
-		foreach ($allmentions as $mention => $detail)
+		foreach ($allmentions as $codemention => $detail)
 		{
 			if (sizeof($list_resp[$detail['cmp']]) == 0)
 			{
-				$list_mention_resp .= "\"".$detail['code']."\";\"".html_entity_decode($mention)."\";\"\"\n";
+				$list_mention_resp .= "\"".$codemention."\";\"".html_entity_decode($detail['value'])."\";\"\"\n";
 			}
 			foreach($list_resp[$detail['cmp']] as $login => $contact)
 			{
-				$list_mention_resp .= "\"".$detail['code']."\";\"".html_entity_decode($mention)."\";\"".$contact['mail']."\"\n";
+				$list_mention_resp .= "\"".$codemention."\";\"".html_entity_decode($detail['value'])."\";\"".$contact['mail']."\"\n";
 			}
 		}
 		$doc = fopen(PDF_PATH."mentions_responsables.csv", 'w+');

@@ -349,6 +349,25 @@ class model {
 		return $field_type;
 	}
 
+	function getCodeField()
+	{
+		$select = "SELECT fty.idfield_type FROM field_type fty WHERE fty.name = 'codemention'";
+		$result = mysqli_query($this->_dbcon, $select);
+		$idfield_type = 0;
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$idfield_type = $res['idfield_type'];
+			}
+		}
+		else
+		{
+			elog("erreur select idfield_type FROM field_type. ".mysqli_error($this->_dbcon));
+		}
+		return $idfield_type;
+	}
+
 	function getListDecreesToEditForComp($composante = null, $cod_anu = null)
 	{
 		$values = array();
@@ -372,7 +391,7 @@ class model {
 	function getStats($model_decrees, $composante, $year = NULL)
 	{
 		require_once dirname(__FILE__,1).'/decree.php';
-		$query_field = $this->getLastQuery();
+		$query_field = $this->getCodeField();
 		$liste_to_do = $this->getListDecreesToEditForComp($composante, $year);
 
 		$idfield_periode = ($this->_idmodel == 12) ? 104 : 7; // idfield_type de la période 7 ou 104 pour capacité
@@ -381,7 +400,7 @@ class model {
 		$decree_doublon = array();
 		$nb_decree_made = 0;
 		$periode_weight = array("Annuel" => 1, "P1" => 0.5, "P2" => 0.5);
-		$liste_etp_to_do = array_map('htmlspecialchars',array_column($liste_to_do,'value'));
+		$liste_etp_to_do = array_map('htmlspecialchars',array_column($liste_to_do,'code'));
 		$decree_made = array(STATUT_VALIDE => $decree_made_by_periode, STATUT_EN_COURS => $decree_made_by_periode, "Validation de la présidence" => $decree_made_by_periode, "Visa de la composante" => $decree_made_by_periode, STATUT_BROUILLON => $decree_made_by_periode);
 		foreach($model_decrees as $mdecree)
 		{

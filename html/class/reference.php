@@ -919,11 +919,11 @@ class reference {
 							{
 								$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann."&etp=".$todo['code'];
 								$recap[$comp['code']] .= $todo['code']." : ".$todo['value']." --- ";
-								if (key_exists($todo['value'], $stats[$comp['code']][$idmodel]['liste_edit']))
+								if (key_exists($todo['code'], $stats[$comp['code']][$idmodel]['liste_edit']))
 								{
 									$liste_periode = array();
-									$liste_periodes_edited = array_column($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']], 'periode');
-									array_multisort($liste_periodes_edited, SORT_ASC, $stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']]);
+									$liste_periodes_edited = array_column($stats[$comp['code']][$idmodel]['liste_edit'][$todo['code']], 'periode');
+									array_multisort($liste_periodes_edited, SORT_ASC, $stats[$comp['code']][$idmodel]['liste_edit'][$todo['code']]);
 									if (!in_array("Annuel", $liste_periodes_edited))
 									{
 										if (!in_array("semestre 1", $liste_periodes_edited))
@@ -933,7 +933,7 @@ class reference {
 											$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
 										}
 									}
-									foreach($stats[$comp['code']][$idmodel]['liste_edit'][$todo['value']] as $elem)
+									foreach($stats[$comp['code']][$idmodel]['liste_edit'][$todo['code']] as $elem)
 									{
 										$recap[$comp['code']] .= " ".$elem['periode']." ".$elem['statut']['img']." - ";
 										$liste_periode[] = $elem['periode'];
@@ -1113,8 +1113,10 @@ class reference {
 						ON dfi2.iddecree = d.iddecree
 					INNER JOIN model_field mfi2
 						ON mfi2.idmodel = mfi.idmodel
-							AND mfi2.idfield_type = 3 # mention du diplôme
 							AND mfi2.idmodel_field = dfi2.idmodel_field
+					INNER JOIN field_type fty
+						ON fty.name = 'codemention'
+							AND mfi2.idfield_type =  fty.idfield_type # code de la mention
 				WHERE
 					mfi.idfield_type = 4 # Président
 					AND not exists (SELECT d2.iddecree FROM decree d2 INNER JOIN decree_field dfi3 ON dfi3.iddecree = d2.iddecree
@@ -1157,7 +1159,7 @@ class reference {
 				$liste_to_do = array_merge($liste_to_do, $obj_model->getListDecreesToEditForComp($cod_comp, $year));
 			}
 		}
-		return array_combine(array_column($liste_to_do, 'value'), $liste_to_do);
+		return array_combine(array_column($liste_to_do, 'code'), $liste_to_do);
 	}
 
 }

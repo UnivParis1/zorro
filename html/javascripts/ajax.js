@@ -279,30 +279,46 @@ function readListMentions(data)
 	}
 }
 
-function majCodeMention()
+function majCodeMention(valeur='')
 {
 	var code = document.getElementById("codemention1");
-	var etp = document.getElementById("mention1");
-	if (code !== null && etp !== null)
+	if (valeur !='')
 	{
-		var options = code.options;
-		var mod = false;
-		for (var i=1, c=options.length; i<c; i++)
-		{
-			if (i == etp.selectedIndex)
+		var codementiondiv = document.getElementById("codemention_div");
+		codementiondiv.setAttribute("style", "display:none;");
+		if (code == null)
 			{
-				options[i].setAttribute("selected", true);
-				code.setAttribute("value", options[i].value);
-				mod = true;
+				var oSelect;
+				oSelect = document.createElement("input");
+				oSelect.setAttribute("id", "codemention1");
+				oSelect.setAttribute("name", "codemention1");
+				codementiondiv.appendChild(oSelect);
 			}
-			else
-			{
-				options[i].removeAttribute("selected");
-			}
-		}
-		if (mod == false)
+			code = document.getElementById("codemention1");
+			code.setAttribute("value", valeur);
+	} else {
+		var etp = document.getElementById("mention1");
+		if (code !== null && etp !== null)
 		{
-			code.removeAttribute("value");
+			var options = code.options;
+			var mod = false;
+			for (var i=1, c=options.length; i<c; i++)
+			{
+				if (i == etp.selectedIndex)
+				{
+					options[i].setAttribute("selected", true);
+					code.setAttribute("value", options[i].value);
+					mod = true;
+				}
+				else
+				{
+					options[i].removeAttribute("selected");
+				}
+			}
+			if (mod == false)
+			{
+				code.removeAttribute("value");
+			}
 		}
 	}
 }
