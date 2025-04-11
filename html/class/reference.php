@@ -1115,7 +1115,7 @@ class reference {
 						ON mfi2.idmodel = mfi.idmodel
 							AND mfi2.idmodel_field = dfi2.idmodel_field
 					INNER JOIN field_type fty
-						ON fty.name = 'codemention'
+						ON fty.name IN ('codemention', 'codemention2')
 							AND mfi2.idfield_type =  fty.idfield_type # code de la mention
 				WHERE
 					mfi.idfield_type = 4 # Président

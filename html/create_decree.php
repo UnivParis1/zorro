@@ -1388,7 +1388,7 @@
 									}
 									elseif ($modelfield['idfield_type'] == 106)
 									{ ?>
-										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>">
+										<select style="width:26em" name="<?php echo $modelfield['name'].$i;?>" id="<?php echo $modelfield['name'].$i;?>" onchange="majCodeMention2();">
 										</select>
 										<?php if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 										{ ?>

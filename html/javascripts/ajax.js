@@ -132,6 +132,7 @@ function majDomaine(select,valeur='')
 			majMention('', valeur);
 			majCodeMention();
 			majMention2('', valeur);
+			majCodeMention2();
 			majSpecialite('', valeur);
 		}
 	}
@@ -220,6 +221,7 @@ function majMention(select, valeur='')
 			majSpecialite('', valeur);
 			majMention2('', valeur);
 			majCodeMention();
+			majCodeMention2();
 		}
 	}
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -298,6 +300,50 @@ function majCodeMention(valeur='')
 			code.setAttribute("value", valeur);
 	} else {
 		var etp = document.getElementById("mention1");
+		if (code !== null && etp !== null)
+		{
+			var options = code.options;
+			var mod = false;
+			for (var i=1, c=options.length; i<c; i++)
+			{
+				if (i == etp.selectedIndex)
+				{
+					options[i].setAttribute("selected", true);
+					code.setAttribute("value", options[i].value);
+					mod = true;
+				}
+				else
+				{
+					options[i].removeAttribute("selected");
+				}
+			}
+			if (mod == false)
+			{
+				code.removeAttribute("value");
+			}
+		}
+	}
+}
+
+function majCodeMention2(valeur='')
+{
+	var code = document.getElementById("codemention21");
+	if (valeur !='')
+	{
+		var codementiondiv = document.getElementById("codemention2_div");
+		codementiondiv.setAttribute("style", "display:none;");
+		if (code == null)
+			{
+				var oSelect;
+				oSelect = document.createElement("input");
+				oSelect.setAttribute("id", "codemention21");
+				oSelect.setAttribute("name", "codemention21");
+				codementiondiv.appendChild(oSelect);
+			}
+			code = document.getElementById("codemention21");
+			code.setAttribute("value", valeur);
+	} else {
+		var etp = document.getElementById("mention21");
 		if (code !== null && etp !== null)
 		{
 			var options = code.options;
@@ -470,19 +516,33 @@ function readListMentions2(data)
 	var mentions = data.getElementsByTagName("item");
 	var listementions = document.getElementById("mention21");
 	var mention_div = document.getElementById("mention2_div");
+	var listecodes = document.getElementById("codemention21");
+	var mention_div = document.getElementById("codemention2_div");
+	mention_div.setAttribute("style", "display:none;");
 	if (mention_div !== null)
 	{
-		mention_div.setAttribute("style", "display:block;");
+		if (listecodes == null)
+		{
+			var oSelect;
+			oSelect = document.createElement("select");
+			oSelect.setAttribute("id", "codemention21");
+			oSelect.setAttribute("name", "codemention21");
+			mention_div.appendChild(oSelect);
+			listecodes = document.getElementById("codemention21");
+		}
+		listecodes.innerHTML = "";
 		listementions.innerHTML = "";
 		if (mentions.length > 0)
 		{
 			if (mentions.length == 1)
 			{
 				var listeRes = ajouteLigneSelect (listementions, "", "");
+				var listeCod = ajouteLigneSelect (listecodes, "", "");
 			}
 			else
 			{
 				var listeRes = ajouteLigneSelect (listementions, "", "", true);
+				var listeCod = ajouteLigneSelect (listecodes, "", "", true);
 			}
 			for (var i=0, c=mentions.length; i<c; i++)
 			{
@@ -495,6 +555,7 @@ function readListMentions2(data)
 					var selected = false;
 				}
 				listeRes = ajouteLigneSelect (listeRes, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("id"), selected);
+				listeCod = ajouteLigneSelect (listeCod, mentions[i].getAttribute("libelle"), mentions[i].getAttribute("code"), selected);
 			}
 		}
 	}
