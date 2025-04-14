@@ -865,6 +865,7 @@ class reference {
 		$tem_commission = false;
 		$tem_jury = false;
 		$yearup = $year;
+		$yearapo = $year;
 		foreach($list_comp as $comp)
 		{
 			$supann = $ldap->getSupannCodeEntiteFromAPO($comp['code']);
@@ -895,10 +896,11 @@ class reference {
 					if ($year == NULL)
 					{
 						$yearup = $model['create_year'] == 'annee_univ_suiv' ? $this->getAnneeUni(1) : $this->getAnneeUni();
+						$yearapo = $model['create_year'] == 'annee_univ_suiv' ? COD_ANU + 1 : COD_ANU;
 					}
 					$model_decrees = $user->getDecreesBy(array('idmodel' => $obj_model->getid(), 'createyear' => $yearup, 'composante' => 'structures-'.$supann, 'allcomp' => 'TRUE'), -1);
 					//var_dump($model_decrees);
-					$stats[$comp['code']][$idmodel] = $obj_model->getStats($model_decrees, $comp['code']);
+					$stats[$comp['code']][$idmodel] = $obj_model->getStats($model_decrees, $comp['code'], $yearapo);
 					if (sizeof($stats[$comp['code']][$idmodel]['liste_to_do']) > 0)
 					{
 						$nb_decree_val = sizeof($stats[$comp['code']][$idmodel]["decree_made"][STATUT_VALIDE]["Annuel"]) + (sizeof($stats[$comp['code']][$idmodel]["decree_made"][STATUT_VALIDE]["P1"]) / 2) + (sizeof($stats[$comp['code']][$idmodel]["decree_made"][STATUT_VALIDE]["P2"]) / 2);
