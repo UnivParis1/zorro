@@ -264,7 +264,7 @@ class ldap {
 	{
 		$retour = array();
 		$curl = curl_init();
-		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SEARCH_USER."?filter_uid=".$uid;
+		$curl_opt_url = WSGROUPS_URL.WSGROUPS_SEARCH_USERTRUSTED."?filter_uid=".$uid;
 
 		$opts = array(
 				CURLOPT_URL => $curl_opt_url,
