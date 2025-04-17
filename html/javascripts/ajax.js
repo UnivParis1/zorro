@@ -237,10 +237,10 @@ function readListMentions(data)
 	var mention_div = document.getElementById("mention_div");
 	var listecodes = document.getElementById("codemention1");
 	var mention_div = document.getElementById("codemention_div");
-	mention_div.setAttribute("style", "display:none;");
 	listementions.innerHTML = "";
 	if (mentions.length > 0)
 	{
+		mention_div.setAttribute("style", "display:none;");
 		if (listecodes == null)
 		{
 			var oSelect;
@@ -518,9 +518,9 @@ function readListMentions2(data)
 	var mention_div = document.getElementById("mention2_div");
 	var listecodes = document.getElementById("codemention21");
 	var mention_div = document.getElementById("codemention2_div");
-	mention_div.setAttribute("style", "display:none;");
 	if (mention_div !== null)
 	{
+		mention_div.setAttribute("style", "display:none;");
 		if (listecodes == null)
 		{
 			var oSelect;
