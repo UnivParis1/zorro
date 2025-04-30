@@ -1148,6 +1148,7 @@
 				$access = true;
 				?>
 				<h2>Modification d'un document</h2>
+				<p class="alerte alerte-modif"><?php echo WARNING_MODIF_MESSAGE; ?> </p>
 				<?php
 				//print_r2($mod_decree_fields);
 			}

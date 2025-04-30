@@ -483,6 +483,13 @@ div.stat label {
    color: white;
 }
 
+.alerte-modif {
+   background: #CF4A02;
+   border: 2px #fcb8b8 dashed;
+   color: white;
+   width: 900px;
+}
+
 
 
 /*==============*/
