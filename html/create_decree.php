@@ -1129,6 +1129,7 @@
 				divs[i].setAttribute("style", 'display:none;');
 			}
 		}
+		return false;
 	}
 	</script>
 	<div id="contenu1">
@@ -1244,7 +1245,12 @@
 					{
 						$hidden = "name= 'linked_".$ref->getModelFieldName($modelfield['linkedto'])."' style='display:none;'";
 					}
-				}?>
+				}
+				if ($modelfield['tem_hidden'] == 'O')
+				{
+					$hidden = " style='display:none;'";
+				}
+				?>
 				<div id='<?php echo $modelfield['name'].'_div';?>' <?php echo $hidden;?>>
 				<?php if ($modelfield['auto'] != 'O' && $modelfield['number'] != '0' && $modelfield['idfield_type'] != 10)
 				{?>
@@ -1278,6 +1284,14 @@
 						switch ($modelfield['datatype']) {
 							case 'user':
 									findPerson($modelfield['name'],$i);
+									if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
+									{
+										echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+										echo "<script>document.getElementById('".$modelfield['name']."1').nextSibling.innerText = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";
+									}
+									break;
+							case 'userpres':
+									findPresident($modelfield['name'],$i);
 									if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields))
 									{
 										echo "<script>document.getElementById('".$modelfield['name']."1').value = '".$mod_decree_fields[$modelfield['idmodel_field']][0]['value']."';</script>";

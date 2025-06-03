@@ -107,7 +107,7 @@ class model {
 	
 	function getModelFields()
 	{
-		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_before, mfi.complement_after, mfi.lib_section, mfi.idfield_type_section, mfi.order, mfi.filename_position, mfi.tem_facultatif, mfi.tem_blank_line, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
+		$select = "SELECT mfi.idmodel_field, mfi.number, mfi.auto, mfi.auto_value, mfi.linkedto, mfi.complement_before, mfi.complement_after, mfi.lib_section, mfi.idfield_type_section, mfi.order, mfi.filename_position, mfi.tem_facultatif, mfi.tem_blank_line, mfi.tem_hidden, fty.* FROM model_field mfi INNER JOIN field_type fty ON mfi.idfield_type = fty.idfield_type WHERE mfi.idmodel = ? ORDER BY mfi.order";
 		$params = array($this->_idmodel);
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$fields = array();

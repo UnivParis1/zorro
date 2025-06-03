@@ -240,7 +240,6 @@ function readListMentions(data)
 	listementions.innerHTML = "";
 	if (mentions.length > 0)
 	{
-		mention_div.setAttribute("style", "display:none;");
 		if (listecodes == null)
 		{
 			var oSelect;
@@ -680,4 +679,56 @@ function refreshtab(){
 	}
 	loadMore(nbaff, userid, orderby, desc, idmodel, status, contenu, findnum, year, allcomp);
 	scrollLoad = false;
+}
+
+/* Met a jour l'email */
+function majMail(select)
+{
+	var uid = document.getElementById("loginpresident1").value;
+	var xhr = getXMLHttpRequest();
+	var params = "uid="+uid;
+	xhr.open("POST", "xml_ajax_mail.php", true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0))
+		{
+			readInfosMail(xhr.responseXML);
+		}
+	}
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.send(params);
+}
+
+/* Recupere et cree le mail du président a partir de la reponse xml */
+function readInfosMail(data)
+{
+	var infos = data.getElementsByTagName("item");
+		for (var i=0, c=infos.length; i<c; i++)
+		{
+			var elem = document.getElementById(infos[i].getAttribute("id")+"1");
+			if (elem == null)
+			{
+				var oInput, oDiv;
+				oDiv = document.getElementById(infos[i].getAttribute("id")+"_div");
+				//alert(infos[i].getAttribute("id")+"_div");
+				if (oDiv != null)
+				{
+					oDiv.setAttribute("style", "display:block;");
+					oInput = document.createElement("input");
+					//oInner  = document.createTextNode(text);
+					oInput.setAttribute("id", infos[i].getAttribute("id")+"1");
+					oInput.setAttribute("name", infos[i].getAttribute("id")+"1");
+					oInput.setAttribute("type", "text");
+					oInput.setAttribute("value", infos[i].getAttribute("libelle"));
+					//oInput.setAttribute("readonly", true);
+					//oInput.appendChild(oInner);
+					oDiv.appendChild(oInput);
+				}
+			}
+			else
+			{
+				elem.value = infos[i].getAttribute("libelle");
+			}
+			//listeRes = ajouteLigneSelect (listeRes, infos[i].getAttribute("libelle"), infos[i].getAttribute("id"));
+		}
+	//}
 }

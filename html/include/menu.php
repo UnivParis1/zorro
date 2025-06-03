@@ -111,7 +111,28 @@
 		var selectedInput = document.activeElement;
 		form.find("[id='" + selectedInput.name + "']").val(ui.item.label);
 		form.find("[class='" + selectedInput.name + "']").val (ui.item.value);
+		return false;
+    };
 
+	var completionPresident = function (event, ui)
+    {
+		// NB: this event is called before the selected value is set in the "input"
+		var form = $(this).closest("form");
+		var selectedInput = document.activeElement;
+		form.find("[id='" + selectedInput.name + "']").val(ui.item.label);
+		if (document.getElementById("loginpresident1") == null)
+		{
+			var divlogin = document.getElementById('loginpresident_div');
+			divlogin.setAttribute("style", "display:none;");
+			oInput = document.createElement("input");
+			oInput.setAttribute("id", "loginpresident1");
+			oInput.setAttribute("name", "loginpresident1");
+			oInput.setAttribute("type", "text");
+			//oInput.setAttribute("readonly", true);
+			divlogin.appendChild(oInput);
+		}
+		form.find("[id='" + "loginpresident1" + "']").val(ui.item.value);
+		majMail(form.find("[id='" + "emailpresident1" + "']"));
 		return false;
     };
 

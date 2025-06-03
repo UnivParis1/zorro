@@ -18,6 +18,19 @@ function findPerson($name, $id = '')
 
 }
 
+function findPresident($name, $id = '')
+{
+	echo "<input id='".$name.$id."' name='".$name.$id."' placeholder='Nom et/ou prenom'/>";
+	
+	echo "<script>";
+	//var input_elt = $( ".token-autocomplete input" );
+	echo "$( '#".$name.$id."' ).autocompleteUser(
+			'".WSGROUPS_URL.WSGROUPS_SEARCH_USERCAS."', { select: completionPresident, wantedAttr: 'uid',
+			wsParams: { allowInvalidAccounts: 0, filter_eduPersonAffiliation: 'employee|staff' } });
+	";
+	echo "</script>";
+
+}
 function findGroup($name, $id = '')
 {
 	echo "<input id='".$name.$id."_ref' name='".$name.$id."_ref' placeholder='Service référent'/>";
