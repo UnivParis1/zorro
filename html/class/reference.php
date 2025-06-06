@@ -1097,6 +1097,7 @@ class reference {
 		$sql = "SELECT
 					dfi2.value as mention,
 					dfi.value as president,
+					dfi3.value as email,
 					NVL(d.majdate, d.createdate) as majdate
 				FROM
 					model_field mfi
@@ -1119,6 +1120,14 @@ class reference {
 					INNER JOIN field_type fty
 						ON fty.name IN ('codemention', 'codemention2')
 							AND mfi2.idfield_type =  fty.idfield_type # code de la mention
+					INNER JOIN decree_field dfi3
+						ON dfi3.iddecree = d.iddecree
+					INNER JOIN model_field mfi3
+						ON mfi3.idmodel = mfi.idmodel
+							AND mfi3.idmodel_field = dfi3.idmodel_field
+					INNER JOIN field_type fty2
+						ON fty2.name = 'emailpresident'
+							AND mfi3.idfield_type =  fty2.idfield_type # email du president
 				WHERE
 					mfi.idfield_type = 4 # Président
 					AND not exists (SELECT d2.iddecree FROM decree d2 INNER JOIN decree_field dfi3 ON dfi3.iddecree = d2.iddecree
