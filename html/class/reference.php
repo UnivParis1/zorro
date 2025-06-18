@@ -1114,6 +1114,7 @@ class reference {
 							AND d.univ_year = ?
 					INNER JOIN decree_field dfi2
 						ON dfi2.iddecree = d.iddecree
+							AND dfi2.value <> ''
 					INNER JOIN model_field mfi2
 						ON mfi2.idmodel = mfi.idmodel
 							AND mfi2.idmodel_field = dfi2.idmodel_field
