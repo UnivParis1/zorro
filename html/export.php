@@ -22,7 +22,7 @@
 	}
 	else
 	{
-		$post_selectyear = $ref->getAnneeUni();
+		$post_selectyear = $ref->getAnneeUni(1);
 	}
 	$anneeuni = explode("-", $post_selectyear);
 	$annee = $anneeuni[0];
