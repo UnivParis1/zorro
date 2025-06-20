@@ -789,31 +789,38 @@ class decree {
 				if (! isset($response['error']))
 				{
 					elog ("Succès. getRefuseComment...");
-					if (isset($response['comments'][0]['text']))
+					if (isset($response['comments']))
 					{
-						elog ("Commentaire : ".$response['comments'][0]['text']);
+						$commentaire = '';
+						foreach($response['comments'] as $c)
+						{
+							if ($c['text'] != '')
+							{
+								$commentaire .= $c['text'].' -- ';
+							}
+						}
 						$esign_info = $this->getEsignInfo();
 						if ($esign_info != null)
 						{
 							$update = "UPDATE esignature_info SET refuse_comment = ? WHERE idesignature = ?";
-							$params = array($response['comments'][0]['text'], $idesignature);
+							$params = array($commentaire, $idesignature);
 							$result = prepared_select($this->_dbcon, $update, $params);
 							if (mysqli_error($this->_dbcon))
 							{
-								elog("Erreur lors de l'update du commentaire de refus. idesignature : ".$idesignature.", commentaire : ".htmlspecialchars($response['comments'][0]['text']));
+								elog("Erreur lors de l'update du commentaire de refus. idesignature : ".$idesignature.", commentaire : ".htmlspecialchars($commentaire));
 							}
 						}
 						else
 						{
 							$insert = "INSERT INTO esignature_info (idesignature, refuse_comment, sign_step) VALUES (?,?,NULL)";
-							$params = array($idesignature, $response['comments'][0]['text']);
+							$params = array($idesignature, $commentaire);
 							$result = prepared_select($this->_dbcon, $insert, $params);
 							if (mysqli_error($this->_dbcon))
 							{
-								elog("Erreur lors de l'insert du commentaire de refus. idesignature : ".$idesignature.", commentaire : ".htmlspecialchars($response['comments'][0]['text']));
+								elog("Erreur lors de l'insert du commentaire de refus. idesignature : ".$idesignature.", commentaire : ".htmlspecialchars($commentaire));
 							}
 						}
-						return htmlspecialchars($response['comments'][0]['text']);
+						return htmlspecialchars($commentaire);
 					}
 					else
 					{
