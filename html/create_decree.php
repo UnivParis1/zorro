@@ -108,6 +108,7 @@
     }
     else 
     {
+		if (!isset($_SESSION['groupes']))
 		$roles = $user->getGroupeRoles($_SESSION['groupes'], null, true); // roles actifs de l'utilisateur
     	//print_r2($_SESSION['groupes']);
 	    $listModels = array();
