@@ -109,6 +109,14 @@
     else 
     {
 		if (!isset($_SESSION['groupes']))
+		{
+			$infos_ldap = $ldap->getInfos($userid);
+			$ldap->getUserAndStructureInfos($userid);
+			$allgroupes = $ref->getAllGroupes();
+			$groupes = $user->getUserGroupes($allgroupes);
+			$_SESSION['groupes'] = $groupes;
+			elog("Les valeurs en session ont été rechargées pour l'uid $userid.");
+		}
 		$roles = $user->getGroupeRoles($_SESSION['groupes'], null, true); // roles actifs de l'utilisateur
     	//print_r2($_SESSION['groupes']);
 	    $listModels = array();
