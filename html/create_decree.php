@@ -820,7 +820,7 @@
 								{
 									$listrooms = $ref->getRoomsList();
 									$prixsalle = $ref->getRoomPricesById($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']);
-									$nom_salle = $listrooms[$prixsalle['idroom_type']]['name'];
+									$nom_salle = $listrooms[$prixsalle['idroom_type']]['centre'].' - '.$listrooms[$prixsalle['idroom_type']]['name'];
 									$ancprixheure = $prixsalle['old_tarif_heure'] == '' ? $prixsalle['old_tarif_heure'] : $prixsalle['old_tarif_heure']." €";
 									$newprixheure = $prixsalle['new_tarif_heure']." €";
 									$ancprixdemi = $prixsalle['old_tarif_demi'] == '' ? $prixsalle['old_tarif_demi'] : $prixsalle['old_tarif_demi']." €";
