@@ -665,7 +665,8 @@ class decree {
 								{
 									if (!is_int($response['parentSignBook']['endDate']))
 									{
-										$date = new DateTime($response['parentSignBook']['endDate']);
+										$date = new DateTime($response['parentSignBook']['endDate'], new DateTimeZone('UTC'));
+										$date->setTimezone(new DateTimeZone('Europe/Paris'));
 										$date = $date->format("Y-m-d H:i:s");
 									}
 									else
@@ -686,7 +687,8 @@ class decree {
 								{
 									if (!is_int($response['parentSignBook']['endDate']))
 									{
-										$date = new DateTime($response['parentSignBook']['endDate']);
+										$date = new DateTime($response['parentSignBook']['endDate'], new DateTimeZone('UTC'));
+										$date->setTimezone(new DateTimeZone('Europe/Paris'));
 										$date = $date->format("Y-m-d H:i:s");
 									}
 									else
@@ -703,7 +705,8 @@ class decree {
 								$date = date("Y-m-d H:i:s");
 								if (!is_int($response['parentSignBook']['endDate']))
 								{
-									$date = new DateTime($response['parentSignBook']['endDate']);
+									$date = new DateTime($response['parentSignBook']['endDate'], new DateTimeZone('UTC'));
+									$date->setTimezone(new DateTimeZone('Europe/Paris'));
 									$date = $date->format("Y-m-d H:i:s");
 								}
 								else

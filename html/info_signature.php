@@ -130,7 +130,8 @@
                         //echo "Date de création : " . date("d/m/Y H:i:s", substr($response["parentSignBook"]["createDate"],0,strlen($response["parentSignBook"]["createDate"])-3)) . " (Valeur brute : " . $response["parentSignBook"]["createDate"] . ")<br>";
                         if (!is_int($response['parentSignBook']['createDate']))
                         {
-                            $date = new DateTime($response['parentSignBook']['createDate']);
+                            $date = new DateTime($response['parentSignBook']['createDate'], new DateTimeZone('UTC'));
+                            $date->setTimezone(new DateTimeZone('Europe/Paris'));
                             $displaydate = $date->format("d/m/Y H:i:s");
                         }
                         else
@@ -242,7 +243,8 @@
                             {
                                 if (!is_int($response['parentSignBook']['endDate']))
                                 {
-                                    $date = new DateTime($response['parentSignBook']['endDate']);
+                                    $date = new DateTime($response['parentSignBook']['endDate'], new DateTimeZone('UTC'));
+                                    $date->setTimezone(new DateTimeZone('Europe/Paris'));
                                     $displaydatefin = $date->format("d/m/Y H:i:s");
                                 }
                                 else
