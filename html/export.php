@@ -23,6 +23,10 @@
 	else
 	{
 		$post_selectyear = $ref->getAnneeUni(1);
+		if (!in_array($post_selectyear, $liste_year))
+		{
+			$post_selectyear = $ref->getAnneeUni();
+		}
 	}
 	$anneeuni = explode("-", $post_selectyear);
 	$annee = $anneeuni[0];
@@ -137,9 +141,6 @@
 						<label>Pour l'année de référence :</label>
 						<select name="selectyear" id="selectyear" onchange="this.form.submit()">
 							<?php
-								if (!isset($post_selectyear)) {
-									$post_selectyear = COD_ANU.'-'.(COD_ANU+1);
-								}
 								foreach ($liste_year as $year) {
 									if ((isset($post_selectyear) && $post_selectyear == $year)) { ?>
 										<option value="<?php echo $year;?>" selected="selected"><?php echo $year;?></option>
