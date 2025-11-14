@@ -406,7 +406,7 @@ class ldap {
 					}
 				}
 			}
-			$retour['nometu'] = array_key_exists('sn', $tab[0]) ? $tab[0]['sn'] : '';
+			$retour['nometu'] = array_key_exists('supannNomDeNaissance', $tab[0]) ? $tab[0]['supannNomDeNaissance'] : '';
 			$retour['prenometu'] = array_key_exists('givenName', $tab[0]) ? $tab[0]['givenName'] : '';
 			$retour['displayname'] = array_key_exists('displayName', $tab[0]) ? $tab[0]['displayName'] : '';
 		}
@@ -415,7 +415,7 @@ class ldap {
 		$attributs = array('uid', 'supannEtuId');
 		if (!is_array($tab) || sizeof($tab) == 0)
 		{
-			$attributs = array('uid', 'supannEtuId','supannEntiteAffectationPrincipale', 'supannEtuEtape', 'sn', 'givenName', 'displayName');
+			$attributs = array('uid', 'supannEtuId','supannEntiteAffectationPrincipale', 'supannEtuEtape', 'supannNomDeNaissance', 'givenName', 'displayName');
 		}
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
@@ -428,7 +428,7 @@ class ldap {
 			}
 			if (!is_array($tab) || sizeof($tab) == 0)
 			{
-				$retour['nometu'] = array_key_exists('sn', $entries[0]) ? $entries[0]['sn'][0] : '';
+				$retour['nometu'] = array_key_exists('supannNomDeNaissance', $entries[0]) ? $entries[0]['supannNomDeNaissance'][0] : '';
 				$retour['prenometu'] = array_key_exists('givenname', $entries[0]) ? $entries[0]['givenname'][0] : '';
 				$retour['displayname'] = array_key_exists('displayname', $entries[0]) ? $entries[0]['displayname'][0] : '';
 				// TODO : Liste Rouge...
