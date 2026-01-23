@@ -932,7 +932,7 @@ class reference {
 										{
 											// TODO : Ajouter paramétrage : modèle, composante, diplôme, periode
 											$params_url .= "&periode=S1";
-											$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
+											$recap[$comp['code']] .= " semestre 1 <a href=\"".URL_BASE_ZORRO."/index.php".$params_url."\" target=\"_blank\">➕</a> - ";
 										}
 									}
 									foreach($stats[$comp['code']][$idmodel]['liste_edit'][$todo['code']] as $elem)
@@ -945,13 +945,13 @@ class reference {
 										if (!in_array("semestre 2", $liste_periodes_edited))
 										{
 											$params_url .= "&periode=S2";
-											$recap[$comp['code']] .= " semestre 2 <a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a> - ";
+											$recap[$comp['code']] .= " semestre 2 <a href=\"".URL_BASE_ZORRO."/index.php".$params_url."\" target=\"_blank\">➕</a> - ";
 										}
 									}
 								}
 								else
 								{
-									$recap[$comp['code']] .= "<a href=\"".URL_BASE_ZORRO."/create_decree.php".$params_url."\" target=\"_blank\">➕</a>";
+									$recap[$comp['code']] .= "<a href=\"".URL_BASE_ZORRO."/index.php".$params_url."\" target=\"_blank\">➕</a>";
 								}
 								$recap[$comp['code']] .= "
 								<br>";

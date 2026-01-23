@@ -41,6 +41,27 @@
 	    //$menuItem = 'menu_manage';
 	    //require_once ("./include/menu.php");
 	    //echo '<html><body class="bodyhtml">';
+		if (isset($_GET['new'])) { 
+			$param = '?new';
+			if (array_key_exists('idmodel', $_GET))
+			{
+				$param .= '&idmodel='.$_GET['idmodel'];
+			}
+			if (array_key_exists('comp', $_GET))
+			{
+				$param .= '&comp='.$_GET['comp'];
+			}
+			if (array_key_exists('etp', $_GET))
+			{
+				$param .= '&etp='.$_GET['etp'];
+			}
+			if (array_key_exists('periode', $_GET))
+			{
+				$param .= '&periode='.$_GET['periode'];
+			}
+			elog("Redirection vers create_decree.php".$param);
+			header("Location: ".URL_BASE_ZORRO."/create_decree.php".$param);
+		}
 	    include './manage_decree.php';
 	    /*foreach ($infos_ldap as $cle => $info)
 	    {
