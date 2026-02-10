@@ -778,10 +778,21 @@
 							{
 
 								// echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']."<br>";
-								if ($modelfieldstype[$modelfieldsarrange[$field]] == 'user' || $modelfieldstype[$modelfieldsarrange[$field]] == 'userpres')
+								if ($modelfieldstype[$modelfieldsarrange[$field]] == 'user')
 								{
 									$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
+								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'userpres')
+								{
+									if (substr($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], 0, 3) == 'Mme')
+									{
+										$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after." (présidente du jury)", "position" => $position1, "longueur" => (strlen($field)+6));
+									}
+									else
+									{
+										$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after." (président du jury)", "position" => $position1, "longueur" => (strlen($field)+6));
+									}
+								}	
 								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox' || $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox2')
 								{
 									$champsamodif[] = array("valeur" => $comp_before."[x]".$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));

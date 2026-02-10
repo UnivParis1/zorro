@@ -109,7 +109,7 @@
 		// NB: this event is called before the selected value is set in the "input"
 		var form = $(this).closest("form");
 		var selectedInput = document.activeElement;
-		form.find("[id='" + selectedInput.name + "']").val(ui.item.label);
+		form.find("[id='" + selectedInput.name + "']").val(ui.item.supannCivilite+" "+ui.item.label);
 		form.find("[class='" + selectedInput.name + "']").val (ui.item.value);
 		return false;
     };
@@ -119,7 +119,7 @@
 		// NB: this event is called before the selected value is set in the "input"
 		var form = $(this).closest("form");
 		var selectedInput = document.activeElement;
-		form.find("[id='" + selectedInput.name + "']").val(ui.item.label);
+		form.find("[id='" + selectedInput.name + "']").val(ui.item.supannCivilite+" "+ui.item.label);
 		if (document.getElementById("loginpresident1") == null)
 		{
 			var divlogin = document.getElementById('loginpresident_div');
