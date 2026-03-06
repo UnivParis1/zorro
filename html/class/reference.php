@@ -909,9 +909,9 @@ class reference {
 							$tem_relance = true;
 							$params_url = "?new&idmodel=".$idmodel."&comp=".'structures-'.$supann;
 							$recap[$comp['code']] .= "<b> Modèle : ".$obj_model->getDecreeType()['name']." ".$model['name'];
-							$recap[$comp['code']] .= "<br> Nombre d'arrêtés à créer : ".sizeof($stats[$comp['code']][$idmodel]['liste_to_do'])."<br>";
-							$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']."<br>";
-							$recap[$comp['code']] .= "Année universitaire de référence : ".$yearup."</b><br>";
+							$recap[$comp['code']] .= "<br> Nombre d'arrêtés à créer : ".sizeof($stats[$comp['code']][$idmodel]['liste_to_do'])." <br>";
+							$recap[$comp['code']] .= "Nombre d'arrêtés créés : ".$stats[$comp['code']][$idmodel]['nb_decree_made']." <br>";
+							$recap[$comp['code']] .= "Année universitaire de référence : ".$yearup." </b><br>";
 							$recap[$comp['code']] .= "Détail :  <br>";
 							$recap_tab[$comp['code']] = array('modelname' => $obj_model->getDecreeType()['name']." ".$model['name'],
 															'nbtocreate' => sizeof($stats[$comp['code']][$idmodel]['liste_to_do']),
