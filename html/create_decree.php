@@ -786,11 +786,11 @@
 								{
 									if (substr($fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'], 0, 3) == 'Mme')
 									{
-										$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after." (présidente du jury)", "position" => $position1, "longueur" => (strlen($field)+6));
+										$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']." (présidente ".$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 									}
 									else
 									{
-										$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after." (président du jury)", "position" => $position1, "longueur" => (strlen($field)+6));
+										$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']." (président ".$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 									}
 								}	
 								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox' || $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox2')
