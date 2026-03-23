@@ -35,7 +35,7 @@ function findGroup($name, $id = '')
 {
 	echo "<input id='".$name.$id."_ref' name='".$name.$id."_ref' placeholder='Service référent'/>";
 	echo "<input type='hidden' id='".$name.$id."' name='".$name.$id."' class='".$name.$id."_ref' onchange='majComposante(this)'/>";
-	?> <button id="<?php echo $name.$id.'_effacer';?>" name="<?php echo $name.$id.'_effacer';?>" onclick="getElementById('<?php echo $name.$id.'_ref';?>').value='';getElementById('<?php echo $name.$id;?>').value='';return false;">x</button>
+	?> <button type="button" id="<?php echo $name.$id.'_effacer';?>" name="<?php echo $name.$id.'_effacer';?>" onclick="getElementById('<?php echo $name.$id.'_ref';?>').value='';getElementById('<?php echo $name.$id;?>').value='';return false;">x</button>
 	<?php echo "<script>";
 	echo "$( '#".$name.$id."_ref' ).autocompleteGroup(
 			'".WSGROUPS_URL.WSGROUPS_SEARCH_GROUP."', { select: completionStructure, wantedAttr: 'key',
