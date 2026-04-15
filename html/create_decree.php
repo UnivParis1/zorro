@@ -780,7 +780,7 @@
 								// echo "($position1 - $position2) à remplacer : $$$".$field."$$$ par : ".$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value']."<br>";
 								if ($modelfieldstype[$modelfieldsarrange[$field]] == 'user')
 								{
-									$champsamodif[] = array("valeur" => "- ".$comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
+									$champsamodif[] = array("valeur" => $comp_before.$fieldstoinsert[$modelfieldsarrange[$field]][$nb_field[$field]]['value'].$comp_after, "position" => $position1, "longueur" => (strlen($field)+6));
 								}
 								elseif ($modelfieldstype[$modelfieldsarrange[$field]] == 'userpres')
 								{
