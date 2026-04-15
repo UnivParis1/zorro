@@ -514,15 +514,14 @@ class decree {
 			}
 		}
 		$ref = new reference('', '');
-		if ($infosModel['iddecree_type'] == 2) // Commissions pour l'année suivante
+		if ($infosModel['iddecree_type'] == 2 || $infosModel['iddecree_type'] == 6) // Commissions pour l'année suivante
 		{
-			$year = $ref->getAnneeUni(1);
+			$filename .= '_'.$ref->getAnneeUni(1);
 		}
-		else
+		elseif ($infosModel['iddecree_type'] == 1 || $infosModel['iddecree_type'] == 5)
 		{
-			$year = $ref->getAnneeUni();
+			$filename .= '_'.$ref->getAnneeUni();
 		}
-		$filename .= '_'.$year;
 		$filename .= '_'.$this->getid();
 		$this->setFilename($filename);
 		$filename .= ".".$extension;
