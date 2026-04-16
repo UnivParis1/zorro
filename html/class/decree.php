@@ -1022,9 +1022,9 @@ class decree {
 			}
 			return TARGET_URL.$model_export_path['decree_type_export_path'].'/'.$struct_export_path.$model_export_path['model_export_path'].'/'.$year;
 		}
-		elseif ($decree_type['iddecree_type'] == 7)
+		elseif ($decree_type['iddecree_type'] == 7 || $decree_type['iddecree_type'] == 8)
 		{
-			// Modèles de la DIRCOM
+			// Modèles de la DIRCOM et de la DAFB
 			$year ++;
 			return TARGET_URL.$model_export_path['decree_type_export_path'].'/'.$model_export_path['model_export_path'].'/'.$year;
 		}
