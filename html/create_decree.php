@@ -699,7 +699,7 @@
 									}
 									// Si le champ est de type liste on modifie le texte au lieu de dupliquer le noeud contenant le texte
 									// Pour éviter l'insertion d'un espace non souhaité
-									if ($modelfieldstype[$idmodel_field] == 'list')
+									if ($modelfieldstype[$idmodel_field] == 'list' || $modelfieldstype[$idmodel_field] == 'stringcell')
 									{
 										$contenu_noeud_courant = $noeudcourant->textContent;
 										$position_de_la_chaine = strpos($contenu_noeud_courant, '$$$'.$champ.'$$$');
@@ -723,6 +723,25 @@
 												{
 													$node->textContent = $contenu_noeud_courant;
 													$noeudpere->replaceChild($clone_parfait, $noeudadupliquer);
+												}
+												
+											}
+											else
+											{
+												if ($node->nodeName == "text:p" && $modelfieldstype[$idmodel_field] == 'stringcell') { 
+													foreach($noeudpere->childNodes as $fils)
+													{
+														if (strpos($fils->textContent, '$$$'.$champ.'$$$') !== false)
+														{
+															$noeudpere = $fils;
+															break;
+														}
+													}
+													for ($i = 1; $i < $nbChamps; $i++)
+													{
+														$clone = $node->cloneNode(true);
+														$noeudpere->insertBefore($clone);
+													}
 												}
 											}
 
