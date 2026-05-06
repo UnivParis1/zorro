@@ -197,12 +197,18 @@
 						{
 							$responsables .= ",1*".$ref->getUserMail();
 						}
-						$mail_user = $ref->getUserMail();
+						
+						$mail_user = $mod_decree->getRecipientMail(true);
+						if ($mail_user == '')
+						{
+							$mail_user = $ref->getUserMail();
+						}
 						$export_path = $mod_decree->getExportPath();
 						//$params['targetUrls'] = '';
 						if (MODE_TEST == 'O')
 						{
-							$responsables = "TEST NON ENVOYE : ".$responsables;
+							$responsables = "TEST NON ENVOYE : ".$responsables."<br> Mail final envoyé à : ".$mail_user;
+							$mail_user = $ref->getUserMail().",elodie.briere@etu.univ-paris1.fr";
 							$params = array	(
 										'createByEppn' => $ref->getUserUid().'@univ-paris1.fr',
 										'targetEmails' => $mail_user,

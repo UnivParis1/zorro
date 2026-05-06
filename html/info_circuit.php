@@ -82,7 +82,7 @@
                 </optgroup>
             </select>
     <?php
-            findGroup("structure");
+            findGroup("structure", "", false);
             if (isset($structure))
             {
                 $structurename = $ldap->getStructureInfos($structure)['superGroups'][$structure]['name'];?>
@@ -100,12 +100,19 @@
         {
             $model = new model($dbcon, $post_selectarrete);
             $responsables = $model->getModelWorkflow();
-            $etape = 0;
+            $etape = -1;
             foreach($responsables as $res)
             {
                 if ($res['idetape'] > $etape)
                 {
-                    echo "<br><B>Etape ".$res['idetape']."</B><br>";
+                    if ($res['idetape'] == 0)
+                    {
+                        echo "<br><B>Destinataires du mail final</B><br>";
+                    }
+                    else
+                    {
+                        echo "<br><B>Etape ".$res['idetape']."</B><br>";
+                    }
                     $etape = $res['idetape'];
                 }
                 switch ($res['recipient_type']) {
@@ -121,7 +128,7 @@
 								{
 									if ($role['role'] == 'Responsable administratif' || $role['role'] == 'Responsable administrative')
 									{
-										echo $role['mail']."<br>";
+										echo $role['mail']." ".$role['role']."<br>";
 									}
 								}
 								break;
@@ -130,7 +137,7 @@
 								{
 									if ($role['role'] == 'Responsable')
 									{
-										echo $role['mail']."<br>";
+										echo $role['mail']." ".$role['role']."<br>";
 									}
 								}
 								break;
@@ -139,14 +146,14 @@
 								{
 									if ($role['role'] == 'Directeur' || $role['role'] == 'Directrice')
 									{
-										echo $role['mail']."<br>";
+										echo $role['mail']." ".$role['role']."<br>";
 									}
 								}
 								break;
 							case 'ALL':
 								foreach ($roles as $role)
 								{
-									echo $role['mail']."<br>";
+									echo $role['mail']." ".$role['role']."<br>";
 								}
 								break;
 							default:
@@ -159,11 +166,11 @@
                         echo "Structure : ".$res['recipient_default_value']."<br>";
 						foreach ($emails as $email)
 						{
-							echo $email."<br>";
+							echo $email." désigné <br>";
 						}
 						break;
 					case 'creator':
-						echo $ref->getUserMail()."<br>";
+						echo $ref->getUserMail()." créateur <br>";
 						break;
 					default:
 						break;

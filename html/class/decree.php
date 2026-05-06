@@ -1103,9 +1103,21 @@ class decree {
 		return $values;
 	}
 
-	function getRecipientMail()
+	// $export_mail = true si on souhaite récupérer les destinataires du document signé
+	function getRecipientMail($export_mail = false)
 	{
-		$select = "SELECT mw.idetape, mw.recipient_type, mw.recipient_default_value FROM model_workflow mw INNER JOIN decree d ON d.idmodel = mw.idmodel WHERE d.iddecree = ? ORDER BY mw.idetape";
+		$select = "SELECT mw.idetape, mw.recipient_type, mw.recipient_default_value FROM model_workflow mw INNER JOIN decree d ON d.idmodel = mw.idmodel WHERE d.iddecree = ? ";
+		if ($export_mail)
+		{
+			$select .= " AND mw.idetape = 0 ";
+			$tem_prefixe = FALSE;
+		}
+		else
+		{
+			$select .= " AND mw.idetape <> 0 ";
+			$tem_prefixe = TRUE;
+		}
+		$select .= " ORDER BY mw.idetape";
 		$params = array($this->getId());
 		$result = prepared_select($this->_dbcon, $select, $params);
 		$values = '';
@@ -1115,9 +1127,17 @@ class decree {
 			$ldap = new ldap();
 			while ($res = mysqli_fetch_assoc($result))
 			{
+				if ($tem_prefixe)
+				{
+					$prefixe = $res['idetape'].'*';
+				}
+				else
+				{
+					$prefixe = "";
+				}
 				switch ($res['recipient_type']) {
 					case 'email':
-						$values .= $res['idetape'].'*'.$res['recipient_default_value'].',';
+						$values .= $prefixe.$res['recipient_default_value'].',';
 						break;
 					case 'role':
 						// récupérer les personnes associées au role $res['recipient_default_value'] et pour chacun ajouter son email
@@ -1128,7 +1148,7 @@ class decree {
 								{
 									if ($role['role'] == 'Responsable administratif' || $role['role'] == 'Responsable administrative')
 									{
-										$values .= $res['idetape'].'*'.$role['mail'].',';
+										$values .= $prefixe.$role['mail'].',';
 									}
 								}
 								break;
@@ -1137,7 +1157,7 @@ class decree {
 								{
 									if ($role['role'] == 'Responsable')
 									{
-										$values .= $res['idetape'].'*'.$role['mail'].',';
+										$values .= $prefixe.$role['mail'].',';
 									}
 								}
 								break;
@@ -1146,14 +1166,14 @@ class decree {
 								{
 									if ($role['role'] == 'Directeur' || $role['role'] == 'Directrice')
 									{
-										$values .= $res['idetape'].'*'.$role['mail'].',';
+										$values .= $prefixe.$role['mail'].',';
 									}
 								}
 								break;
 							case 'ALL':
 								foreach ($roles as $role)
 								{
-									$values .= $res['idetape'].'*'.$role['mail'].',';
+									$values .= $prefixe.$role['mail'].',';
 								}
 								break;
 							default:
@@ -1165,11 +1185,11 @@ class decree {
 						$emails = $ldap->getEmailsForGroupUsers($res['recipient_default_value']);
 						foreach ($emails as $email)
 						{
-							$values .= $res['idetape'].'*'.$email.',';
+							$values .= $prefixe.$email.',';
 						}
 						break;
 					case 'creator':
-						$values .= $res['idetape'].'*'.$ref->getUserMail().',';
+						$values .= $prefixe.$ref->getUserMail().',';
 						break;
 					default:
 						break;
