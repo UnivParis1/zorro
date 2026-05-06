@@ -212,6 +212,10 @@
 							{
 								$params['targetUrls'] = $export_path."/TEST,".URL_WS_ZORRO;
 							}
+							else
+							{
+									$params['targetUrls'] = URL_WS_ZORRO;
+							}
 						}
 						else
 						{
@@ -223,6 +227,10 @@
 							if ($export_path != NULL)
 							{
 								$params['targetUrls'] = $export_path.",".URL_WS_ZORRO;
+							}
+							else
+							{
+								$params['targetUrls'] = URL_WS_ZORRO;
 							}
 						}
 						//$params['signRequestParamsJsonString'] = "[{ \"xPos\": 100, \"yPos\": 100, \"signPageNumber\": 1 },{ \"xPos\": 388, \"yPos\": 636, \"signPageNumber\": 1 }]";
