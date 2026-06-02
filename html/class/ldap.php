@@ -409,13 +409,14 @@ class ldap {
 			$retour['nometu'] = array_key_exists('supannNomDeNaissance', $tab[0]) ? $tab[0]['supannNomDeNaissance'] : '';
 			$retour['prenometu'] = array_key_exists('givenName', $tab[0]) ? $tab[0]['givenName'] : '';
 			$retour['displayname'] = array_key_exists('displayName', $tab[0]) ? $tab[0]['displayName'] : '';
+			$retour['civilite'] = array_key_exists('supannCivilite', $tab[0]) ? $tab[0]['supannCivilite'] : '';
 		}
 		$r = ldap_bind($this->_con_ldap, LDAP_BIND_LOGIN, LDAP_BIND_PASS);
 		$filtre = "(uid=$uid)";
 		$attributs = array('uid', 'supannEtuId');
 		if (!is_array($tab) || sizeof($tab) == 0)
 		{
-			$attributs = array('uid', 'supannEtuId','supannEntiteAffectationPrincipale', 'supannEtuEtape', 'supannNomDeNaissance', 'givenName', 'displayName');
+			$attributs = array('uid', 'supannEtuId','supannEntiteAffectationPrincipale', 'supannEtuEtape', 'supannNomDeNaissance', 'givenName', 'displayName', 'supannCivilite');
 		}
 		$result = ldap_search($this->_con_ldap, LDAP_SEARCH_BASE_PEOPLE, $filtre, $attributs);
 		$entries = ldap_get_entries($this->_con_ldap, $result);
@@ -431,6 +432,7 @@ class ldap {
 				$retour['nometu'] = array_key_exists('supannNomDeNaissance', $entries[0]) ? $entries[0]['supannNomDeNaissance'][0] : '';
 				$retour['prenometu'] = array_key_exists('givenname', $entries[0]) ? $entries[0]['givenname'][0] : '';
 				$retour['displayname'] = array_key_exists('displayname', $entries[0]) ? $entries[0]['displayname'][0] : '';
+				$retour['civilite'] = array_key_exists('supannCivilite', $entries[0]) ? $entries[0]['supannCivilite'][0] : '';
 				// TODO : Liste Rouge...
 				$retour['infoetu'] = array_key_exists('supannentiteaffectationprincipale', $entries[0]) ? $entries[0]['supannentiteaffectationprincipale'][0] : '';
 				$retour['infoetu'] = array_key_exists('supannetuetape', $entries[0]) ? $entries[0]['supannetuetape'][0].' - '.$retour['infoetu'] : $retour['infoetu'];
