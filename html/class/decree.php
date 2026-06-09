@@ -398,6 +398,58 @@ class decree {
 		}
 		return $fields;
 	}
+
+	function getComposedFields()
+	{
+		$select = "SELECT dcf.* FROM decree_composed_field dcf INNER JOIN decree_field df ON df.iddecree_field = dcf.iddecree_composed_field WHERE iddecree = ?";
+		$params = array($this->getId());
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$fields = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($row = mysqli_fetch_assoc($result))
+			{
+				$fields[$row['iddecree_composed_field']][$row['idfield_type']] = $row;
+			}
+		}
+		else
+		{
+			elog("Erreur select decree_composed_field : ".$this->getid()." ".mysqli_error($this->_dbcon));
+		}
+		return $fields;
+	}
+
+	function setComposedFields($fields, $update=false)
+	{
+		if ($update)
+		{
+			$delete = "DELETE FROM decree_composed_field WHERE iddecree_composed_field IN (SELECT iddecree_field FROM decree_field WHERE iddecree = ? )";
+			$param = array($this->getid());
+			$result = prepared_query($this->_dbcon, $delete, $param);
+			if ( !mysqli_error($this->_dbcon))
+			{
+				elog("Composed Fields supprimés pour le decree ".$this->getNumber());
+			}
+			else
+			{
+				elog("Erreur delete Composed Fields : ".$this->getNumber()." ".mysqli_error($this->_dbcon));
+			}
+		}
+		foreach ($fields as $field)
+		{
+			$insert = "INSERT INTO decree_composed_field (`iddecree_composed_field`, `idfield_type`, `value`) VALUES (?, ?, ?)";
+			$params = array($field['iddecree_composed_field'], $field['idfield_type'], $field['value']);
+			$result = prepared_query($this->_dbcon, $insert, $params);
+			if ( !mysqli_error($this->_dbcon))
+			{
+				elog("Composed Field cree pour le decree ".$this->getNumber()." : ".var_export($field, true));
+			}
+			else
+			{
+				elog("Erreur insert Composed Field : ".$this->getNumber()." ".mysqli_error($this->_dbcon));
+			}
+		}
+	}
 	
 	function unsetNumber($iduser, $majdate = true)
 	{

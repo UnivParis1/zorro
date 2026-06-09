@@ -387,6 +387,26 @@ class model {
 		return $idfield_type;
 	}
 
+	function getComposingFields($idmodel_field)
+	{
+		$select = "SELECT cfi.order, fty.* FROM composed_field cfi INNER JOIN field_type fty ON cfi.idfield_type = fty.idfield_type WHERE cfi.idmodel_composed_field = ? ORDER BY 1";
+		$params = array($idmodel_field);
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$values = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$values[] = $res;
+			}
+		}
+		else
+		{
+			elog("erreur select composed fields. ".mysqli_error($this->_dbcon));
+		}
+		return $values;
+	}
+
 	function getListDecreesToEditForComp($composante = null, $cod_anu = null)
 	{
 		$values = array();

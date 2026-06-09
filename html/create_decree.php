@@ -421,7 +421,7 @@
 						{
 							if ($modelfield['auto'] == 'N')
 							{
-								if ($modelfield['datatype'] != 'object' && $modelfield['datatype'] != 'room')
+								if ($modelfield['datatype'] != 'object' && $modelfield['datatype'] != 'room' && $modelfield['datatype'] != 'composed')
 								{
 									if ($modelfield['number'] == '+')
 									{
@@ -496,7 +496,43 @@
 								}
 							}
 						}
+						elseif ($modelfield['datatype'] == 'composed')
+						{
+							// Enregistrer arrêté existant
+							$idcomposed = 1;
+							$post_composed = array();
+							// Récupérer les champs composants
+							$composing_fields = $modelselected->getComposingFields($modelfield['idmodel_field']);
+							while (isset($_POST[$modelfield['name'].$idcomposed]))
+							{
+								foreach($composing_fields as $composing_field)
+								{
+									$post_composed[$idcomposed][$composing_field['idfield_type']] = $_POST[$composing_field['name'].$idcomposed];
+								}
+								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $_POST[$modelfield['name'].$idcomposed]);
+								$idcomposed++;
+							}
+						}
 						$decree->setFields($decreefields, true);
+						if ($modelfield['datatype'] == 'composed')
+						{
+							// Récupérer les id des champs composés
+							$fields_composed = $decree->getFields()[$modelfield['idmodel_field']];
+							$new_composing_fields = array();
+							foreach($fields_composed as $field_composed)
+							{
+								// Associer les champs composants
+								foreach($composing_fields as $composing_field)
+								{
+									if (array_key_exists($field_composed['value'],$post_composed))
+									{
+										$new_composing_fields[] = array('iddecree_composed_field' => $field_composed['iddecree_field'], 'idfield_type' => $composing_field['idfield_type'], 'value' => $post_composed[$field_composed['value']][$composing_field['idfield_type']]);
+									}
+								}
+							}
+							$decree->setComposedFields($new_composing_fields);
+							$mod_decree = new decree($dbcon, null, null, $decree->getid());
+						}
 					}
 					else
 					{
@@ -528,7 +564,40 @@
 								}
 							}
 						}
+						elseif ($modelfield['datatype'] == 'composed')
+						{
+							// Enregistrer le nouvel arrêté
+							$idcomposed = 1;
+							$post_composed = array();
+							// Récupérer les champs composants
+							$composing_fields = $modelselected->getComposingFields($modelfield['idmodel_field']);
+							while (isset($_POST[$modelfield['name'].$idcomposed]))
+							{
+								foreach($composing_fields as $composing_field)
+								{
+									$post_composed[$idcomposed][$composing_field['idfield_type']] = $_POST[$composing_field['name'].$idcomposed];
+								}
+								$decreefields[] = array('idmodel_field' => $modelfield['idmodel_field'], 'value' => $_POST[$modelfield['name'].$idcomposed]);
+								$idcomposed++;
+							}
+						}
 						$decree->setFields($decreefields);
+						if ($modelfield['datatype'] == 'composed')
+						{
+							// Récupérer les id des champs composés
+							$fields_composed = $decree->getFields()[$modelfield['idmodel_field']];
+							$new_composing_fields = array();
+							foreach($fields_composed as $field_composed)
+							{
+								// Associer les champs composants
+								foreach($composing_fields as $composing_field)
+								{
+									$new_composing_fields[] = array('iddecree_composed_field' => $field_composed['iddecree_field'], 'idfield_type' => $composing_field['idfield_type'], 'value' => $post_composed[$field_composed['value']][$composing_field['idfield_type']]);
+								}
+							}
+							$decree->setComposedFields($new_composing_fields);
+							$mod_decree = new decree($dbcon, null, null, $decree->getid());
+						}
 						if (isset($mod_status) && $mod_status == STATUT_REFUSE)
 						{
 							$mod_decree->setRefuseHisto($decree->getid(), $motif_refus, $date_refus);
@@ -582,15 +651,36 @@
 						$doc->loadXML($contenu);
 						$x = $doc->documentElement;
 						$body = $x->getElementsByTagName('body')->item(0);
+						$vc_ainserer = array();
 						// echo "BODY 1 : <br>"; print_r2($body);
 						foreach ($fieldstoinsert as $idmodel_field => $field)
 						{
 							// dupliquer les champs multiples
 							$nbChamps = sizeof($field);
+							$tem_composed = false;
+							if($modelfieldstype[$field[0]['idmodel_field']] == 'composed')
+							{
+								$composing_fields = $modelselected->getComposingFields($field[0]['idmodel_field']);
+								$cf_name_id = array_column($composing_fields, 'idfield_type', 'name');
+								$decree_composing_fields = isset($mod_decree) ? $mod_decree->getComposedFields() : array();
+								$mod_decree_fields = $decree->getFields();
+								foreach ($mod_decree_fields[$modelfield['idmodel_field']] as $cc)
+								{
+									foreach($composing_fields as $cf)
+									{
+										$vc_ainserer[] = isset($decree_composing_fields[$cc['iddecree_field']][$cf['idfield_type']]['value']) ? $decree_composing_fields[$cc['iddecree_field']][$cf['idfield_type']]['value'] : '';
+									}
+								}
+								$tem_composed = true;
+							}
 							if ($nbChamps > 1)
 							{
 								$champ = array_keys($modelfieldsarrange, $idmodel_field)[0];
-								if ($champ == 'objetpromo' || $champ == 'espaceloc')
+								if ($tem_composed)
+								{
+									$champ = $composing_fields[0]['name'];
+								}
+								if ($champ == 'objetpromo' || $champ == 'espaceloc' || $tem_composed)
 								{
 									// echo "Champs à multiplier : ";print_r2($field);
 									// trouver le champs dans le xml
@@ -790,6 +880,7 @@
 						//print_r2(strlen($contenu));
 						$nb_field = array();
 						$champsamodif = array();
+						$id_vc_insert = 0;
 						while ($position1 < strlen($contenu) && substr($contenu, $position1 + 3, $position2 - $position1 - 3) && $position1 !== false && $position2 !== false)
 						{
 							$field = substr($contenu, $position1 + 3, $position2 - $position1 - 3); // le nom du champ est entre les balises
@@ -932,6 +1023,11 @@
 								elseif ($field == "anctarifjour")
 								{
 									$champsamodif[] = array("valeur" => $ancprixjour, "position" => $position1, "longueur" => (strlen($field)+6));
+								}
+								elseif(isset($cf_name_id) && array_key_exists($field, $cf_name_id))
+								{
+									$champsamodif[] = array("valeur" => $vc_ainserer[$id_vc_insert], "position" => $position1, "longueur" => (strlen($field)+6));
+									$id_vc_insert++;
 								}
 								elseif ((array_key_exists($field, $modelfieldsarrange) && array_key_exists($modelfieldsarrange[$field], $modelfieldstype) && $modelfieldstype[$modelfieldsarrange[$field]] == 'checkbox')
 										|| ($idfield_type != null && in_array($idfield_type, $sectionabsente))  // Pour supprimer les lignes des sections inutilisées
@@ -1163,6 +1259,52 @@
 		newtarifheure.value = '';
 		newtarifdemi.value = '';
 		newtarifjour.value = '';
+		return false;
+	}
+
+	function ajouterComposed(divid)
+	{
+		var noeudacloner = document.getElementById(divid);
+		var noeudpere = noeudacloner.parentNode;
+		var nbfils = document.querySelectorAll("tbody tr").length;
+		var clone = noeudacloner.cloneNode(true);
+		clone.id = clone.id + nbfils;
+		clone.name = clone.name + nbfils;
+		clone.removeAttribute("hidden");
+		clone.childNodes.forEach(function(td) { 
+			td.childNodes.forEach(function(element) {
+				if (element.id+"_tr" == divid)
+				{
+					element.value = nbfils;
+				} 
+      			element.id = element.id+nbfils;
+				element.name = element.name+nbfils;
+			});
+  		});
+		noeudpere.insertBefore(clone, noeudacloner);
+		return false;
+	}
+
+	function supprimerComposed(tableid, divid)
+	{
+		var elementsuppr = document.getElementById(divid);
+		var rowind = elementsuppr.rowIndex;
+		var tablemere = document.getElementById(tableid);
+		var sizetable = tablemere.querySelectorAll("tbody tr").length;
+		var rows = tablemere.rows;
+		for (var i = rowind; i < sizetable - 1; i++)
+		{
+			var nbtd = rows[i].querySelectorAll("td input").length;
+			for (var j = 0; j < nbtd; j++)
+			{
+				if (!rows[i].querySelectorAll("td")[j].hasAttribute("hidden"))
+				{
+					rows[i].querySelectorAll("td input")[j].value = rows[i+1].querySelectorAll("td input")[j].value;
+					rows[i].querySelectorAll("td input")[j].innerHTML = rows[i+1].querySelectorAll("td input")[j].innerHTML;
+				}
+			}
+		}
+		tablemere.deleteRow(sizetable - 1);
 		return false;
 	}
 
@@ -1631,6 +1773,22 @@
 									</select>
 								<?php }
 								break;
+							case 'composed':
+								$valeurs_composees = array();
+								// Récupérer les champs composants
+								$composing_fields = $modelselected->getComposingFields($modelfield['idmodel_field']);
+								if (isset($mod_decree_fields) && key_exists($modelfield['idmodel_field'], $mod_decree_fields) && sizeof($mod_decree_fields[$modelfield['idmodel_field']]) > 0)
+								{
+									$decree_composing_fields = $mod_decree->getComposedFields();
+									foreach ($mod_decree_fields[$modelfield['idmodel_field']] as $cc)
+									{
+										foreach($composing_fields as $cf)
+										{
+											$valeurs_composees[$cc['value']][] = array($cf['name'] => isset($decree_composing_fields[$cc['iddecree_field']][$cf['idfield_type']]['value']) ? $decree_composing_fields[$cc['iddecree_field']][$cf['idfield_type']]['value'] : '');
+										}
+									}
+								}
+								break;
 							default:
 								if ($modelfield['idfield_type'] == 10) {
 									if (isset($mod_decree_fields) && array_key_exists($modelfield['idmodel_field'], $mod_decree_fields) && array_key_exists($i-1, $mod_decree_fields[$modelfield['idmodel_field']])) {
@@ -1789,6 +1947,47 @@
 							</table>
 						<?php }
 					}
+					elseif($modelfield['datatype'] == 'composed')
+					{ ?>
+						<button onclick="return ajouterComposed('<?php echo $modelfield['name'];?>_tr');">+</button>
+						<br><br>
+						<table id="tableau" class="tableaucomposed">
+							<thead>
+								<tr id="entetes">
+									<th hidden>id</th>
+								<?php foreach($composing_fields as $cf)
+								{ ?>
+									<th class="entetecompose"><?php echo $cf['web_name'];?></th>
+								<?php } ?>
+								<th class="entetecompose">Supprimer</th>
+								</tr>
+							</thead>
+							<tbody id="body">
+								<?php if (isset($valeurs_composees))
+								{
+									foreach($valeurs_composees as $numero => $valeur_composee)
+									{ ?>
+										<tr id="<?php echo $modelfield['name']."_tr".$numero;?>">
+											<td hidden><input type="text" id="<?php echo $modelfield['name'].$numero;?>" name="<?php echo $modelfield['name'].$numero;?>" value=<?php echo $numero;?> ></td>
+											<?php foreach ($valeur_composee as $valeur)
+												{ ?>
+													<td><input type="text" id="<?php echo key($valeur).$numero;?>" name="<?php echo key($valeur).$numero;?>" value="<?php echo $valeur[key($valeur)];?>"></td>
+												<?php } ?>
+											<td><button id="<?php echo 'boutonsuppr'.$numero;?>" name="<?php echo 'boutonsuppr'.$numero;?>" onclick="return supprimerComposed('tableau', '<?php echo $modelfield['name'].'_tr'.$numero;?>');">-</button></td>
+										</tr>
+									<?php }
+								}?>
+								<tr id="<?php echo $modelfield['name'];?>_tr" hidden>
+									<td hidden><input type="text" id="<?php echo $modelfield['name'];?>" name="<?php echo $modelfield['name'];?>" value=1 ></td>
+								<?php foreach($composing_fields as $cf)
+								{ ?>
+									<td><input type="text" id="<?php echo $cf['name'];?>" name="<?php echo $cf['name'];?>" value=""></td>
+								<?php } ?>
+									<td><button id="boutonsuppr" name="boutonsuppr" onclick="return supprimerComposed('tableau', '<?php echo $modelfield['name'];?>_tr');">-</button></td>
+								</tr>
+							</body>
+						</table>
+					<?php }
 					else
 					{ ?>
 					<button onclick="return ajouterValeur('<?php echo $modelfield['name'];?>');">+</button>
