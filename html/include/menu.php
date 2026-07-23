@@ -192,6 +192,12 @@
 					<li id='menu_stat' <?php echo ($menuItem == 'menu_stat') ? "class='navcourant'" : '';?> >
 						<a href="stat.php">Indicateurs</a>
 					</li>
+					<?php if ($user->isSuperAdmin() || $user->isDaji()) 
+					{ ?>
+					<li id='menu_visa' <?php echo ($menuItem == 'menu_visa') ? "class='navcourant'" : '';?> >
+						<a href="visa.php">Visas</a>
+					</li>
+					<?php } ?>
 					<?php if ($user->isSuperAdmin()) 
 					{
 						$menuAdmin = array('menu_admin', 'menu_role', 'menu_signature', 'menu_circuit', 'menu_export', 'menu_model', 'menu_maintenance'); ?>

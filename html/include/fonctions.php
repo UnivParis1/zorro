@@ -75,3 +75,45 @@ function prepared_query($mysqli, $sql, $params, $types = "")
 function prepared_select($mysqli, $sql, $params = [], $types = "") {
 	return prepared_query($mysqli, $sql, $params, $types)->get_result();
 }
+
+function odt_to_pdf($file)
+{
+	$message = '';
+	// CONVERSION EN PDF
+	$descriptorspec = array(
+			0 => array("pipe", "r"),  // stdin
+			1 => array("pipe", "w"),  // stdout
+			2 => array("pipe", "w"),  // stderr
+	);
+	if (isset($_SERVER['SystemRoot']) && strpos($_SERVER['SystemRoot'], 'WINDOWS') !== false)
+	{
+		$process = proc_open("python.exe \"C:\Program Files\Unoconv\unoconv-0.8.2\unoconv\" --doctype=document --format=pdf \"".$file."\"", $descriptorspec, $pipes);
+	}
+	else
+	{
+		$process = proc_open("unoconv --doctype=document --format=pdf \"".$file."\"", $descriptorspec, $pipes);
+	}
+	$stdout = stream_get_contents($pipes[1]);
+	fclose($pipes[1]);
+
+	$stderr = stream_get_contents($pipes[2]);
+	fclose($pipes[2]);
+	if ($stdout != "")
+	{
+		elog( "stdout : \n");
+		elog($stdout);
+		elog( "La création du document PDF a échoué. <br>");
+		$message .= "<p class='alerte alerte-danger'>La création du document a échoué.</p>";
+	}
+	elseif ($stderr != "")
+	{
+		elog( "stderr :\n");
+		elog($stderr);
+		elog( "La création du document PDF a échoué. <br>");
+	}
+	else
+	{
+		$message .= "<p class='alerte alerte-success'>Document enregistré.</p>";
+	}
+	return $message;
+}

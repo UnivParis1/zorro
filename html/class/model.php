@@ -771,4 +771,165 @@ class model {
 		}
 		return array("decree_made" => $decree_made, "nb_decree_made" => $nb_decree_made, "decree_doublon" => $decree_doublon, "liste_edit" => $liste_edit, "query_field" => $query_field, "liste_to_do" => $liste_to_do);
 	}
+
+	function getVisas($inactive)
+	{
+		$params = array($this->_idmodel, $inactive);
+		$select = "SELECT * FROM model_visa WHERE idmodel = ? AND active <> ? ORDER BY position";
+		$result = prepared_select($this->_dbcon, $select, $params);
+		$visas = array();
+		if ( !mysqli_error($this->_dbcon))
+		{
+			while ($res = mysqli_fetch_assoc($result))
+			{
+				$visas[] = $res;
+			}
+		}
+		else
+		{
+			elog("erreur select model_visa. ".mysqli_error($this->_dbcon));
+		}
+		return $visas;
+	}
+
+	function updateVisa($idmodel_visa, $content, $positionvisa, $active, $iduser)
+	{
+		$update = "UPDATE model_visa SET content = ?, active = ?, position = ?, majdate = sysdate(), idmajuser = ? WHERE idmodel = ? AND idmodel_visa = ?";
+		$params = array($content, $active, $positionvisa, $iduser, $this->_idmodel, $idmodel_visa);
+		$result = prepared_query($this->_dbcon, $update, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("modif visa : (idmodel_visa, idmodel, position, content, active, idusermaj) ($idmodel_visa, ".$this->_idmodel.", $positionvisa, $content, $active, $iduser)");
+		}
+		else
+		{
+			elog("Erreur modif visa : (idmodel_visa, idmodel, position, content, active, idusermaj) ($idmodel_visa, ".$this->_idmodel.", $positionvisa, $content, $active, $iduser) ".mysqli_error($this->_dbcon));
+		}
+	}
+	function newVisa($positionvisa, $iduser)
+	{
+		$insert = "INSERT INTO model_visa (idmodel, position, iduser, createdate, active) VALUES (?, ?, ?, sysdate(), 'O')";
+		$params = array($this->_idmodel, $positionvisa, $iduser);
+		$result = prepared_query($this->_dbcon, $insert, $params);
+		if ( !mysqli_error($this->_dbcon))
+		{
+			elog("new visa : (idmodel, position, iduser) (".$this->_idmodel.", $positionvisa, $iduser)");
+			return $result->insert_id;
+		}
+		else
+		{
+			elog("Erreur new visa : (idmodel, position, iduser) (".$this->_idmodel.", $positionvisa, $iduser) ".mysqli_error($this->_dbcon));
+		}
+		return NULL;
+	}
+
+	function updateModelFile()
+	{
+		$modelfile = new ZipArchive();
+		$datesave = time();
+		$odtfilename = "./models/".$this->getfile();
+		$odtfilenamevisafree = $odtfilename."_visafree.odt";
+		// Historiser le modèle
+		if (file_exists($odtfilename))
+		{
+			copy($odtfilename, $odtfilename.".".$datesave);
+		}
+		// Copier le document modèle sans visa dans le modèle à utiliser
+		copy($odtfilenamevisafree, $odtfilename);
+		// Ouvrir le document modèle sans visa
+		$modelfile->open($odtfilename);
+		// extraction du content.xml dans le dossier temporaire pour l'arrêté
+		// TODO : nommer le document selon TAGS
+		$modelfile->extractTo("./models/travail/", array('content.xml', 'styles.xml'));
+		// ouverture du content.xml extrait
+		$content = fopen("./models/travail/content.xml", 'r+');
+		// lecture du content.xml extrait
+		$contenu = fread($content, filesize("./models/travail/content.xml"));
+		$doc = new DOMDocument('1.0', 'utf-8');
+		$doc->preserveWhiteSpace = false;
+		$doc->formatOutput = true;
+		$doc->loadXML($contenu);
+		$x = $doc->documentElement;
+		$body = $x->getElementsByTagName('body')->item(0);
+		$visastoinsert = $this->getVisas('N');
+		$nbChamps = sizeof($visastoinsert);
+		if ($nbChamps > 1)
+		{
+			// trouver le champs dans le xml
+			$noeudcourant = $body; // le dernier noeud contenant le champ
+			$noeudpere = $body; // le noeud où raccrocher le clone du champ
+			$positiondunoeudadupliquer = 0; // la position où raccrocher le clone du champ sous le noeud père
+			while (strpos($noeudcourant->textContent, '$$$visa$$$') !== false)
+			{
+				if ($noeudcourant->hasChildNodes())
+				{
+					if ($noeudcourant->nodeName == "text:p")
+					{
+						break;
+					}
+					if ($noeudcourant->childNodes->count() > 1)
+					{
+						$noeudpere = $noeudcourant;
+						$positiondunoeudadupliquer = 0;
+					}
+					foreach($noeudcourant->childNodes as $node)
+					{
+						if (strpos($node->textContent, '$$$visa$$$') !== false)
+						{
+							$noeudcourant = $node;
+							break;
+						}
+						if ($noeudpere == $noeudcourant)
+						{
+							$positiondunoeudadupliquer++;
+						}
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			for ($i = 1; $i < $nbChamps; $i++)
+			{
+				// dupliquer le noeud
+				$clone = $noeudcourant->cloneNode(true);
+				// insérer le noeud
+				$noeudpere->insertBefore($clone, $noeudpere->childNodes->item($positiondunoeudadupliquer));
+			}
+		}
+		// enregistrement du xml modifié
+		$doc->save("./models/travail/content2.xml");
+		fclose($content);
+		$content = fopen("./models/travail/content2.xml", 'r+');
+		// lecture du content2.xml extrait
+		$contenu = fread($content, filesize("./models/travail/content2.xml"));
+		// copie du contenu extrait
+		$contenu2 = $contenu;
+		$position1 = strpos($contenu, '$$$visa$$$'); // position de la balise de début d'un champ paramétrable
+		$position2 = strpos($contenu, '$$$', $position1+1); // position de la balise de fin d'un champ paramétrable
+		$nb_field = array();
+		$champsamodif = array();
+		$id_visa_insert = 0;
+		while ($position1 < strlen($contenu) && substr($contenu, $position1 + 3, $position2 - $position1 - 3) && $position1 !== false && $position2 !== false)
+		{
+			$champsamodif[] = array("valeur" => $visastoinsert[$id_visa_insert]['content'], "position" => $position1, "longueur" => 10);
+			$id_visa_insert += 1;
+			$position1 = strpos($contenu, '$$$visa$$$', $position2 + 3);
+			$position2 = strpos($contenu, '$$$', $position1 + 1);
+		}
+		fclose($content);
+		$content = fopen("./models/travail/content2.xml", 'w');
+		$champsamodiffromlast = array_reverse($champsamodif);
+		// remplacement des champs à partir de la fin du fichier
+		foreach ($champsamodiffromlast as $champ)
+		{
+			$contenu2 = substr_replace($contenu2, $champ['valeur'], $champ['position'], $champ['longueur']);
+		}
+		// écriture du contenu modifié dans le fichier
+		fwrite($content, $contenu2);
+		// Ajout du fichier dans le document
+		$modelfile->addFile("./models/travail/content2.xml", 'content.xml');
+		$modelfile->close();
+	}
 }
